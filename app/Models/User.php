@@ -35,6 +35,13 @@ class User extends Authenticatable
         return $this->hasMany(\App\Models\CourseEnrollment::class);
     }
 
+    public function courses()
+    {
+        return $this->belongsToMany(\App\Models\Course::class, 'course_enrollments')
+            ->withPivot('approval_status', 'progress_percentage', 'completed_lessons_count', 'xp_earned', 'approved_at', 'completed_at')
+            ->withTimestamps();
+    }
+
     public function lessonCompletions()
     {
         return $this->hasMany(\App\Models\LessonCompletion::class);

@@ -2,6 +2,11 @@
 
 namespace App\Filament\Resources\CourseResource\RelationManagers;
 
+use Filament\Actions\AttachAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -64,7 +69,7 @@ class StudentsRelationManager extends RelationManager
                     ]),
             ])
             ->headerActions([
-                Tables\Actions\AttachAction::make()
+                AttachAction::make()
                     ->label('Enroll Student')
                     ->form([
                         \Filament\Forms\Components\Select::make('user_id')
@@ -84,7 +89,7 @@ class StudentsRelationManager extends RelationManager
                     ]),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->label('Edit Enrollment')
                     ->form([
                         \Filament\Forms\Components\Select::make('approval_status')
@@ -109,12 +114,12 @@ class StudentsRelationManager extends RelationManager
                             ->numeric()
                             ->minValue(0),
                     ]),
-                Tables\Actions\DetachAction::make()
+                DetachAction::make()
                     ->label('Remove Student'),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DetachBulkAction::make()
+                BulkActionGroup::make([
+                DetachBulkAction::make()
                         ->label('Remove Students'),
                 ]),
             ]);
