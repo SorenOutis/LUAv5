@@ -3,7 +3,8 @@
     "allow": [
       "Bash(php artisan route:clear:*)",
       "Bash(php artisan route:list:*)",
-      "Bash(powershell.exe:*)"
+      "Bash(powershell.exe:*)",
+      "Bash(php artisan cache:clear:*)"
     ],
     "deny": [],
     "ask": []

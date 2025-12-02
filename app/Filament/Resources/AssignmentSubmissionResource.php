@@ -4,8 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Models\AssignmentSubmission;
 use BackedEnum;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\EditAction;
+use Filament\Actions;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -34,9 +33,6 @@ class AssignmentSubmissionResource extends Resource
                 ->relationship('user', 'name')
                 ->required()
                 ->searchable(),
-            Textarea::make('notes')
-                ->label('Student Notes')
-                ->rows(4),
             Select::make('status')
                 ->options([
                     'submitted' => 'Submitted',
@@ -45,6 +41,7 @@ class AssignmentSubmissionResource extends Resource
                 ])
                 ->default('submitted'),
             TextInput::make('grade')
+                ->label('Score')
                 ->numeric()
                 ->minValue(0)
                 ->maxValue(100)
@@ -88,6 +85,12 @@ class AssignmentSubmissionResource extends Resource
                     ->label('Submitted At')
                     ->dateTime()
                     ->sortable(),
+                TextColumn::make('file_path')
+                    ->label('Submission File')
+                    ->url(fn (AssignmentSubmission $record) => $record->file_path ? '/storage/' . $record->file_path : null)
+                    ->openUrlInNewTab()
+                    ->formatStateUsing(fn ($state) => $state ? 'View File' : 'No file')
+                    ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -99,7 +102,16 @@ class AssignmentSubmissionResource extends Resource
                 SelectFilter::make('assignment_id')
                     ->relationship('assignment', 'title'),
             ])
-            ->actions([EditAction::make(), DeleteAction::make()]);
+            ->actions([
+                Actions\Action::make('download')
+                    ->label('Download')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->url(fn (AssignmentSubmission $record) => $record->file_path ? '/storage/' . $record->file_path : null)
+                    ->openUrlInNewTab()
+                    ->hidden(fn (AssignmentSubmission $record) => !$record->file_path),
+                Actions\EditAction::make(),
+                Actions\DeleteAction::make(),
+            ]);
     }
 
     public static function getPages(): array

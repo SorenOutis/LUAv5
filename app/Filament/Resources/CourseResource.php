@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use BackedEnum;
 use App\Models\Course;
+use App\Filament\Resources\CourseResource\RelationManagers;
 use Filament\Actions;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -21,6 +22,16 @@ class CourseResource extends Resource
     protected static ?string $model = Course::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-academic-cap';
+
+    protected static ?string $recordTitleAttribute = 'title';
+
+    public static function getRelations(): array
+    {
+        return [
+            RelationManagers\EnrollmentsRelationManager::class,
+            RelationManagers\StudentsRelationManager::class,
+        ];
+    }
 
     public static function form(Schema $schema): Schema
     {

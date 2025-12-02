@@ -19,13 +19,14 @@ import { ref, computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 
 interface Submission {
-    id: number;
-    status: string;
-    grade?: number;
-    feedback?: string;
-    file_path?: string;
-    created_at: string;
-    notes?: string;
+     id: number;
+     status: string;
+     grade?: number;
+     feedback?: string;
+     file_path?: string;
+     created_at: string;
+     notes?: string;
+     updated_at?: string;
 }
 
 interface Assignment {
@@ -54,11 +55,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const selectedAssignment = ref<Assignment | null>(null);
-const filterStatus = ref<'all' | 'active' | 'inactive' | 'pending'>('all');
+const filterStatus = ref<'all' | 'completed' | 'inactive' | 'pending'>('all');
 const showUploadDialog = ref(false);
+const showSuccessModal = ref(false);
+const successMessage = ref('');
 const uploadForm = useForm({
-    file: null as File | null,
-    notes: '',
+     file: null as File | null,
+     notes: '',
 });
 const currentUploadAssignment = ref<Assignment | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -67,19 +70,19 @@ const isUploading = ref(false);
 
 // Filter assignments based on status
 const filteredAssignments = computed(() => {
-    return props.assignments.filter(assignment => {
-        switch (filterStatus.value) {
-            case 'active':
-                return assignment.is_active;
-            case 'inactive':
-                return !assignment.is_active;
-            case 'pending':
-                return assignment.is_active && !isOverdue(assignment.due_date);
-            case 'all':
-            default:
-                return true;
-        }
-    });
+     return props.assignments.filter(assignment => {
+         switch (filterStatus.value) {
+             case 'completed':
+                 return assignment.submission?.status === 'submitted';
+             case 'inactive':
+                 return !assignment.is_active;
+             case 'pending':
+                 return assignment.is_active && !isOverdue(assignment.due_date) && assignment.submission?.status !== 'submitted';
+             case 'all':
+             default:
+                 return true;
+         }
+     });
 });
 
 const handleAssignmentClick = (assignment: Assignment) => {
@@ -121,77 +124,36 @@ const handleFileSelect = (event: Event) => {
     }
 };
 
-const submitAssignment = async () => {
-    if (!currentUploadAssignment.value || !uploadForm.file) {
-        alert('Please select a file');
-        return;
-    }
+const submitAssignment = () => {
+     if (!currentUploadAssignment.value || !uploadForm.file) {
+         alert('Please select a file');
+         return;
+     }
 
-    isUploading.value = true;
-    uploadProgress.value = 0;
+     isUploading.value = true;
+     uploadProgress.value = 0;
 
-    // Create FormData for file upload
-    const formData = new FormData();
-    formData.append('file', uploadForm.file);
-    formData.append('notes', uploadForm.notes);
+     const assignmentId = currentUploadAssignment.value.id;
 
-    // Get the upload URL
-    const assignmentId = currentUploadAssignment.value.id;
-    const uploadUrl = `/assignments/${assignmentId}/upload`;
-    console.log('Upload URL:', uploadUrl);
-    console.log('Sending upload request with file:', uploadForm.file.name, 'size:', uploadForm.file.size);
-
-    // Use fetch API with proper headers
-    try {
-        // Get CSRF token from cookie
-        const getCookie = (name: string) => {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop()?.split(';').shift();
-        };
-        
-        const csrfToken = getCookie('XSRF-TOKEN');
-        console.log('CSRF Token from cookie:', csrfToken ? 'present' : 'missing');
-
-        const headers: Record<string, string> = {
-            'Accept': 'application/json',
-        };
-        
-        if (csrfToken) {
-            headers['X-CSRF-TOKEN'] = csrfToken;
-        }
-
-        const response = await fetch(uploadUrl, {
-            method: 'POST',
-            body: formData,
-            credentials: 'same-origin',
-            headers: headers,
-        });
-
-        console.log('Upload completed with status:', response.status);
-        
-        if (response.ok) {
-            uploadProgress.value = 100;
-            const data = await response.json();
-            setTimeout(() => {
-                closeUploadDialog();
-                // Reload the page to show updated submission status
-                window.location.reload();
-            }, 500);
-        } else {
-            console.error('Upload failed with status:', response.status);
-            const errorText = await response.text();
-            console.error('Response:', errorText);
-            isUploading.value = false;
-            uploadProgress.value = 0;
-            alert('Failed to upload assignment. Server error: ' + response.status);
-        }
-    } catch (error) {
-        console.error('Upload error:', error);
-        isUploading.value = false;
-        uploadProgress.value = 0;
-        alert('Failed to upload assignment. Network error. Please try again.');
-    }
+     uploadForm.post(`/assignments/${assignmentId}/upload`, {
+         onSuccess: () => {
+             uploadProgress.value = 100;
+             setTimeout(() => {
+                 successMessage.value = `${currentUploadAssignment.value?.title} has been successfully submitted!`;
+                 showSuccessModal.value = true;
+                 closeUploadDialog();
+                 setTimeout(() => {
+                     router.reload();
+                 }, 2000);
+             }, 500);
+         },
+         onError: (errors: any) => {
+             console.error('Upload error:', errors);
+             isUploading.value = false;
+             uploadProgress.value = 0;
+             alert('Failed to upload assignment. Please try again.');
+         },
+     });
 };
 </script>
 
@@ -215,25 +177,25 @@ const submitAssignment = async () => {
                     All Assignments
                 </Button>
                 <Button
-                    :variant="filterStatus === 'active' ? 'default' : 'outline'"
-                    @click="filterStatus = 'active'"
-                    class="transition-all"
-                >
-                    <svg
-                        class="h-4 w-4 mr-1.5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                    </svg>
-                    Active
-                </Button>
+                     :variant="filterStatus === 'completed' ? 'default' : 'outline'"
+                     @click="filterStatus = 'completed'"
+                     class="transition-all"
+                 >
+                     <svg
+                         class="h-4 w-4 mr-1.5"
+                         fill="none"
+                         stroke="currentColor"
+                         viewBox="0 0 24 24"
+                     >
+                         <path
+                             stroke-linecap="round"
+                             stroke-linejoin="round"
+                             stroke-width="2"
+                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                         />
+                     </svg>
+                     Completed
+                 </Button>
                 <Button
                     :variant="filterStatus === 'pending' ? 'default' : 'outline'"
                     @click="filterStatus = 'pending'"
@@ -297,15 +259,17 @@ const submitAssignment = async () => {
 
                 <template v-else>
                     <Card
-                        v-for="assignment in filteredAssignments"
-                        :key="assignment.id"
-                        :class="[
-                            'overflow-hidden transition-all duration-200',
-                            assignment.is_active
-                                ? 'cursor-pointer border-sidebar-border/70 dark:border-sidebar-border hover:border-sidebar-border hover:shadow-md dark:hover:shadow-lg hover:scale-105'
-                                : 'cursor-not-allowed border-sidebar-border/30 dark:border-sidebar-border/40 opacity-60',
-                        ]"
-                        @click="assignment.is_active && handleAssignmentClick(assignment)"
+                         v-for="assignment in filteredAssignments"
+                         :key="assignment.id"
+                         :class="[
+                             'overflow-hidden transition-all duration-200',
+                             assignment.submission?.status && ['submitted', 'pending', 'graded'].includes(assignment.submission.status)
+                                 ? 'cursor-not-allowed border-sidebar-border/30 dark:border-sidebar-border/40 opacity-60'
+                                 : assignment.is_active
+                                 ? 'cursor-pointer border-sidebar-border/70 dark:border-sidebar-border hover:border-sidebar-border hover:shadow-md dark:hover:shadow-lg hover:scale-105'
+                                 : 'cursor-not-allowed border-sidebar-border/30 dark:border-sidebar-border/40 opacity-60',
+                         ]"
+                         @click="assignment.is_active && (!assignment.submission?.status || !['submitted', 'pending', 'graded'].includes(assignment.submission.status)) && handleAssignmentClick(assignment)"
                     >
                         <CardHeader class="pb-3 relative">
                             <div v-if="!assignment.is_active" class="absolute top-2 right-2">
@@ -339,12 +303,14 @@ const submitAssignment = async () => {
                                     v-if="assignment.is_active"
                                     :class="[
                                         'px-2 py-1 rounded text-xs font-medium',
-                                        isOverdue(assignment.due_date)
+                                        assignment.submission?.status === 'submitted'
+                                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
+                                            : isOverdue(assignment.due_date)
                                             ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200'
                                             : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200',
                                     ]"
                                 >
-                                    {{ isOverdue(assignment.due_date) ? 'Overdue' : 'Pending' }}
+                                    {{ assignment.submission?.status === 'submitted' ? '✓ Done' : isOverdue(assignment.due_date) ? 'Overdue' : 'Pending' }}
                                 </div>
                             </div>
                         </CardHeader>
@@ -372,47 +338,63 @@ const submitAssignment = async () => {
                                     </svg>
                                 </div>
                                 <!-- Submission Status Badge -->
-                                <div v-if="assignment.submission" class="text-xs mb-3">
-                                    <span :class="[
-                                        'inline-block px-2 py-1 rounded text-xs font-medium',
-                                        assignment.submission.status === 'submitted'
-                                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
-                                            : assignment.submission.status === 'graded'
-                                            ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200'
-                                            : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200'
-                                    ]">
-                                        {{ assignment.submission.status === 'submitted' ? '✓ Submitted' : assignment.submission.status === 'graded' ? `✓ Graded (${assignment.submission.grade}%)` : 'Pending Review' }}
-                                    </span>
-                                </div>
+                                 <div v-if="assignment.submission" class="text-xs mb-3 space-y-2">
+                                     <span :class="[
+                                         'inline-block px-2 py-1 rounded text-xs font-medium',
+                                         assignment.submission.status === 'submitted'
+                                             ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
+                                             : assignment.submission.status === 'graded'
+                                             ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200'
+                                             : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200'
+                                     ]">
+                                         {{ assignment.submission.status === 'submitted' ? '✓ Submitted' : assignment.submission.status === 'graded' ? `✓ Graded (${assignment.submission.grade}%)` : 'Pending Review' }}
+                                     </span>
+                                     <!-- Score Display -->
+                                     <div v-if="assignment.submission.grade !== null && assignment.submission.grade !== undefined" class="text-xs bg-blue-50 dark:bg-blue-900/20 p-2 rounded border border-blue-200 dark:border-blue-700">
+                                         <p class="font-semibold text-blue-900 dark:text-blue-200">Score: {{ assignment.submission.grade }}%</p>
+                                     </div>
+                                     <!-- Feedback Display -->
+                                     <div v-if="assignment.submission.feedback" class="text-xs bg-purple-50 dark:bg-purple-900/20 p-2 rounded border border-purple-200 dark:border-purple-700">
+                                         <p class="font-semibold text-purple-900 dark:text-purple-200 mb-1">Feedback:</p>
+                                         <p class="text-purple-800 dark:text-purple-300 line-clamp-2">{{ assignment.submission.feedback }}</p>
+                                     </div>
+                                 </div>
                                 <!-- Upload Button -->
-                                <Button 
-                                    v-if="assignment.is_active && !isOverdue(assignment.due_date)"
-                                    @click.stop="openUploadDialog(assignment)"
-                                    class="w-full"
-                                    variant="outline"
-                                >
-                                    <svg
-                                        class="h-4 w-4 mr-2"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
-                                        />
-                                    </svg>
-                                    Upload Assignment
-                                </Button>
-                                <Button 
-                                    v-else-if="isOverdue(assignment.due_date)"
-                                    disabled
-                                    class="w-full"
-                                >
-                                    Submission Closed (Overdue)
-                                </Button>
+                                 <Button 
+                                     v-if="assignment.is_active && !isOverdue(assignment.due_date) && (!assignment.submission?.status || !['submitted', 'pending', 'graded'].includes(assignment.submission.status))"
+                                     @click.stop="openUploadDialog(assignment)"
+                                     class="w-full"
+                                     variant="outline"
+                                 >
+                                     <svg
+                                         class="h-4 w-4 mr-2"
+                                         fill="none"
+                                         stroke="currentColor"
+                                         viewBox="0 0 24 24"
+                                     >
+                                         <path
+                                             stroke-linecap="round"
+                                             stroke-linejoin="round"
+                                             stroke-width="2"
+                                             d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
+                                         />
+                                     </svg>
+                                     Upload Assignment
+                                 </Button>
+                                 <Button 
+                                     v-else-if="assignment.submission?.status && ['submitted', 'pending', 'graded'].includes(assignment.submission.status)"
+                                     disabled
+                                     class="w-full"
+                                 >
+                                     {{ assignment.submission.status === 'submitted' ? 'Already Submitted' : assignment.submission.status === 'pending' ? 'Pending Review' : 'Graded' }}
+                                 </Button>
+                                 <Button 
+                                     v-else-if="isOverdue(assignment.due_date)"
+                                     disabled
+                                     class="w-full"
+                                 >
+                                     Submission Closed (Overdue)
+                                 </Button>
                             </div>
                         </CardContent>
                     </Card>
@@ -531,14 +513,41 @@ const submitAssignment = async () => {
                     </div>
 
                     <!-- Disabled message for inactive -->
-                    <div v-else class="pt-4">
-                        <Button class="w-full" disabled>
-                            Download Not Available - Assignment Inactive
-                        </Button>
+                     <div v-else class="pt-4">
+                         <Button class="w-full" disabled>
+                             Download Not Available - Assignment Inactive
+                         </Button>
+                     </div>
+
+                     <!-- Submission Details - Grade and Feedback -->
+                     <div v-if="selectedAssignment.submission" class="pt-4 border-t border-sidebar-border">
+                         <h4 class="font-medium mb-4">Submission Details</h4>
+                         
+                         <!-- Score Section -->
+                         <div v-if="selectedAssignment.submission.grade !== null && selectedAssignment.submission.grade !== undefined" class="mb-4 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700">
+                             <p class="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-1">Your Score</p>
+                             <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ selectedAssignment.submission.grade }}%</p>
+                         </div>
+
+                         <!-- Feedback Section -->
+                         <div v-if="selectedAssignment.submission.feedback" class="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700">
+                             <p class="text-sm font-semibold text-purple-900 dark:text-purple-200 mb-2">Instructor Feedback</p>
+                             <p class="text-sm text-purple-800 dark:text-purple-300 whitespace-pre-wrap">{{ selectedAssignment.submission.feedback }}</p>
+                         </div>
+
+                         <!-- Submission Date -->
+                         <div class="mt-4 pt-4 border-t border-sidebar-border">
+                             <p class="text-xs text-muted-foreground">
+                                 Submitted: {{ formatDate(selectedAssignment.submission.created_at) }}
+                             </p>
+                             <p v-if="selectedAssignment.submission.updated_at" class="text-xs text-muted-foreground">
+                                 Last Updated: {{ formatDate(selectedAssignment.submission.updated_at) }}
+                             </p>
+                         </div>
+                     </div>
                     </div>
-                </div>
-            </DialogContent>
-        </Dialog>
+                    </DialogContent>
+                    </Dialog>
 
         <!-- Upload Assignment Dialog -->
         <Dialog
@@ -563,7 +572,7 @@ const submitAssignment = async () => {
                             class="hidden"
                             accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.webp,.zip,.rar"
                         />
-                        <div class="text-center cursor-pointer" @click="$refs.fileInput?.click()">
+                        <div class="text-center cursor-pointer" @click="fileInput?.click()">
                             <svg
                                 class="mx-auto h-12 w-12 text-muted-foreground mb-2"
                                 fill="none"
@@ -631,6 +640,42 @@ const submitAssignment = async () => {
                             Submit
                         </Button>
                     </div>
+                </div>
+            </DialogContent>
+        </Dialog>
+
+        <!-- Success Modal -->
+        <Dialog
+            :open="showSuccessModal"
+            @update:open="(open) => !open && (showSuccessModal = false)"
+        >
+            <DialogContent class="max-w-md">
+                <DialogHeader>
+                    <DialogTitle class="text-green-600 dark:text-green-400">Success!</DialogTitle>
+                </DialogHeader>
+
+                <div class="text-center space-y-4">
+                    <div class="flex justify-center mb-4">
+                        <svg
+                            class="h-16 w-16 text-green-600 dark:text-green-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                        </svg>
+                    </div>
+                    <p class="text-sm text-muted-foreground">
+                        {{ successMessage }}
+                    </p>
+                    <p class="text-xs text-muted-foreground">
+                        Refreshing your assignments...
+                    </p>
                 </div>
             </DialogContent>
         </Dialog>
