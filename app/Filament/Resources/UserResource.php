@@ -6,6 +6,7 @@ use BackedEnum;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Resources\Resource;
@@ -57,6 +58,9 @@ class UserResource extends Resource
                 ->numeric()
                 ->default(0)
                 ->minValue(0),
+                CheckboxList::make('roles')
+                ->relationship('roles', 'name')
+                ->searchable(),
         ]);
     }
 
@@ -91,6 +95,7 @@ class UserResource extends Resource
                     ->label('Joined')
                     ->dateTime('M d, Y')
                     ->sortable(),
+                
             ])
             ->filters([])
             ->actions([EditAction::make(), DeleteAction::make()]);

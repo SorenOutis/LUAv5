@@ -46,6 +46,10 @@ class AssignmentSubmissionResource extends Resource
                 ->minValue(0)
                 ->maxValue(100)
                 ->suffix('%'),
+            TextInput::make('xp')
+                ->label('XP')
+                ->numeric()
+                ->minValue(0),
             Textarea::make('feedback')
                 ->label('Instructor Feedback')
                 ->rows(4),
@@ -78,8 +82,11 @@ class AssignmentSubmissionResource extends Resource
                     ])
                     ->sortable(),
                 TextColumn::make('grade')
-                    ->label('Grade')
+                    ->label('Score')
                     ->suffix('%')
+                    ->sortable(),
+                TextColumn::make('xp')
+                    ->label('XP')
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Submitted At')

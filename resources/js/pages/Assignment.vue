@@ -19,14 +19,15 @@ import { ref, computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 
 interface Submission {
-     id: number;
-     status: string;
-     grade?: number;
-     feedback?: string;
-     file_path?: string;
-     created_at: string;
-     notes?: string;
-     updated_at?: string;
+      id: number;
+      status: string;
+      grade?: number;
+      feedback?: string;
+      file_path?: string;
+      created_at: string;
+      notes?: string;
+      updated_at?: string;
+      xp?: number;
 }
 
 interface Assignment {
@@ -299,18 +300,24 @@ const submitAssignment = () => {
                                         Due: {{ formatDate(assignment.due_date) }}
                                     </CardDescription>
                                 </div>
-                                <div
-                                    v-if="assignment.is_active"
-                                    :class="[
-                                        'px-2 py-1 rounded text-xs font-medium',
-                                        assignment.submission?.status === 'submitted'
-                                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
-                                            : isOverdue(assignment.due_date)
-                                            ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200'
-                                            : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200',
-                                    ]"
-                                >
-                                    {{ assignment.submission?.status === 'submitted' ? '✓ Done' : isOverdue(assignment.due_date) ? 'Overdue' : 'Pending' }}
+                                <div class="flex items-center gap-2">
+                                    <div
+                                        v-if="assignment.is_active"
+                                        :class="[
+                                            'px-2 py-1 rounded text-xs font-medium',
+                                            assignment.submission?.status === 'submitted'
+                                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
+                                                : isOverdue(assignment.due_date)
+                                                ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200'
+                                                : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200',
+                                        ]"
+                                    >
+                                        {{ assignment.submission?.status === 'submitted' ? '✓ Done' : isOverdue(assignment.due_date) ? 'Overdue' : 'Pending' }}
+                                    </div>
+                                    <!-- XP Badge -->
+                                    <!-- <div v-if="assignment.submission?.xp !== null && assignment.submission?.xp !== undefined" class="px-2 py-1 rounded text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-200">
+                                        +{{ assignment.submission.xp }} XP
+                                    </div> -->
                                 </div>
                             </div>
                         </CardHeader>
@@ -352,6 +359,10 @@ const submitAssignment = () => {
                                      <!-- Score Display -->
                                      <div v-if="assignment.submission.grade !== null && assignment.submission.grade !== undefined" class="text-xs bg-blue-50 dark:bg-blue-900/20 p-2 rounded border border-blue-200 dark:border-blue-700">
                                          <p class="font-semibold text-blue-900 dark:text-blue-200">Score: {{ assignment.submission.grade }}%</p>
+                                     </div>
+                                     <!-- XP Display -->
+                                     <div v-if="assignment.submission.xp !== null && assignment.submission.xp !== undefined" class="text-xs bg-amber-50 dark:bg-amber-900/20 p-2 rounded border border-amber-200 dark:border-amber-700">
+                                         <p class="font-semibold text-amber-900 dark:text-amber-200">XP: +{{ assignment.submission.xp }}</p>
                                      </div>
                                      <!-- Feedback Display -->
                                      <div v-if="assignment.submission.feedback" class="text-xs bg-purple-50 dark:bg-purple-900/20 p-2 rounded border border-purple-200 dark:border-purple-700">
@@ -527,6 +538,12 @@ const submitAssignment = () => {
                          <div v-if="selectedAssignment.submission.grade !== null && selectedAssignment.submission.grade !== undefined" class="mb-4 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700">
                              <p class="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-1">Your Score</p>
                              <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ selectedAssignment.submission.grade }}%</p>
+                         </div>
+
+                         <!-- XP Section -->
+                         <div v-if="selectedAssignment.submission.xp !== null && selectedAssignment.submission.xp !== undefined" class="mb-4 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700">
+                             <p class="text-sm font-semibold text-amber-900 dark:text-amber-200 mb-1">Experience Points</p>
+                             <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">+{{ selectedAssignment.submission.xp }} XP</p>
                          </div>
 
                          <!-- Feedback Section -->

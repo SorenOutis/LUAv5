@@ -10,6 +10,11 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
+        // Calculate total XP from assignment submissions
+        $assignmentXP = $user->assignmentSubmissions()
+            ->whereNotNull('xp')
+            ->sum('xp');
+
         // Get or create user profile
         $profile = $user->profile()->firstOrCreate([], [
             'total_xp' => 0,
@@ -18,6 +23,18 @@ class DashboardController extends Controller
             'xp_for_next_level' => 500,
             'streak_days' => 0,
             'rank_title' => 'Beginner',
+        ]);
+
+        // Set total_xp to assignment XP (not accumulated)
+        $totalXP = $assignmentXP;
+        $profile->update(['total_xp' => $totalXP]);
+
+        // Calculate level based on total XP (100 XP per level)
+        $level = max(1, intval($totalXP / 100) + 1);
+        $currentLevelXP = $totalXP % 100;
+        $profile->update([
+            'level' => $level,
+            'current_level_xp' => $currentLevelXP,
         ]);
 
         // Get active courses with enrollment progress
@@ -34,15 +51,20 @@ class DashboardController extends Controller
                 'nextDeadline' => $enrollment->course->updated_at->format('Y-m-d'),
             ]);
 
-        // Get leaderboard (top 5 users by XP)
-        $leaderboard = \App\Models\User::with('profile')
+        // Get leaderboard (top 5 users by assignment XP)
+        $leaderboard = \App\Models\User::with('profile', 'assignmentSubmissions')
             ->get()
             ->map(fn ($u) => [
                 'name' => $u->name,
-                'xp' => $u->profile?->total_xp ?? 0,
-                'level' => $u->profile?->level ?? 1,
-                'badge' => $this->getLevelBadge($u->profile?->level ?? 1),
-                'isUser' => $u->id === $user->id,
+                'assignmentXP' => $u->assignmentSubmissions()->whereNotNull('xp')->sum('xp'),
+                'profileXP' => $u->profile?->total_xp ?? 0,
+            ])
+            ->map(fn ($item) => [
+                'name' => $item['name'],
+                'xp' => $item['assignmentXP'],
+                'level' => max(1, intval($item['assignmentXP'] / 100) + 1),
+                'badge' => $this->getLevelBadge(max(1, intval($item['assignmentXP'] / 100) + 1)),
+                'isUser' => $item['name'] === $user->name,
             ])
             ->sortByDesc('xp')
             ->take(5)
@@ -86,10 +108,10 @@ class DashboardController extends Controller
 
         return Inertia::render('Dashboard', [
             'userStats' => [
-                'totalXP' => $profile->total_xp,
-                'level' => $profile->level,
-                'currentXP' => $profile->current_level_xp,
-                'maxXPForLevel' => $profile->xp_for_next_level,
+                'totalXP' => $totalXP,
+                'level' => $level,
+                'currentXP' => $currentLevelXP,
+                'maxXPForLevel' => 100,
                 'rank' => $profile->rank_title,
                 'streakDays' => $profile->streak_days,
                 'achievements' => $achievements->count(),

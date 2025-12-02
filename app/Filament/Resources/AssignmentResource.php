@@ -6,6 +6,7 @@ use App\Models\Assignment;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -67,6 +68,9 @@ class AssignmentResource extends Resource
             Toggle::make('is_active')
                 ->label('Active')
                 ->default(true),
+                CheckboxList::make('roles')
+                ->relationship('roles', 'name')
+                ->searchable(),
         ]);
     }
 

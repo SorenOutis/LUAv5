@@ -27,7 +27,7 @@ class AssignmentController extends Controller
                 'submission' => $assignment->submissions()
                     ->where('user_id', Auth::id())
                     ->first()
-                    ?->only(['id', 'status', 'grade', 'feedback', 'file_path', 'created_at', 'notes']),
+                    ?->only(['id', 'status', 'grade', 'feedback', 'file_path', 'created_at', 'notes', 'xp', 'updated_at']),
             ]);
 
         return Inertia::render('Assignment', [
