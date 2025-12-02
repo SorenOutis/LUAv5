@@ -14,7 +14,7 @@ import {
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, FileText } from 'lucide-vue-next';
+import { BookOpen, Folder, LayoutGrid, FileText, User, Zap, Trophy, Star, Gift, MessageSquare, TrendingUp, Target } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -24,9 +24,49 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
+        title: 'Courses',
+        href: '/courses',
+        icon: BookOpen,
+    },
+    {
+        title: 'Quests',
+        href: '/quests',
+        icon: Target,
+    },
+    {
+        title: 'Leaderboard',
+        href: '/leaderboard',
+        icon: Trophy,
+    },
+    {
+        title: 'Achievements',
+        href: '/achievements',
+        icon: Star,
+    },
+    {
+        title: 'Progress',
+        href: '/progress',
+        icon: TrendingUp,
+    },
+    {
+        title: 'Rewards',
+        href: '/rewards',
+        icon: Gift,
+    },
+    {
+        title: 'Messages',
+        href: '/messages',
+        icon: MessageSquare,
+    },
+    {
         title: 'Assignments',
         href: '/assignments',
         icon: FileText,
+    },
+    {
+        title: 'Profile',
+        href: '/profile',
+        icon: User,
     },
 ];
 

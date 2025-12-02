@@ -10,13 +10,16 @@ class CourseEnrollment extends Model
     protected $fillable = [
         'user_id',
         'course_id',
+        'approval_status',
         'progress_percentage',
         'completed_lessons_count',
         'xp_earned',
+        'approved_at',
         'completed_at',
     ];
 
     protected $casts = [
+        'approved_at' => 'datetime',
         'completed_at' => 'datetime',
     ];
 

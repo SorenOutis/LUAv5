@@ -14,6 +14,42 @@ Route::get('dashboard', [\App\Http\Controllers\DashboardController::class, 'inde
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+Route::get('profile', [\App\Http\Controllers\UserController::class, 'profile'])
+    ->middleware(['auth', 'verified'])
+    ->name('profile');
+
+Route::get('courses', [\App\Http\Controllers\CoursesController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('courses');
+
+Route::post('courses/{course}/enroll', [\App\Http\Controllers\CoursesController::class, 'enroll'])
+    ->middleware(['auth', 'verified'])
+    ->name('courses.enroll');
+
+Route::get('quests', [\App\Http\Controllers\QuestsController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('quests');
+
+Route::get('leaderboard', [\App\Http\Controllers\LeaderboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('leaderboard');
+
+Route::get('achievements', [\App\Http\Controllers\AchievementsController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('achievements');
+
+Route::get('progress', [\App\Http\Controllers\ProgressController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('progress');
+
+Route::get('rewards', [\App\Http\Controllers\RewardsController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('rewards');
+
+Route::get('messages', [\App\Http\Controllers\MessagesController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('messages');
+
 Route::get('assignments', [\App\Http\Controllers\AssignmentController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('assignments');
