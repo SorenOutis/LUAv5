@@ -13,10 +13,6 @@ class EditCourse extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('enrollments')
-                ->label('View Enrollments')
-                ->icon('heroicon-o-users')
-                ->url(fn () => route('filament.admin.resources.courses.enrollments', ['record' => $this->record])),
             Actions\DeleteAction::make(),
         ];
     }

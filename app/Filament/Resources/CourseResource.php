@@ -63,6 +63,7 @@ class CourseResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->withCount('enrollments'))
             ->columns([
                 TextColumn::make('title')
                     ->label('Course Title')
@@ -108,10 +109,7 @@ class CourseResource extends Resource
                     ]),
             ])
             ->actions([
-                Actions\Action::make('enrollments')
-                    ->label('View Enrollments')
-                    ->icon('heroicon-o-users')
-                    ->url(fn (Course $record) => static::getUrl('enrollments', ['record' => $record->id])),
+                Actions\ViewAction::make(),
                 Actions\EditAction::make(),
                 Actions\DeleteAction::make(),
             ])
@@ -127,8 +125,8 @@ class CourseResource extends Resource
         return [
             'index' => \App\Filament\Resources\CourseResource\Pages\ListCourses::route('/'),
             'create' => \App\Filament\Resources\CourseResource\Pages\CreateCourse::route('/create'),
+            'view' => \App\Filament\Resources\CourseResource\Pages\ViewCourse::route('/{record}/view'),
             'edit' => \App\Filament\Resources\CourseResource\Pages\EditCourse::route('/{record}/edit'),
-            'enrollments' => \App\Filament\Resources\CourseResource\Pages\ManageEnrollments::route('/{record}/enrollments'),
         ];
     }
 }
