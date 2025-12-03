@@ -19,7 +19,6 @@ interface Quest {
     objective: string;
     reward: number;
     difficulty: 'Easy' | 'Medium' | 'Hard' | 'Legendary';
-    daysLeft: number;
     progress: number;
     status: 'active' | 'completed' | 'failed' | 'available';
 }
@@ -27,7 +26,6 @@ interface Quest {
 interface Props {
     activeQuests: Quest[];
     completedQuests: Quest[];
-    availableQuests: Quest[];
     stats: {
         totalActive: number;
         totalCompleted: number;
@@ -49,7 +47,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const selectedFilter = ref<'active' | 'completed' | 'available'>('active');
+const selectedFilter = ref<'active' | 'completed'>('active');
 
 const getDifficultyColor = (difficulty: string) => {
     const colors: Record<string, string> = {
@@ -75,8 +73,6 @@ const getFilteredQuests = () => {
     switch (selectedFilter.value) {
         case 'completed':
             return props.completedQuests;
-        case 'available':
-            return props.availableQuests;
         default:
             return props.activeQuests;
     }
@@ -134,7 +130,7 @@ const getFilteredQuests = () => {
             <!-- Filter Tabs -->
             <div class="flex gap-2 border-b border-sidebar-border/30">
                 <button
-                    v-for="filter in ['active', 'completed', 'available'] as const"
+                    v-for="filter in ['active', 'completed'] as const"
                     :key="filter"
                     @click="selectedFilter = filter"
                     :class="[
@@ -144,7 +140,7 @@ const getFilteredQuests = () => {
                             : 'text-muted-foreground hover:text-foreground'
                     ]"
                 >
-                    {{ filter }} ({{ filter === 'active' ? activeQuests.length : filter === 'completed' ? completedQuests.length : availableQuests.length }})
+                    {{ filter }} ({{ filter === 'active' ? activeQuests.length : completedQuests.length }})
                 </button>
             </div>
 
@@ -173,29 +169,33 @@ const getFilteredQuests = () => {
 
                                     <p class="text-sm text-muted-foreground mb-4">{{ quest.description }}</p>
 
-                                    <div v-if="selectedFilter === 'active'" class="space-y-2 mb-4">
+                                    <div class="space-y-2 mb-4">
                                         <div class="flex items-center justify-between">
                                             <span class="text-xs font-medium">Progress</span>
                                             <span class="text-xs text-muted-foreground">{{ quest.progress }}%</span>
                                         </div>
                                         <Progress :value="quest.progress" class="h-2" />
+                                        <div class="flex items-center justify-between text-xs text-muted-foreground">
+                                            <span>0</span>
+                                            <span>100</span>
+                                        </div>
                                     </div>
 
                                     <div class="flex items-center gap-4 flex-wrap">
                                         <div class="flex items-center gap-1">
-                                            <span class="text-yellow-500">⭐</span>
-                                            <span class="text-sm font-medium">{{ quest.reward }} XP</span>
-                                        </div>
-                                        <div v-if="selectedFilter === 'active'" class="text-sm text-muted-foreground">
-                                            ⏱️ {{ quest.daysLeft }} days left
-                                        </div>
-                                        <div v-else-if="selectedFilter === 'completed'" class="text-sm text-green-600 dark:text-green-400">
-                                            ✓ Completed
-                                        </div>
+                                             <span class="text-yellow-500">⭐</span>
+                                             <span class="text-sm font-medium">{{ quest.reward }} XP</span>
+                                         </div>
+                                         <div v-if="selectedFilter === 'completed'" class="text-sm text-green-600 dark:text-green-400">
+                                             ✓ Completed
+                                         </div>
 
-                                        <Button size="sm" :variant="selectedFilter === 'completed' ? 'outline' : 'default'">
-                                            {{ selectedFilter === 'completed' ? 'View' : 'Continue' }}
-                                        </Button>
+                                        <span v-if="selectedFilter === 'completed'" class="px-3 py-1 text-xs rounded-full font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                            ✓ Completed
+                                        </span>
+                                        <span v-else class="px-3 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                            In Progress
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -207,9 +207,6 @@ const getFilteredQuests = () => {
             <!-- Empty State -->
             <div v-if="getFilteredQuests().length === 0" class="text-center py-12">
                 <p class="text-muted-foreground mb-4">No {{ selectedFilter }} quests</p>
-                <Button v-if="selectedFilter !== 'available'" variant="outline">
-                    Browse Available Quests
-                </Button>
             </div>
         </div>
     </AppLayout>

@@ -93,6 +93,29 @@ class DashboardController extends Controller
                 'icon' => $achievement->icon,
             ]);
 
+        // Get pending assignments (not submitted or not graded)
+        $assignments = \App\Models\Assignment::where('is_active', true)
+            ->with('submissions')
+            ->get()
+            ->map(function ($assignment) use ($user) {
+                $userSubmission = $assignment->submissions()
+                    ->where('user_id', $user->id)
+                    ->first();
+
+                return [
+                    'id' => $assignment->id,
+                    'title' => $assignment->title,
+                    'description' => $assignment->description,
+                    'dueDate' => $assignment->due_date?->format('Y-m-d'),
+                    'isOverdue' => $assignment->due_date && $assignment->due_date->isPast(),
+                    'submitted' => $userSubmission ? true : false,
+                    'status' => $userSubmission?->status ?? 'pending',
+                    'grade' => $userSubmission?->grade,
+                ];
+            })
+            ->sortBy(fn ($a) => $a['isOverdue'] ? 0 : 1)
+            ->values();
+
         // Get recent activity
         $recentActivity = $user->lessonCompletions()
             ->with('lesson')
@@ -117,6 +140,7 @@ class DashboardController extends Controller
                 'achievements' => $achievements->count(),
             ],
             'courses' => $courses,
+            'assignments' => $assignments,
             'leaderboard' => $leaderboard,
             'achievements' => $allAchievements,
             'recentActivity' => $recentActivity,
