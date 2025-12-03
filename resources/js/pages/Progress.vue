@@ -40,9 +40,9 @@ interface Props {
         description: string;
     }[];
     stats: {
-        totalLessonsCompleted: number;
+        totalAssignmentsCompleted: number;
         totalCoursesEnrolled: number;
-        totalLessonsAvailable: number;
+        totalAssignmentsAvailable: number;
         averageCompletionRate: number;
     };
 }
@@ -86,12 +86,14 @@ const getLevelProgressPercentage = () => {
 </script>
 
 <template>
+
     <Head title="Progress" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <!-- Level Progress Section -->
-            <Card class="border-sidebar-border/70 dark:border-sidebar-border bg-gradient-to-r from-accent/20 to-accent/5">
+            <Card
+                class="border-sidebar-border/70 dark:border-sidebar-border bg-gradient-to-r from-accent/20 to-accent/5">
                 <CardHeader>
                     <CardTitle>Level Progress</CardTitle>
                     <CardDescription>Your journey to the next level</CardDescription>
@@ -130,15 +132,15 @@ const getLevelProgressPercentage = () => {
             </Card>
 
             <!-- Stats Grid -->
-            <div class="grid gap-4 md:grid-cols-4">
+            <div class="grid gap-4 md:grid-cols-3">
                 <Card class="border-sidebar-border/70 dark:border-sidebar-border">
                     <CardHeader class="pb-2">
-                        <CardTitle class="text-sm font-medium">Lessons</CardTitle>
+                        <CardTitle class="text-sm font-medium">Assignments</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold">{{ stats.totalLessonsCompleted }}</div>
+                        <div class="text-2xl font-bold">{{ stats.totalAssignmentsCompleted }}</div>
                         <p class="text-xs text-muted-foreground mt-1">
-                            of {{ stats.totalLessonsAvailable }} completed
+                            of {{ stats.totalAssignmentsAvailable }} completed
                         </p>
                     </CardContent>
                 </Card>
@@ -162,16 +164,6 @@ const getLevelProgressPercentage = () => {
                         <p class="text-xs text-muted-foreground mt-1">Average</p>
                     </CardContent>
                 </Card>
-
-                <Card class="border-sidebar-border/70 dark:border-sidebar-border">
-                    <CardHeader class="pb-2">
-                        <CardTitle class="text-sm font-medium">Learning Time</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold">42h</div>
-                        <p class="text-xs text-muted-foreground mt-1">Total spent</p>
-                    </CardContent>
-                </Card>
             </div>
 
             <!-- Progress Metrics -->
@@ -179,28 +171,21 @@ const getLevelProgressPercentage = () => {
                 <div class="mb-4">
                     <h2 class="text-lg font-semibold mb-3">Progress Metrics</h2>
                     <div class="flex gap-2 flex-wrap">
-                        <button
-                            @click="selectedCategory = 'all'"
-                            :class="[
-                                'px-3 py-1 rounded-full text-sm font-medium transition-colors',
-                                selectedCategory === 'all'
-                                    ? 'bg-accent text-accent-foreground'
-                                    : 'bg-sidebar-border/20 text-muted-foreground hover:text-foreground'
-                            ]"
-                        >
+                        <button @click="selectedCategory = 'all'" :class="[
+                            'px-3 py-1 rounded-full text-sm font-medium transition-colors',
+                            selectedCategory === 'all'
+                                ? 'bg-accent text-accent-foreground'
+                                : 'bg-sidebar-border/20 text-muted-foreground hover:text-foreground'
+                        ]">
                             All
                         </button>
-                        <button
-                            v-for="category in getCategories()"
-                            :key="category"
-                            @click="selectedCategory = category"
+                        <button v-for="category in getCategories()" :key="category" @click="selectedCategory = category"
                             :class="[
                                 'px-3 py-1 rounded-full text-sm font-medium transition-colors capitalize',
                                 selectedCategory === category
                                     ? 'bg-accent text-accent-foreground'
                                     : 'bg-sidebar-border/20 text-muted-foreground hover:text-foreground'
-                            ]"
-                        >
+                            ]">
                             {{ category }}
                         </button>
                     </div>
@@ -236,16 +221,18 @@ const getLevelProgressPercentage = () => {
             </div>
 
             <!-- Recent Milestones -->
-            <Card class="border-sidebar-border/70 dark:border-sidebar-border">
+            <!-- <Card class="border-sidebar-border/70 dark:border-sidebar-border">
                 <CardHeader>
                     <CardTitle>Recent Milestones</CardTitle>
                     <CardDescription>Your recent achievements and progress markers</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div class="space-y-4">
-                        <div v-for="(milestone, index) in recentMilestones" :key="index" class="flex gap-4 pb-4 border-b border-sidebar-border/30 last:border-b-0 last:pb-0">
+                        <div v-for="(milestone, index) in recentMilestones" :key="index"
+                            class="flex gap-4 pb-4 border-b border-sidebar-border/30 last:border-b-0 last:pb-0">
                             <div class="flex-shrink-0">
-                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-accent/20 border border-accent/30">
+                                <div
+                                    class="flex h-8 w-8 items-center justify-center rounded-full bg-accent/20 border border-accent/30">
                                     <span class="text-sm">✓</span>
                                 </div>
                             </div>
@@ -257,7 +244,7 @@ const getLevelProgressPercentage = () => {
                         </div>
                     </div>
                 </CardContent>
-            </Card>
+            </Card> -->
 
             <!-- Continue Learning CTA -->
             <!-- <Card class="border-sidebar-border/70 dark:border-sidebar-border bg-gradient-to-br from-accent/30 to-accent/10">
