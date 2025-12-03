@@ -37,9 +37,8 @@ class AssignmentResource extends Resource
                 ->rows(4),
             Select::make('category_id')
                 ->label('Category')
-                ->relationship('category', 'name')
-                ->searchable()
-                ->preload(),
+                ->options(fn () => Category::query()->pluck('name', 'id'))
+                ->native(false),
             FileUpload::make('file_path')
                 ->label('Upload File')
                 ->disk('public')
@@ -73,6 +72,7 @@ class AssignmentResource extends Resource
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('category.name')
+                    ->formatStateUsing(fn ($state, $record) => $record->category?->name ?? 'N/A')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('description')

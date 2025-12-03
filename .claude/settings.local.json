@@ -4,7 +4,10 @@
       "Bash(php artisan route:clear:*)",
       "Bash(php artisan route:list:*)",
       "Bash(powershell.exe:*)",
-      "Bash(php artisan cache:clear:*)"
+      "Bash(php artisan cache:clear:*)",
+      "Bash(php artisan config:clear:*)",
+      "Bash(php artisan:*)",
+      "Bash(php artisan migrate:*)"
     ],
     "deny": [],
     "ask": []
