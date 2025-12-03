@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use BackedEnum;
+use UnitEnum;
 use App\Models\User;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\TextInput;
@@ -19,6 +20,7 @@ class AwardPointsResource extends Resource
     protected static ?string $model = User::class;
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-star';
     protected static ?string $navigationLabel = 'Award Points';
+    protected static string|UnitEnum|null $navigationGroup = 'User Management';
     protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema

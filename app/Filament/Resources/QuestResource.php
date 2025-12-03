@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use BackedEnum;
+use UnitEnum;
 use App\Models\Quest;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -18,6 +19,9 @@ class QuestResource extends Resource
 {
     protected static ?string $model = Quest::class;
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-star';
+    protected static ?string $navigationLabel = 'Quests';
+    protected static string|UnitEnum|null $navigationGroup = 'Gamification';
+    protected static ?int $navigationSort = 3;
 
     public static function form(Schema $schema): Schema
     {

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use BackedEnum;
+use UnitEnum;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -19,6 +20,8 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-users';
     protected static ?string $navigationLabel = 'Users';
+    protected static string|UnitEnum|null $navigationGroup = 'User Management';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
     {

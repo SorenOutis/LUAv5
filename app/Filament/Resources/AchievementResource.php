@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use BackedEnum;
+use UnitEnum;
 use App\Models\Achievement;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -25,7 +26,8 @@ class AchievementResource extends Resource
     protected static ?string $navigationLabel = 'Achievements';
     protected static ?string $label = 'Achievement';
     protected static ?string $pluralLabel = 'Achievements';
-    protected static ?int $navigationSort = 3;
+    protected static string|UnitEnum|null $navigationGroup = 'Gamification';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
     {

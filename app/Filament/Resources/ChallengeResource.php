@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use BackedEnum;
+use UnitEnum;
 use App\Models\Challenge;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -20,6 +21,9 @@ class ChallengeResource extends Resource
 {
     protected static ?string $model = Challenge::class;
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-star';
+    protected static ?string $navigationLabel = 'Challenges';
+    protected static string|UnitEnum|null $navigationGroup = 'Gamification';
+    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
     {

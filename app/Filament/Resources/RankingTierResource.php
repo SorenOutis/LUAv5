@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\RankingTierResource\Pages;
 use App\Models\RankingTier;
 use BackedEnum;
+use UnitEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\ColorPicker;
@@ -27,8 +28,10 @@ class RankingTierResource extends Resource
     protected static ?string $label = 'Ranking Tier';
 
     protected static ?string $pluralLabel = 'Ranking Tiers';
+    
+    protected static string|UnitEnum|null $navigationGroup = 'Gamification';
 
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 5;
 
     public static function form(Schema $schema): Schema
     {

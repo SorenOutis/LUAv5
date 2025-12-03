@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use BackedEnum;
+use UnitEnum;
 use App\Models\Category;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -21,6 +22,9 @@ class CategoryResource extends Resource
     protected static ?string $model = Category::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-folder';
+    protected static ?string $navigationLabel = 'Categories';
+    protected static string|UnitEnum|null $navigationGroup = 'Learning Content';
+    protected static ?int $navigationSort = 3;
 
     public static function form(Schema $schema): Schema
     {

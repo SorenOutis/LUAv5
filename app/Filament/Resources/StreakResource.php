@@ -4,9 +4,9 @@ namespace App\Filament\Resources;
 
 use App\Models\Streak;
 use BackedEnum;
+use UnitEnum;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
@@ -26,42 +26,39 @@ class StreakResource extends Resource
     protected static ?string $navigationLabel = 'Streaks';
 
     protected static ?string $pluralModelLabel = 'Streaks';
+    
+    protected static string|UnitEnum|null $navigationGroup = 'Gamification';
 
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 4;
 
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            Section::make('Streak Information')
-                ->description('View and manage user streaks')
-                ->schema([
-                    Select::make('user_id')
-                        ->relationship('user', 'name')
-                        ->searchable()
-                        ->preload()
-                        ->required()
-                        ->label('User'),
+            Select::make('user_id')
+                ->relationship('user', 'name')
+                ->searchable()
+                ->preload()
+                ->required()
+                ->label('User'),
 
-                    TextInput::make('current_streak')
-                        ->numeric()
-                        ->default(0)
-                        ->label('Current Streak (days)')
-                        ->hint('Consecutive days logged in'),
+            TextInput::make('current_streak')
+                ->numeric()
+                ->default(0)
+                ->label('Current Streak (days)')
+                ->hint('Consecutive days logged in'),
 
-                    TextInput::make('longest_streak')
-                        ->numeric()
-                        ->default(0)
-                        ->label('Longest Streak (days)')
-                        ->hint('Longest streak achieved'),
+            TextInput::make('longest_streak')
+                ->numeric()
+                ->default(0)
+                ->label('Longest Streak (days)')
+                ->hint('Longest streak achieved'),
 
-                    DatePicker::make('last_login_date')
-                        ->label('Last Login Date'),
+            DatePicker::make('last_login_date')
+                ->label('Last Login Date'),
 
-                    DateTimePicker::make('last_login_at')
-                        ->label('Last Login Time')
-                        ->disabled(),
-                ])
-                ->columns(2),
+            DateTimePicker::make('last_login_at')
+                ->label('Last Login Time')
+                ->disabled(),
         ]);
     }
 

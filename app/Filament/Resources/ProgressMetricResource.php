@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use BackedEnum;
+use UnitEnum;
 use App\Models\ProgressMetric;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -24,7 +25,8 @@ class ProgressMetricResource extends Resource
     protected static ?string $navigationLabel = 'Progress Metrics';
     protected static ?string $label = 'Progress Metric';
     protected static ?string $pluralLabel = 'Progress Metrics';
-    protected static ?int $navigationSort = 10;
+    protected static string|UnitEnum|null $navigationGroup = 'Analytics';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
     {

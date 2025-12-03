@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Models\AssignmentSubmission;
 use BackedEnum;
+use UnitEnum;
 use Filament\Actions;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
@@ -21,6 +22,8 @@ class AssignmentSubmissionResource extends Resource
     protected static ?string $model = AssignmentSubmission::class;
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-check';
     protected static ?string $navigationLabel = 'Submissions';
+    protected static string|UnitEnum|null $navigationGroup = 'Learning Content';
+    protected static ?int $navigationSort = 4;
 
     public static function form(Schema $schema): Schema
     {

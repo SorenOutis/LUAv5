@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use BackedEnum;
+use UnitEnum;
 use App\Models\Course;
 use App\Filament\Resources\CourseResource\RelationManagers;
 use Filament\Actions;
@@ -22,6 +23,9 @@ class CourseResource extends Resource
     protected static ?string $model = Course::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-academic-cap';
+    protected static ?string $navigationLabel = 'Courses';
+    protected static string|UnitEnum|null $navigationGroup = 'Learning Content';
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'title';
 
