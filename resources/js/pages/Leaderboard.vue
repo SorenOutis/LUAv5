@@ -189,14 +189,25 @@ const restOfLeaderboard = computed(() => {
                 <!-- 1st Place -->
                 <div v-if="topThree[0]" class="order-0 md:order-2">
                     <Card
-                        class="border-sidebar-border/70 dark:border-sidebar-border h-full hover:shadow-md transition-shadow border-yellow-500/50">
-                        <CardContent class="pt-6 text-center">
-                            <div class="text-5xl mb-2">{{ topThree[0].rankTier.icon }}</div>
-                            <h3 class="font-semibold text-lg mb-1">{{ topThree[0].name }}</h3>
-                            <p class="text-xs font-semibold mb-2" :style="{ color: topThree[0].rankTier.color }">
+                        :class="[
+                            'border-sidebar-border/70 dark:border-sidebar-border h-full hover:shadow-md transition-shadow',
+                            topThree[0].rank === 1 && topThree[0].rankTier.name === 'SUPREME'
+                                ? 'border-yellow-500/50 animate-pulse shadow-lg shadow-yellow-500/50 bg-gradient-to-br from-yellow-500/20 via-yellow-500/10 to-transparent'
+                                : 'border-sidebar-border/70'
+                        ]">
+                        <CardContent class="pt-6 text-center relative">
+                            <div v-if="topThree[0].rank === 1 && topThree[0].rankTier.name === 'SUPREME'" class="absolute top-4 right-4 inline-block px-3 py-1 rounded-full bg-yellow-500/30 border border-yellow-500/50">
+                                <span class="text-lg font-bold text-yellow-500">#{{ topThree[0].rank }}</span>
+                            </div>
+                            <div v-else class="absolute top-4 right-4 inline-block px-3 py-1 rounded-full" :style="{ backgroundColor: topThree[0].rankTier.color + '20', borderColor: topThree[0].rankTier.color + '50' }" style="border-width: 1px;">
+                                <span class="text-lg font-bold" :style="{ color: topThree[0].rankTier.color }">#{{ topThree[0].rank }}</span>
+                            </div>
+                            <div class="text-6xl mb-3">{{ topThree[0].rankTier.icon }}</div>
+                            <h3 class="font-bold text-2xl mb-2 bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">{{ topThree[0].name }}</h3>
+                            <p class="text-sm font-bold mb-3 px-3 py-1 inline-block rounded-md" :style="{ color: topThree[0].rankTier.color, backgroundColor: topThree[0].rankTier.color + '20' }">
                                 {{ topThree[0].rankTier.name }}
                             </p>
-                            <p class="text-muted-foreground text-sm mb-3">
+                            <p class="font-semibold text-sm mb-3">
                                 {{ topThree[0].xp.toLocaleString() }} XP
                             </p>
                             <div class="grid grid-cols-2 gap-2 text-xs">
