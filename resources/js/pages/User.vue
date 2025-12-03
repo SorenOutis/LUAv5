@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import Button from '@/components/ui/button/Button.vue';
 import Card from '@/components/ui/card/Card.vue';
 import CardContent from '@/components/ui/card/CardContent.vue';
@@ -74,12 +74,79 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const selectedAchievement = ref<UserAchievement | null>(null);
 const isEditingProfile = ref(false);
+const profileHovered = ref(false);
+const particles = ref<Array<{ id: number; x: number; y: number }>>([]);
+const particleCounter = ref(0);
+const levelProgressAnimated = ref(0);
 
 const editedProfile = ref({
     name: props.user.name,
     email: props.user.email,
     bio: props.user.bio || '',
 });
+
+// Animated stats
+const animatedStats = ref([
+    { label: 'XP', value: 0, target: props.stats.totalXP, icon: '⭐', suffix: '' },
+    { label: 'Level', value: 0, target: props.stats.level, icon: '👑', suffix: '' },
+    { label: 'Courses', value: 0, target: props.stats.coursesEnrolled, icon: '📚', suffix: '' },
+    { label: 'Assignments', value: 0, target: props.stats.assignmentsCompleted, icon: '✓', suffix: '' },
+    { label: 'Streak', value: 0, target: props.stats.currentStreak, icon: '🔥', suffix: ' days' },
+]);
+
+const nextLevelXp = computed(() => (props.stats.level + 1) * 1000);
+const currentLevelXp = computed(() => props.stats.level * 1000);
+const xpProgress = computed(() => {
+    const current = (props.stats.totalXP % 1000);
+    return (current / 1000) * 100;
+});
+
+onMounted(() => {
+    // Animate stat counters
+    animatedStats.value.forEach((stat) => {
+        let current = 0;
+        const increment = Math.ceil(stat.target / 40);
+        const interval = setInterval(() => {
+            current += increment;
+            if (current >= stat.target) {
+                stat.value = stat.target;
+                clearInterval(interval);
+            } else {
+                stat.value = current;
+            }
+        }, 30);
+    });
+
+    // Animate XP progress bar
+    const xpInterval = setInterval(() => {
+        if (levelProgressAnimated.value < xpProgress.value) {
+            levelProgressAnimated.value = Math.min(
+                levelProgressAnimated.value + 2,
+                xpProgress.value
+            );
+        }
+    }, 50);
+
+    return () => clearInterval(xpInterval);
+});
+
+const createParticle = (event: MouseEvent) => {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    const particle = {
+        id: particleCounter.value++,
+        x,
+        y,
+    };
+
+    particles.value.push(particle);
+
+    setTimeout(() => {
+        particles.value = particles.value.filter((p) => p.id !== particle.id);
+    }, 600);
+};
 
 const handleEditClick = () => {
     isEditingProfile.value = true;
@@ -92,123 +159,161 @@ const handleSaveProfile = () => {
 const handleAchievementClick = (achievement: UserAchievement) => {
     selectedAchievement.value = achievement;
 };
+
+const getStreakEmoji = () => {
+    const streak = props.stats.currentStreak;
+    if (streak === 0) return '❄️';
+    if (streak < 7) return '🔥';
+    if (streak < 30) return '🔥🔥';
+    return '🔥🔥🔥';
+};
 </script>
 
 <template>
     <Head title="User Profile" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-            <!-- User Header Section -->
-            <Card class="border-sidebar-border/70 dark:border-sidebar-border bg-gradient-to-r from-accent/20 to-accent/5">
-                <CardContent class="pt-6">
-                    <div class="flex items-start justify-between">
-                        <div class="flex items-center gap-4">
-                            <!-- Avatar -->
-                            <div class="h-20 w-20 rounded-full bg-gradient-to-br from-accent to-accent/50 flex items-center justify-center text-2xl font-bold text-white">
-                                {{ user.name.charAt(0).toUpperCase() }}
-                            </div>
+        <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
+            <!-- User Header Section - Game Style -->
+            <div 
+                class="relative overflow-hidden rounded-xl border-2 border-sidebar-border/70 dark:border-sidebar-border bg-gradient-to-r from-accent/20 to-accent/5 p-8 shadow-lg transition-all duration-300 hover:shadow-xl hover:border-sidebar-border"
+                @mouseenter="profileHovered = true"
+                @mouseleave="profileHovered = false"
+            >
+                <!-- Animated background -->
+                <div class="absolute inset-0 opacity-10">
+                    <div
+                        class="absolute -right-1/2 -top-1/2 h-full w-full rounded-full bg-gradient-to-br from-accent to-transparent blur-3xl transition-transform duration-500"
+                        :class="{ 'scale-110': profileHovered }"
+                    />
+                </div>
 
-                            <!-- User Info -->
-                            <div class="flex-1">
-                                <h1 class="text-2xl font-bold">{{ user.name }}</h1>
-                                <p class="text-muted-foreground">{{ user.email }}</p>
-                                <p class="text-xs text-muted-foreground mt-1">
-                                    Joined {{ user.joinedDate }}
-                                </p>
-                            </div>
+                <!-- Particle effects -->
+                <div v-for="particle in particles" :key="particle.id" class="absolute pointer-events-none">
+                    <div
+                        class="text-2xl"
+                        :style="{
+                            left: particle.x + 'px',
+                            top: particle.y + 'px',
+                            animation: `float-up 0.6s ease-out forwards`,
+                        }"
+                    >
+                        ✨
+                    </div>
+                </div>
+
+                <div class="relative z-10 flex items-start justify-between">
+                    <div class="flex items-center gap-6">
+                        <!-- Avatar with glow -->
+                        <div 
+                            class="h-24 w-24 rounded-full bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center text-4xl font-bold text-accent-foreground shadow-lg relative transition-all duration-300"
+                            :class="{ 'scale-110 shadow-xl': profileHovered }"
+                        >
+                            {{ user.name.charAt(0).toUpperCase() }}
                         </div>
 
-                        <Button @click="handleEditClick">Edit Profile</Button>
+                        <!-- User Info -->
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h1 class="text-4xl font-bold text-foreground">
+                                    {{ user.name }}
+                                </h1>
+                                <span class="text-3xl">👑</span>
+                            </div>
+                            <p class="text-muted-foreground mb-2">{{ user.email }}</p>
+                            <p class="text-sm text-muted-foreground">
+                                🎮 Player since {{ user.joinedDate }}
+                            </p>
+                            <div class="mt-3 pt-3 border-t border-sidebar-border/70 dark:border-sidebar-border">
+                                <p class="text-foreground font-semibold">Level {{ props.stats.level }} Champion</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Bio Section -->
-                    <div v-if="user.bio" class="mt-4 p-4 rounded-lg bg-accent/5 border border-accent/20">
-                        <p class="text-sm text-muted-foreground">{{ user.bio }}</p>
-                    </div>
-                </CardContent>
-            </Card>
+                    <Button 
+                        @click="handleEditClick"
+                        class="transition-all duration-300 hover:scale-105"
+                    >
+                        ✏️ Edit Profile
+                    </Button>
+                </div>
 
-            <!-- Stats Grid -->
+                <!-- Bio Section -->
+                <div v-if="user.bio" class="mt-6 p-4 rounded-lg bg-accent/10 border border-accent/20">
+                    <p class="text-sm text-foreground">{{ user.bio }}</p>
+                </div>
+            </div>
+
+            <!-- XP Progress Bar -->
+            <div class="rounded-lg border-2 border-sidebar-border/70 dark:border-sidebar-border bg-card p-6">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-lg font-semibold text-foreground">⭐ Experience to Next Level</span>
+                        <span class="text-sm text-muted-foreground">{{ props.stats.totalXP % 1000 }} / 1000 XP</span>
+                    </div>
+                    <div class="relative h-6 w-full overflow-hidden rounded-full bg-muted border border-sidebar-border/50">
+                        <div
+                            class="h-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 transition-all duration-500 rounded-full shadow-lg"
+                            :style="{ width: levelProgressAnimated + '%' }"
+                        />
+                        <div
+                            class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent"
+                            style="opacity: 0.2;"
+                            :style="{ width: levelProgressAnimated + '%' }"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid - Interactive -->
             <div class="grid gap-4 md:grid-cols-5">
-                <Card class="border-sidebar-border/70 dark:border-sidebar-border">
-                    <CardHeader class="pb-2">
-                        <CardTitle class="text-sm font-medium">Total XP</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold">{{ stats.totalXP.toLocaleString() }}</div>
-                        <p class="text-xs text-muted-foreground mt-1">Lifetime points</p>
-                    </CardContent>
-                </Card>
-
-                <Card class="border-sidebar-border/70 dark:border-sidebar-border">
-                    <CardHeader class="pb-2">
-                        <CardTitle class="text-sm font-medium">Level</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold">{{ stats.level }}</div>
-                        <p class="text-xs text-muted-foreground mt-1">Current level</p>
-                    </CardContent>
-                </Card>
-
-                <Card class="border-sidebar-border/70 dark:border-sidebar-border">
-                    <CardHeader class="pb-2">
-                        <CardTitle class="text-sm font-medium">Courses</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold">{{ stats.coursesEnrolled }}</div>
-                        <p class="text-xs text-muted-foreground mt-1">Enrolled</p>
-                    </CardContent>
-                </Card>
-
-                <Card class="border-sidebar-border/70 dark:border-sidebar-border">
-                    <CardHeader class="pb-2">
-                        <CardTitle class="text-sm font-medium">Assignments</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold">{{ stats.assignmentsCompleted }}</div>
-                        <p class="text-xs text-muted-foreground mt-1">Completed</p>
-                    </CardContent>
-                </Card>
-
-                <Card class="border-sidebar-border/70 dark:border-sidebar-border">
-                    <CardHeader class="pb-2">
-                        <CardTitle class="text-sm font-medium">Streak</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold">{{ stats.currentStreak }}</div>
-                        <p class="text-xs text-muted-foreground mt-1">Days active</p>
-                    </CardContent>
-                </Card>
+                <button
+                    v-for="(stat, index) in animatedStats"
+                    :key="index"
+                    @click="createParticle"
+                    class="group relative overflow-hidden rounded-lg border-2 border-sidebar-border/70 dark:border-sidebar-border bg-card p-6 text-center transition-all duration-300 hover:border-sidebar-border hover:shadow-md dark:hover:shadow-lg cursor-pointer hover:scale-105"
+                >
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                    />
+                    <div class="relative z-10">
+                        <div class="mb-3 text-4xl">{{ stat.icon }}</div>
+                        <div class="text-3xl font-bold text-foreground">{{ stat.value.toLocaleString() }}</div>
+                        <div class="text-xs text-muted-foreground mt-2">{{ stat.label }}{{ stat.suffix }}</div>
+                    </div>
+                </button>
             </div>
 
             <!-- Main Content Grid -->
-            <div class="grid gap-4 lg:grid-cols-3">
+            <div class="grid gap-6 lg:grid-cols-3">
                 <!-- Left Column: Courses & Progress -->
-                <div class="lg:col-span-2 space-y-4">
+                <div class="lg:col-span-2 space-y-6">
                     <!-- Course Progress -->
-                    <Card class="border-sidebar-border/70 dark:border-sidebar-border">
+                    <Card class="border-sidebar-border/70 dark:border-sidebar-border shadow-md">
                         <CardHeader>
-                            <CardTitle>Course Progress</CardTitle>
+                            <CardTitle class="text-foreground flex items-center gap-2">
+                                <span>📚</span> Course Progress
+                            </CardTitle>
                             <CardDescription>Your learning journey across all enrolled courses</CardDescription>
                         </CardHeader>
-                        <CardContent class="space-y-4">
-                            <div v-if="progress.length === 0" class="text-center py-8">
-                                <p class="text-muted-foreground">No courses enrolled yet</p>
+                        <CardContent class="space-y-6">
+                            <div v-if="progress.length === 0" class="text-center py-12">
+                                <p class="text-muted-foreground text-lg">🎯 No courses enrolled yet</p>
+                                <p class="text-muted-foreground text-sm mt-2">Start your learning journey by enrolling in a course!</p>
                             </div>
-                            <div v-for="course in progress" :key="course.courseId" class="space-y-2">
+                            <div v-for="course in progress" :key="course.courseId" class="space-y-3">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <h4 class="font-medium text-sm">{{ course.courseName }}</h4>
+                                        <h4 class="font-semibold text-foreground">{{ course.courseName }}</h4>
                                         <p class="text-xs text-muted-foreground">
-                                            {{ course.completedLessons }} / {{ course.totalLessons }} lessons
+                                            {{ course.completedLessons }} / {{ course.totalLessons }} lessons completed
                                         </p>
                                     </div>
-                                    <span class="text-sm font-semibold">{{ course.progress }}%</span>
+                                    <span class="text-sm font-bold text-accent">{{ course.progress }}%</span>
                                 </div>
-                                <div class="h-2 rounded-full bg-muted overflow-hidden">
+                                <div class="h-3 rounded-full bg-muted overflow-hidden border border-sidebar-border/50">
                                     <div
-                                        class="h-full bg-gradient-to-r from-accent to-accent/60 transition-all duration-500"
+                                        class="h-full bg-gradient-to-r from-accent to-accent/60 transition-all duration-700 rounded-full shadow-lg"
                                         :style="{ width: `${course.progress}%` }"
                                     />
                                 </div>
@@ -216,74 +321,94 @@ const handleAchievementClick = (achievement: UserAchievement) => {
                         </CardContent>
                     </Card>
 
-                    <!-- Overview Stats -->
-                    <Card class="border-sidebar-border/70 dark:border-sidebar-border">
+                    <!-- Achievement Summary -->
+                    <Card class="border-sidebar-border/70 dark:border-sidebar-border shadow-md">
                         <CardHeader>
-                            <CardTitle>Achievement Summary</CardTitle>
+                            <CardTitle class="text-foreground flex items-center gap-2">
+                                <span>🏆</span> Achievement Summary
+                            </CardTitle>
                             <CardDescription>{{ stats.achievementsUnlocked }} achievements unlocked</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div class="space-y-3">
-                                <div class="flex items-center justify-between p-3 rounded-lg bg-accent/5 border border-accent/20">
-                                    <span class="font-medium text-sm">Total Achievements</span>
-                                    <span class="text-lg font-bold">{{ stats.achievementsUnlocked }}</span>
+                                <div class="flex items-center justify-between p-4 rounded-lg bg-accent/10 border border-accent/20 hover:border-accent/30 transition-all duration-200">
+                                    <span class="font-semibold text-foreground">Total Achievements</span>
+                                    <span class="text-2xl font-bold text-accent">{{ stats.achievementsUnlocked }}</span>
                                 </div>
-                                <div class="flex items-center justify-between p-3 rounded-lg bg-accent/5 border border-accent/20">
-                                    <span class="font-medium text-sm">Success Rate</span>
-                                    <span class="text-lg font-bold">{{ Math.round((stats.achievementsUnlocked / 20) * 100) }}%</span>
+                                <div class="flex items-center justify-between p-4 rounded-lg bg-accent/10 border border-accent/20 hover:border-accent/30 transition-all duration-200">
+                                    <span class="font-semibold text-foreground">Success Rate</span>
+                                    <span class="text-2xl font-bold text-accent">{{ Math.round((stats.achievementsUnlocked / 20) * 100) }}%</span>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
                 </div>
 
-                <!-- Right Column: Achievements -->
-                <div class="space-y-4">
+                <!-- Right Column: Achievements & Member Info -->
+                <div class="space-y-6">
                     <!-- Achievements -->
-                    <Card class="border-sidebar-border/70 dark:border-sidebar-border">
+                    <Card class="border-sidebar-border/70 dark:border-sidebar-border shadow-md">
                         <CardHeader>
-                            <CardTitle class="text-base">Recent Achievements</CardTitle>
+                            <CardTitle class="text-foreground text-base flex items-center gap-2">
+                                <span>⭐</span> Recent Achievements
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div v-if="achievements.length === 0" class="text-center py-8">
-                                <p class="text-muted-foreground text-sm">No achievements yet</p>
+                                <p class="text-muted-foreground text-sm">🎯 No achievements yet</p>
+                                <p class="text-muted-foreground text-xs mt-2">Complete challenges to unlock achievements!</p>
                             </div>
                             <div v-else class="space-y-3">
-                                <div v-for="achievement in achievements.slice(0, 5)" :key="achievement.id"
-                                    class="flex flex-col items-center justify-center p-3 rounded border border-accent/30 bg-accent/10 cursor-pointer transition-all duration-150 hover:scale-105 hover:shadow-sm"
+                                <button
+                                    v-for="achievement in achievements.slice(0, 5)"
+                                    :key="achievement.id"
+                                    class="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-sidebar-border/70 dark:border-sidebar-border bg-card cursor-pointer transition-all duration-200 hover:scale-110 hover:border-sidebar-border hover:shadow-md dark:hover:shadow-lg"
                                     :title="achievement.description"
-                                    @click="handleAchievementClick(achievement)">
-                                    <div class="text-3xl mb-1">{{ achievement.icon }}</div>
-                                    <p class="text-xs text-center font-medium text-muted-foreground">{{ achievement.name }}</p>
-                                </div>
+                                    @click="handleAchievementClick(achievement)"
+                                >
+                                    <div class="text-4xl mb-2">{{ achievement.icon }}</div>
+                                    <p class="text-xs text-center font-semibold text-foreground">{{ achievement.name }}</p>
+                                </button>
                             </div>
 
-                            <Button v-if="achievements.length > 5" class="w-full mt-4" variant="outline">
+                            <Button 
+                                v-if="achievements.length > 5" 
+                                class="w-full mt-4"
+                                variant="outline"
+                            >
                                 View All Achievements
                             </Button>
                         </CardContent>
                     </Card>
 
-                    <!-- Profile Stats -->
-                    <Card class="border-sidebar-border/70 dark:border-sidebar-border bg-gradient-to-br from-accent/30 to-accent/10">
+                    <!-- Member Info -->
+                    <Card class="border-sidebar-border/70 dark:border-sidebar-border bg-gradient-to-br from-accent/10 to-accent/5 shadow-md">
                         <CardHeader>
-                            <CardTitle class="text-sm">Member Info</CardTitle>
+                            <CardTitle class="text-foreground text-sm flex items-center gap-2">
+                                <span>👤</span> Member Info
+                            </CardTitle>
                         </CardHeader>
-                        <CardContent class="space-y-3">
+                        <CardContent class="space-y-4">
                             <div>
-                                <p class="text-xs text-muted-foreground mb-1">Email</p>
-                                <p class="text-sm font-medium">{{ user.email }}</p>
+                                <p class="text-xs text-muted-foreground mb-2">📧 Email</p>
+                                <p class="text-sm font-medium text-foreground">{{ user.email }}</p>
                             </div>
                             <div>
-                                <p class="text-xs text-muted-foreground mb-1">Member Since</p>
-                                <p class="text-sm font-medium">{{ user.joinedDate }}</p>
+                                <p class="text-xs text-muted-foreground mb-2">📅 Member Since</p>
+                                <p class="text-sm font-medium text-foreground">{{ user.joinedDate }}</p>
                             </div>
                             <div>
-                                <p class="text-xs text-muted-foreground mb-1">Current Streak</p>
-                                <p class="text-sm font-medium">{{ stats.currentStreak }} days</p>
+                                <p class="text-xs text-muted-foreground mb-2">{{ getStreakEmoji() }} Current Streak</p>
+                                <p class="text-sm font-bold text-accent">
+                                    {{ stats.currentStreak }} days
+                                </p>
                             </div>
-                            <Button class="w-full mt-2" variant="outline" size="sm">
-                                Settings
+                            <Button 
+                                class="w-full mt-4"
+                                variant="outline" 
+                                size="sm"
+                            >
+                                ⚙️ Settings
                             </Button>
                         </CardContent>
                     </Card>
@@ -293,10 +418,10 @@ const handleAchievementClick = (achievement: UserAchievement) => {
 
         <!-- Achievement Details Dialog -->
         <Dialog v-if="selectedAchievement" :open="!!selectedAchievement" @update:open="(open) => !open && (selectedAchievement = null)">
-            <DialogContent>
+            <DialogContent class="border-sidebar-border/70 dark:border-sidebar-border">
                 <DialogHeader>
-                    <DialogTitle class="flex items-center gap-2">
-                        <span class="text-4xl">{{ selectedAchievement.icon }}</span>
+                    <DialogTitle class="flex items-center gap-3 text-foreground">
+                        <span class="text-5xl animate-bounce">{{ selectedAchievement.icon }}</span>
                         {{ selectedAchievement.name }}
                     </DialogTitle>
                     <DialogDescription>
@@ -304,54 +429,91 @@ const handleAchievementClick = (achievement: UserAchievement) => {
                     </DialogDescription>
                 </DialogHeader>
                 <div class="space-y-4">
-                    <div class="p-4 rounded-lg bg-accent/10 border border-accent/30">
-                        <p class="text-sm font-medium text-accent">✓ Unlocked {{ selectedAchievement.unlockedAt }}</p>
+                    <div class="p-4 rounded-lg bg-green-500/10 border border-green-500/30">
+                        <p class="text-sm font-semibold text-green-600 dark:text-green-400">✓ Unlocked {{ selectedAchievement.unlockedAt }}</p>
                     </div>
-                    <Button class="w-full">Share Achievement</Button>
+                    <Button class="w-full">
+                        🚀 Share Achievement
+                    </Button>
                 </div>
             </DialogContent>
         </Dialog>
 
         <!-- Edit Profile Dialog -->
         <Dialog :open="isEditingProfile" @update:open="isEditingProfile = $event">
-            <DialogContent>
+            <DialogContent class="border-sidebar-border/70 dark:border-sidebar-border">
                 <DialogHeader>
-                    <DialogTitle>Edit Profile</DialogTitle>
+                    <DialogTitle class="text-foreground">✏️ Edit Profile</DialogTitle>
                     <DialogDescription>
                         Update your profile information
                     </DialogDescription>
                 </DialogHeader>
                 <div class="space-y-4">
                     <div>
-                        <label class="text-sm font-medium">Name</label>
+                        <label class="text-sm font-semibold text-foreground">Name</label>
                         <input
                             v-model="editedProfile.name"
                             type="text"
-                            class="w-full px-3 py-2 border rounded-md border-input bg-background mt-1"
+                            class="w-full px-4 py-2 border-2 rounded-lg border-sidebar-border/70 dark:border-sidebar-border bg-card text-foreground mt-2 transition-all duration-200 focus:border-sidebar-border focus:ring-2 focus:ring-accent/30"
+                            placeholder="Your name"
                         />
                     </div>
                     <div>
-                        <label class="text-sm font-medium">Email</label>
+                        <label class="text-sm font-semibold text-foreground">Email</label>
                         <input
                             v-model="editedProfile.email"
                             type="email"
-                            class="w-full px-3 py-2 border rounded-md border-input bg-background mt-1"
+                            class="w-full px-4 py-2 border-2 rounded-lg border-sidebar-border/70 dark:border-sidebar-border bg-card text-foreground mt-2 transition-all duration-200 focus:border-sidebar-border focus:ring-2 focus:ring-accent/30"
+                            placeholder="Your email"
                         />
                     </div>
                     <div>
-                        <label class="text-sm font-medium">Bio</label>
+                        <label class="text-sm font-semibold text-foreground">Bio</label>
                         <textarea
                             v-model="editedProfile.bio"
-                            class="w-full px-3 py-2 border rounded-md border-input bg-background mt-1"
+                            class="w-full px-4 py-2 border-2 rounded-lg border-sidebar-border/70 dark:border-sidebar-border bg-card text-foreground mt-2 transition-all duration-200 focus:border-sidebar-border focus:ring-2 focus:ring-accent/30"
                             rows="4"
+                            placeholder="Tell us about yourself..."
                         />
                     </div>
-                    <div class="flex gap-2">
-                        <Button @click="handleSaveProfile" class="flex-1">Save Changes</Button>
-                        <Button @click="isEditingProfile = false" variant="outline" class="flex-1">Cancel</Button>
+                    <div class="flex gap-3 pt-4">
+                        <Button 
+                            @click="handleSaveProfile" 
+                            class="flex-1"
+                        >
+                            💾 Save Changes
+                        </Button>
+                        <Button 
+                            @click="isEditingProfile = false" 
+                            variant="outline" 
+                            class="flex-1"
+                        >
+                            ✕ Cancel
+                        </Button>
                     </div>
                 </div>
             </DialogContent>
         </Dialog>
     </AppLayout>
 </template>
+
+<style scoped>
+@keyframes float-up {
+    0% {
+        opacity: 1;
+        transform: translateY(0) translateX(0);
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-60px) translateX(20px) scale(0);
+    }
+}
+
+:deep(input),
+:deep(textarea) {
+    color-scheme: light dark;
+}
+</style>

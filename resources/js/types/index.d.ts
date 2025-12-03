@@ -34,6 +34,9 @@ export interface User {
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
+    xp?: number;
+    achievements_count?: number;
+    streaks_count?: number;
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;
