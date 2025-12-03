@@ -10,11 +10,6 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        // Calculate total XP from assignment submissions
-        $assignmentXP = $user->assignmentSubmissions()
-            ->whereNotNull('xp')
-            ->sum('xp');
-
         // Get or create user profile
         $profile = $user->profile()->firstOrCreate([], [
             'total_xp' => 0,
@@ -25,17 +20,10 @@ class DashboardController extends Controller
             'rank_title' => 'Plastic',
         ]);
 
-        // Set total_xp to assignment XP (not accumulated)
-        $totalXP = $assignmentXP;
-        $profile->update(['total_xp' => $totalXP]);
-
-        // Calculate level based on total XP (100 XP per level)
-        $level = max(1, intval($totalXP / 100) + 1);
-        $currentLevelXP = $totalXP % 100;
-        $profile->update([
-            'level' => $level,
-            'current_level_xp' => $currentLevelXP,
-        ]);
+        // Get total XP from profile (includes both assignment XP and manually awarded points)
+        $totalXP = $profile->total_xp;
+        $level = $profile->level;
+        $currentLevelXP = $profile->current_level_xp;
 
         // Get active courses with enrollment progress
         $courses = $user->enrollments()
@@ -51,9 +39,9 @@ class DashboardController extends Controller
                 'nextDeadline' => $enrollment->course->updated_at->format('Y-m-d'),
             ]);
 
-        // Get leaderboard (top 5 users by assignment XP)
+        // Get leaderboard (top 5 users by total XP from database)
         // Exclude admin users - only show students
-        $leaderboard = \App\Models\User::with('profile', 'assignmentSubmissions')
+        $leaderboard = \App\Models\User::with('profile')
             ->where('id', '>', 1) // Exclude first user (admin)
             ->get()
             ->filter(function ($u) {
@@ -62,15 +50,16 @@ class DashboardController extends Controller
             })
             ->map(fn ($u) => [
                 'name' => $u->name,
-                'assignmentXP' => $u->assignmentSubmissions()->whereNotNull('xp')->sum('xp'),
-                'profileXP' => $u->profile?->total_xp ?? 0,
+                'xp' => $u->profile?->total_xp ?? 0,
+                'level' => $u->profile?->level ?? 1,
+                'isUser' => $u->name === $user->name,
             ])
             ->map(fn ($item) => [
                 'name' => $item['name'],
-                'xp' => $item['assignmentXP'],
-                'level' => max(1, intval($item['assignmentXP'] / 100) + 1),
-                'badge' => $this->getLevelBadge(max(1, intval($item['assignmentXP'] / 100) + 1)),
-                'isUser' => $item['name'] === $user->name,
+                'xp' => $item['xp'],
+                'level' => $item['level'],
+                'badge' => $this->getLevelBadge($item['level']),
+                'isUser' => $item['isUser'],
             ])
             ->sortByDesc('xp')
             ->take(5)
