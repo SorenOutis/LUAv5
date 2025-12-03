@@ -133,6 +133,7 @@ class DashboardController extends Controller
             ]);
 
         return Inertia::render('Dashboard', [
+            'userName' => $user->name,
             'userStats' => [
                 'totalXP' => $totalXP,
                 'level' => $level,

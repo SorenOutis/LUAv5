@@ -82,6 +82,7 @@ interface StreakData {
 }
 
 interface Props {
+    userName: string;
     userStats: UserStats;
     courses: Course[];
     assignments: Assignment[];
@@ -147,6 +148,11 @@ const handleLeaderboardClick = (leader: LeaderboardEntry) => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <!-- Welcome Message -->
+            <div class="mb-2">
+                <h1 class="text-3xl font-bold">Welcome, {{ userName }}!</h1>
+            </div>
+
             <!-- Header Section with User Stats -->
             <div class="grid gap-4 md:grid-cols-4">
                 <!-- Level Card -->
