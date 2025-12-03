@@ -220,7 +220,7 @@ const getTypeColor = (type: string) => {
             </Card>
 
             <!-- Share Rewards -->
-            <Card class="border-sidebar-border/70 dark:border-sidebar-border">
+            <!-- <Card class="border-sidebar-border/70 dark:border-sidebar-border">
                 <CardContent class="pt-6">
                     <div class="flex items-center justify-between">
                         <div>
@@ -233,7 +233,7 @@ const getTypeColor = (type: string) => {
                         </div>
                     </div>
                 </CardContent>
-            </Card>
+            </Card> -->
         </div>
     </AppLayout>
 </template>

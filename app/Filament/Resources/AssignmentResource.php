@@ -3,10 +3,10 @@
 namespace App\Filament\Resources;
 
 use App\Models\Assignment;
+use App\Models\Category;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -35,17 +35,11 @@ class AssignmentResource extends Resource
                 ->label('Description')
                 ->maxLength(1000)
                 ->rows(4),
-            Select::make('category')
+            Select::make('category_id')
                 ->label('Category')
-                ->options([
-                    'python' => 'Python',
-                    'web-development' => 'Web Development',
-                    'data-science' => 'Data Science',
-                    'mobile' => 'Mobile Development',
-                    'devops' => 'DevOps',
-                    'other' => 'Other',
-                ])
-                ->searchable(),
+                ->relationship('category', 'name')
+                ->searchable()
+                ->preload(),
             FileUpload::make('file_path')
                 ->label('Upload File')
                 ->disk('public')
@@ -68,9 +62,6 @@ class AssignmentResource extends Resource
             Toggle::make('is_active')
                 ->label('Active')
                 ->default(true),
-                CheckboxList::make('roles')
-                ->relationship('roles', 'name')
-                ->searchable(),
         ]);
     }
 
@@ -81,7 +72,7 @@ class AssignmentResource extends Resource
                 TextColumn::make('title')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('category')
+                TextColumn::make('category.name')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('description')

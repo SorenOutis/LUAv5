@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('assignments', function (Blueprint $table) {
-            if (!Schema::hasColumn('assignments', 'category')) {
-                $table->string('category')->nullable();
+            if (!Schema::hasColumn('assignments', 'category_id')) {
+                $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null');
             }
         });
     }
@@ -24,8 +24,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('assignments', function (Blueprint $table) {
-            if (Schema::hasColumn('assignments', 'category')) {
-                $table->dropColumn('category');
+            // Drop foreign key constraint first
+            $table->dropForeign(['category_id']);
+            if (Schema::hasColumn('assignments', 'category_id')) {
+                $table->dropColumn('category_id');
             }
         });
     }

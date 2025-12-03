@@ -260,7 +260,7 @@ const getLevelProgressPercentage = () => {
             </Card>
 
             <!-- Continue Learning CTA -->
-            <Card class="border-sidebar-border/70 dark:border-sidebar-border bg-gradient-to-br from-accent/30 to-accent/10">
+            <!-- <Card class="border-sidebar-border/70 dark:border-sidebar-border bg-gradient-to-br from-accent/30 to-accent/10">
                 <CardContent class="pt-6">
                     <div class="flex items-center justify-between">
                         <div>
@@ -270,7 +270,7 @@ const getLevelProgressPercentage = () => {
                         <Button size="lg">Continue Learning</Button>
                     </div>
                 </CardContent>
-            </Card>
+            </Card> -->
         </div>
     </AppLayout>
 </template>

@@ -452,7 +452,7 @@ const handleLeaderboardClick = (leader: LeaderboardEntry) => {
                         </CardContent>
                     </Card>
 
-                    <!-- Next Goal -->
+                    <!-- Next Goal
                     <Card class="border-sidebar-border/70 dark:border-sidebar-border bg-gradient-to-br from-accent/30 to-accent/10 transition-all duration-200 hover:shadow-md dark:hover:shadow-lg cursor-pointer hover:scale-105">
                         <CardHeader>
                             <CardTitle class="text-sm">Next Goal</CardTitle>
@@ -465,7 +465,7 @@ const handleLeaderboardClick = (leader: LeaderboardEntry) => {
                                 <Button class="w-full mt-3" size="sm">Continue Learning</Button>
                             </div>
                         </CardContent>
-                    </Card>
+                    </Card> -->
                 </div>
             </div>
         </div>

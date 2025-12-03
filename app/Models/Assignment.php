@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Assignment extends Model
 {
@@ -12,7 +13,7 @@ class Assignment extends Model
         'description',
         'file_path',
         'due_date',
-        'category',
+        'category_id',
         'is_active',
     ];
 
@@ -22,6 +23,11 @@ class Assignment extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
 
     public function submissions(): HasMany
     {

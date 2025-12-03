@@ -6,9 +6,11 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\Action;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
+use App\Models\CourseEnrollment;
 
 class EnrollmentsRelationManager extends RelationManager
 {
@@ -67,6 +69,25 @@ class EnrollmentsRelationManager extends RelationManager
                 //
             ])
             ->actions([
+                Action::make('approve')
+                    ->label('Approve')
+                    ->icon('heroicon-m-check-circle')
+                    ->color('success')
+                    ->visible(fn (CourseEnrollment $record) => $record->approval_status === 'pending')
+                    ->action(fn (CourseEnrollment $record) => $record->update([
+                        'approval_status' => 'approved',
+                        'approved_at' => now(),
+                    ]))
+                    ->requiresConfirmation(),
+                Action::make('reject')
+                    ->label('Reject')
+                    ->icon('heroicon-m-x-circle')
+                    ->color('danger')
+                    ->visible(fn (CourseEnrollment $record) => $record->approval_status === 'pending')
+                    ->action(fn (CourseEnrollment $record) => $record->update([
+                        'approval_status' => 'rejected',
+                    ]))
+                    ->requiresConfirmation(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
