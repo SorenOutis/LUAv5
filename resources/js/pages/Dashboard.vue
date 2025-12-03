@@ -479,7 +479,7 @@ const handleLeaderboardClick = (leader: LeaderboardEntry) => {
                         </CardHeader>
                         <CardContent>
                             <div class="grid grid-cols-3 gap-2">
-                                <div v-for="achievement in achievements" :key="achievement.id"
+                                <div v-for="achievement in achievements.filter(a => a.unlocked)" :key="achievement.id"
                                     :class="['flex flex-col items-center justify-center p-2 rounded border cursor-pointer transition-all duration-150 hover:scale-110', achievement.unlocked ? 'bg-accent/20 border-sidebar-border/50 hover:border-accent hover:shadow-sm' : 'opacity-50 grayscale border-sidebar-border/50 hover:opacity-75']"
                                     :title="achievement.description" @click="handleAchievementClick(achievement)">
                                     <div class="text-2xl mb-1">{{ achievement.icon }}</div>
