@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\RankingTier;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -9,107 +11,157 @@ class LeaderboardController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
+        $currentUser = Auth::user();
+        $currentProfile = $currentUser->profile;
+
+        // Get all users with their profiles, ordered by total XP (for leaderboard display)
+        // Exclude admin and staff users - only show students
+        $allUsers = User::with('profile')
+            ->whereHas('profile')
+            ->where('id', '>', 1) // Exclude first user (admin)
+            ->get()
+            ->filter(function ($user) {
+                // Additional exclusions: users with any admin-related roles
+                return !$user->hasAnyRole(['admin', 'staff', 'teacher', 'super_admin']);
+            })
+            ->sortByDesc(fn($user) => $user->profile->total_xp)
+            ->values();
+
+        // Create leaderboard entries with pagination (20 per page initially)
+        $leaderboardEntries = $allUsers->map(function ($user, $index) use ($currentUser) {
+            $achievements = $user->achievements()->count();
+            // Calculate rank tier based on the user's level, not leaderboard position
+            // Map levels to rank positions: Level 1 = Rank 131+, Level 2 = Rank 101-130, etc.
+            $rankTier = $this->getRankTierByLevel((int) $user->profile->level);
+            
+            return [
+                'rank' => $index + 1,
+                'userId' => $user->id,
+                'name' => $user->name,
+                'xp' => (int) $user->profile->total_xp,
+                'level' => (int) $user->profile->level,
+                'streakDays' => (int) $user->profile->streak_days,
+                'achievements' => $achievements,
+                'isCurrentUser' => $user->id === $currentUser->id,
+                'rankTier' => $rankTier,
+            ];
+        })->toArray();
+
+        // Get current user's rank
+        $currentUserRank = collect($leaderboardEntries)
+            ->where('userId', $currentUser->id)
+            ->first() ?? [
+            'rank' => count($allUsers) + 1,
+            'userId' => $currentUser->id,
+            'name' => $currentUser->name,
+            'xp' => 0,
+            'level' => 1,
+            'streakDays' => 0,
+            'achievements' => 0,
+            'isCurrentUser' => true,
+            'rankTier' => $this->getRankTierByLevel(1),
+        ];
+
+        $totalUsers = count($allUsers);
+        $topXP = $allUsers->first()?->profile?->total_xp ?? 0;
+
+        // Calculate XP to next level (example: 1000 XP per level)
+        $xpPerLevel = 1000;
+        $currentLevelXP = ($currentProfile->level - 1) * $xpPerLevel;
+        $nextLevelXP = $currentProfile->level * $xpPerLevel;
+        $xpToNextRank = max(0, $nextLevelXP - $currentProfile->total_xp);
+
+        // Get all ranking tiers sorted by minRank
+        $allTiers = RankingTier::orderBy('min_rank', 'asc')->get()->map(function ($tier) {
+            return [
+                'id' => $tier->id,
+                'name' => $tier->name,
+                'icon' => $tier->icon,
+                'color' => $tier->color,
+                'minRank' => $tier->min_rank,
+                'maxRank' => $tier->max_rank,
+            ];
+        })->toArray();
 
         return Inertia::render('Leaderboard', [
-            'leaderboard' => [
-                [
-                    'rank' => 1,
-                    'userId' => 1,
-                    'name' => 'Alex Chen',
-                    'xp' => 15750,
-                    'level' => 25,
-                    'streakDays' => 42,
-                    'achievements' => 18,
-                    'isCurrentUser' => false,
-                ],
-                [
-                    'rank' => 2,
-                    'userId' => 2,
-                    'name' => 'Jordan Silva',
-                    'xp' => 14200,
-                    'level' => 24,
-                    'streakDays' => 38,
-                    'achievements' => 16,
-                    'isCurrentUser' => false,
-                ],
-                [
-                    'rank' => 3,
-                    'userId' => 3,
-                    'name' => 'Taylor Morgan',
-                    'xp' => 13500,
-                    'level' => 23,
-                    'streakDays' => 35,
-                    'achievements' => 15,
-                    'isCurrentUser' => false,
-                ],
-                [
-                    'rank' => 4,
-                    'userId' => 4,
-                    'name' => 'Casey Rivera',
-                    'xp' => 12800,
-                    'level' => 22,
-                    'streakDays' => 30,
-                    'achievements' => 14,
-                    'isCurrentUser' => false,
-                ],
-                [
-                    'rank' => 5,
-                    'userId' => 5,
-                    'name' => 'You',
-                    'xp' => 8500,
-                    'level' => 18,
-                    'streakDays' => 12,
-                    'achievements' => 8,
-                    'isCurrentUser' => true,
-                ],
-                [
-                    'rank' => 6,
-                    'userId' => 6,
-                    'name' => 'Morgan Blake',
-                    'xp' => 7800,
-                    'level' => 16,
-                    'streakDays' => 8,
-                    'achievements' => 7,
-                    'isCurrentUser' => false,
-                ],
-                [
-                    'rank' => 7,
-                    'userId' => 7,
-                    'name' => 'Riley Stone',
-                    'xp' => 6500,
-                    'level' => 14,
-                    'streakDays' => 5,
-                    'achievements' => 5,
-                    'isCurrentUser' => false,
-                ],
-                [
-                    'rank' => 8,
-                    'userId' => 8,
-                    'name' => 'Avery Cross',
-                    'xp' => 5200,
-                    'level' => 12,
-                    'streakDays' => 3,
-                    'achievements' => 4,
-                    'isCurrentUser' => false,
-                ],
-            ],
-            'userRank' => [
-                'rank' => 5,
-                'userId' => 5,
-                'name' => 'You',
-                'xp' => 8500,
-                'level' => 18,
-                'streakDays' => 12,
-                'achievements' => 8,
-                'isCurrentUser' => true,
-            ],
+            'leaderboard' => array_slice($leaderboardEntries, 0, 20),
+            'leaderboardTotal' => count($leaderboardEntries),
+            'userRank' => $currentUserRank,
+            'allTiers' => $allTiers,
             'stats' => [
-                'totalUsers' => 1247,
-                'topXP' => 15750,
-                'myRank' => 5,
-                'xpToNextRank' => 4300,
+                'totalUsers' => $totalUsers,
+                'topXP' => (int) $topXP,
+                'myRank' => $currentUserRank['rank'],
+                'xpToNextRank' => $xpToNextRank,
             ],
         ]);
+    }
+
+    /**
+     * Get rank tier based on user level
+     * Maps levels to tier rank positions
+     */
+    private function getRankTierByLevel(int $level): array
+    {
+        // Map levels to approximate rank positions
+        // This converts level progression to tier progression
+        $rankPosition = $this->levelToRankPosition($level);
+        return $this->getRankTier($rankPosition);
+    }
+
+    /**
+     * Convert user level to a rank position for tier matching
+     * Level 1 = Plastic (131+)
+     * Level 2 = Iron (101-130)
+     * Level 3-4 = Bronze (81-100)
+     * Level 5-6 = Silver (61-80)
+     * Level 7-9 = Gold (46-60)
+     * Level 10-11 = Platinum (36-45)
+     * Level 12-14 = Diamond (26-35)
+     * Level 15-19 = Apex (16-25)
+     * Level 20-24 = Eternal (6-15)
+     * Level 25+ = Supreme (1-5)
+     */
+    private function levelToRankPosition(int $level): int
+    {
+        return match (true) {
+            $level >= 25 => 1,      // Supreme
+            $level >= 20 => 6,      // Eternal
+            $level >= 15 => 16,     // Apex
+            $level >= 12 => 26,     // Diamond
+            $level >= 10 => 36,     // Platinum
+            $level >= 7 => 46,      // Gold
+            $level >= 5 => 61,      // Silver
+            $level >= 3 => 81,      // Bronze
+            $level >= 2 => 101,     // Iron
+            default => 131,         // Plastic
+        };
+    }
+
+    private function getRankTier(int $rank): array
+    {
+        // Find the tier that matches this rank position
+        // Priority: find exact match, then fallback to lowest tier (highest sort_order)
+        $tier = RankingTier::where('min_rank', '<=', $rank)
+            ->where(function ($query) use ($rank) {
+                $query->whereNull('max_rank')
+                    ->orWhere('max_rank', '>=', $rank);
+            })
+            ->orderBy('sort_order', 'asc') // Get highest tier that matches (lowest sort_order)
+            ->first();
+
+        if (!$tier) {
+            // Fallback to the tier with the highest sort_order (lowest tier/worst rank)
+            $tier = RankingTier::orderBy('sort_order', 'desc')->first();
+        }
+
+        return [
+            'id' => $tier->id,
+            'name' => $tier->name,
+            'icon' => $tier->icon,
+            'color' => $tier->color,
+            'minRank' => $tier->min_rank,
+            'maxRank' => $tier->max_rank,
+        ];
     }
 }

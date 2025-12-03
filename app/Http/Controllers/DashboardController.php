@@ -20,9 +20,9 @@ class DashboardController extends Controller
             'total_xp' => 0,
             'level' => 1,
             'current_level_xp' => 0,
-            'xp_for_next_level' => 500,
+            'xp_for_next_level' => 1000,
             'streak_days' => 0,
-            'rank_title' => 'Beginner',
+            'rank_title' => 'Plastic',
         ]);
 
         // Set total_xp to assignment XP (not accumulated)
@@ -52,8 +52,14 @@ class DashboardController extends Controller
             ]);
 
         // Get leaderboard (top 5 users by assignment XP)
+        // Exclude admin users - only show students
         $leaderboard = \App\Models\User::with('profile', 'assignmentSubmissions')
+            ->where('id', '>', 1) // Exclude first user (admin)
             ->get()
+            ->filter(function ($u) {
+                // Also exclude users with admin-related roles
+                return !$u->hasAnyRole(['admin', 'staff', 'teacher', 'super_admin']);
+            })
             ->map(fn ($u) => [
                 'name' => $u->name,
                 'assignmentXP' => $u->assignmentSubmissions()->whereNotNull('xp')->sum('xp'),
