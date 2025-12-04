@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, withDefaults } from 'vue';
 import Button from '@/components/ui/button/Button.vue';
 import Card from '@/components/ui/card/Card.vue';
 import CardContent from '@/components/ui/card/CardContent.vue';
@@ -59,9 +59,12 @@ interface Props {
     stats: UserStats;
     progress: UserProgress[];
     achievements: UserAchievement[];
+    isOwnProfile?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+    isOwnProfile: true,
+});
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -205,7 +208,7 @@ const getCoverPhotoUrl = () => {
                 </button> -->
 
                 <!-- Add Cover Photo Placeholder -->
-                <div v-if="!getCoverPhotoUrl()" @click="openCoverPhotoUpload"
+                <div v-if="!getCoverPhotoUrl() && isOwnProfile" @click="openCoverPhotoUpload"
                     class="absolute inset-0 w-full h-full flex items-center justify-center group cursor-pointer z-10">
                     <div class="text-center transition-transform group-hover:scale-110">
                         <div class="text-4xl mb-2">📸</div>
@@ -240,9 +243,9 @@ const getCoverPhotoUrl = () => {
                     <div class="flex items-center gap-6">
                         <!-- Avatar with glow -->
                         <div
-                            class="h-24 w-24 rounded-full bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center text-4xl font-bold text-accent-foreground shadow-lg relative transition-all duration-300 overflow-hidden group cursor-pointer"
-                            :class="{ 'scale-110 shadow-xl': profileHovered }"
-                            @click="handleEditClick"
+                            class="h-24 w-24 rounded-full bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center text-4xl font-bold text-accent-foreground shadow-lg relative transition-all duration-300 overflow-hidden group"
+                            :class="[{ 'scale-110 shadow-xl': profileHovered }, isOwnProfile ? 'cursor-pointer' : '']"
+                            @click="isOwnProfile && handleEditClick()"
                         >
                             <img 
                                 v-if="user.profile_photo_path"
@@ -251,9 +254,9 @@ const getCoverPhotoUrl = () => {
                                 class="w-full h-full object-cover"
                             />
                             <span v-else>{{ user.name.charAt(0).toUpperCase() }}</span>
-                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <span class="text-white text-lg">📸</span>
-                            </div>
+                            <div v-if="isOwnProfile" class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                 <span class="text-white text-lg">📸</span>
+                             </div>
                         </div>
 
                         <!-- User Info -->
@@ -275,6 +278,7 @@ const getCoverPhotoUrl = () => {
                     </div>
 
                     <Button 
+                        v-if="isOwnProfile"
                         @click="handleEditClick"
                         class="transition-all duration-300 hover:scale-105"
                     >

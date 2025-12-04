@@ -9,13 +9,14 @@ use Inertia\Inertia;
 class UserController extends Controller
 {
     /**
-     * Display the user profile page.
+     * Display the current user's profile page.
      */
     public function profile()
     {
         $user = Auth::user();
 
         return Inertia::render('User', [
+            'isOwnProfile' => true,
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
@@ -57,12 +58,15 @@ class UserController extends Controller
                 ->orderByPivot('unlocked_at', 'desc')
                 ->get()
                 ->map(function ($achievement) {
+                    $unlockedAt = $achievement->pivot?->unlocked_at;
+                    $formattedDate = is_string($unlockedAt) ? $unlockedAt : ($unlockedAt ? $unlockedAt->format('M d, Y') : 'Unlocked');
+                    
                     return [
                         'id' => $achievement->id,
                         'name' => $achievement->name,
                         'description' => $achievement->description,
                         'icon' => $achievement->icon ?? '⭐',
-                        'unlockedAt' => $achievement->pivot->unlocked_at->format('M d, Y'),
+                        'unlockedAt' => $formattedDate,
                     ];
                 }),
         ]);
@@ -92,11 +96,12 @@ class UserController extends Controller
     }
 
     /**
-     * Display a specific user (admin view).
+     * Display a specific user's profile.
      */
     public function show(User $user)
     {
-        return Inertia::render('Users/Show', [
+        return Inertia::render('User', [
+            'isOwnProfile' => $user->id === Auth::id(),
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
@@ -138,12 +143,15 @@ class UserController extends Controller
                 ->orderByPivot('unlocked_at', 'desc')
                 ->get()
                 ->map(function ($achievement) {
+                    $unlockedAt = $achievement->pivot?->unlocked_at;
+                    $formattedDate = is_string($unlockedAt) ? $unlockedAt : ($unlockedAt ? $unlockedAt->format('M d, Y') : 'Unlocked');
+                    
                     return [
                         'id' => $achievement->id,
                         'name' => $achievement->name,
                         'description' => $achievement->description,
                         'icon' => $achievement->icon ?? '⭐',
-                        'unlockedAt' => $achievement->pivot->unlocked_at->format('M d, Y'),
+                        'unlockedAt' => $formattedDate,
                     ];
                 }),
         ]);

@@ -2,7 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard, assignments as assignmentsRoute } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import Button from '@/components/ui/button/Button.vue';
 import Progress from '@/components/ui/progress/Progress.vue';
@@ -41,6 +41,7 @@ interface Course {
 }
 
 interface LeaderboardEntry {
+    id: number;
     rank: number;
     name: string;
     xp: number;
@@ -139,6 +140,10 @@ const handleAchievementClick = (achievement: Achievement) => {
 
 const handleLeaderboardClick = (leader: LeaderboardEntry) => {
     selectedLeaderboardEntry.value = leader;
+};
+
+const handleViewProfile = (userId: number) => {
+    router.visit(`/users/${userId}`);
 };
 </script>
 
@@ -612,7 +617,7 @@ const handleLeaderboardClick = (leader: LeaderboardEntry) => {
                             <p class="text-2xl font-bold">{{ selectedLeaderboardEntry.xp.toLocaleString() }}</p>
                         </div>
                     </div>
-                    <Button class="w-full" variant="outline">View Profile</Button>
+                    <Button class="w-full" variant="outline" @click="handleViewProfile(selectedLeaderboardEntry.id)">View Profile</Button>
                 </div>
             </DialogContent>
         </Dialog>

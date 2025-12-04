@@ -15,18 +15,26 @@ class AchievementsController extends Controller
             ->with('users')
             ->get();
 
-        $allAchievements = $achievements->map(fn($achievement) => [
-            'id' => $achievement->id,
-            'name' => $achievement->name,
-            'description' => $achievement->description,
-            'icon' => $achievement->icon,
-            'category' => $achievement->category,
-            'difficulty' => $achievement->difficulty,
-            'xp_reward' => $achievement->xp_reward,
-            'unlocked' => $achievement->users->contains($user->id),
-            'unlockedAt' => $achievement->users
-                ->find($user->id)?->pivot->unlocked_at?->format('M d, Y'),
-        ]);
+        $allAchievements = $achievements->map(function($achievement) use ($user) {
+            $unlockedAt = $achievement->users->find($user->id)?->pivot->unlocked_at;
+            $formattedDate = null;
+            
+            if ($unlockedAt) {
+                $formattedDate = is_string($unlockedAt) ? $unlockedAt : $unlockedAt->format('M d, Y');
+            }
+            
+            return [
+                'id' => $achievement->id,
+                'name' => $achievement->name,
+                'description' => $achievement->description,
+                'icon' => $achievement->icon,
+                'category' => $achievement->category,
+                'difficulty' => $achievement->difficulty,
+                'xp_reward' => $achievement->xp_reward,
+                'unlocked' => $achievement->users->contains($user->id),
+                'unlockedAt' => $formattedDate,
+            ];
+        });
 
         $unlockedCount = $allAchievements->filter(fn($a) => $a['unlocked'])->count();
         $totalCount = $allAchievements->count();

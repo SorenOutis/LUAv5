@@ -48,31 +48,33 @@ class DashboardController extends Controller
             ]);
 
         // Get leaderboard (top 5 users by total XP from database)
-        // Exclude admin users - only show students
-        $leaderboard = \App\Models\User::with('profile')
-            ->where('id', '>', 1) // Exclude first user (admin)
-            ->get()
-            ->filter(function ($u) {
-                // Also exclude users with admin-related roles
-                return !$u->hasAnyRole(['admin', 'staff', 'teacher', 'super_admin']);
-            })
-            ->map(fn ($u) => [
-                'name' => $u->name,
-                'xp' => $u->profile?->total_xp ?? 0,
-                'level' => $u->profile?->level ?? 1,
-                'isUser' => $u->name === $user->name,
-            ])
-            ->map(fn ($item) => [
-                'name' => $item['name'],
-                'xp' => $item['xp'],
-                'level' => $item['level'],
-                'badge' => $this->getLevelBadge($item['level']),
-                'isUser' => $item['isUser'],
-            ])
-            ->sortByDesc('xp')
-            ->take(5)
-            ->values()
-            ->map(fn ($item, $index) => array_merge($item, ['rank' => $index + 1]));
+         // Exclude admin users - only show students
+         $leaderboard = \App\Models\User::with('profile')
+             ->where('id', '>', 1) // Exclude first user (admin)
+             ->get()
+             ->filter(function ($u) {
+                 // Also exclude users with admin-related roles
+                 return !$u->hasAnyRole(['admin', 'staff', 'teacher', 'super_admin']);
+             })
+             ->map(fn ($u) => [
+                 'id' => $u->id,
+                 'name' => $u->name,
+                 'xp' => $u->profile?->total_xp ?? 0,
+                 'level' => $u->profile?->level ?? 1,
+                 'isUser' => $u->id === $user->id,
+             ])
+             ->map(fn ($item) => [
+                 'id' => $item['id'],
+                 'name' => $item['name'],
+                 'xp' => $item['xp'],
+                 'level' => $item['level'],
+                 'badge' => $this->getLevelBadge($item['level']),
+                 'isUser' => $item['isUser'],
+             ])
+             ->sortByDesc('xp')
+             ->take(5)
+             ->values()
+             ->map(fn ($item, $index) => array_merge($item, ['rank' => $index + 1]));
 
         // Get unlocked achievements
         $achievements = $user->achievements()

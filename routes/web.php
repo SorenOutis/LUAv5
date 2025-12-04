@@ -18,6 +18,10 @@ Route::get('profile', [\App\Http\Controllers\UserController::class, 'profile'])
     ->middleware(['auth', 'verified'])
     ->name('profile');
 
+Route::get('users/{user}', [\App\Http\Controllers\UserController::class, 'show'])
+    ->middleware(['auth', 'verified'])
+    ->name('users.show');
+
 Route::get('courses', [\App\Http\Controllers\CoursesController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('courses');
