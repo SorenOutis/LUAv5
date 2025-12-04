@@ -53,10 +53,17 @@ class AssignmentSubmissionObserver
             ->sum('xp');
 
         // Update profile with total XP from assignments and recalculate level
+        $newLevel = max(1, intval($assignmentXP / 100) + 1);
+        
+        // Update profile object in memory first to calculate correct rank title
+        $profile->level = $newLevel;
+        $newRankTitle = $profile->calculateRankTitle();
+        
         $profile->update([
             'total_xp' => $assignmentXP,
-            'level' => max(1, intval($assignmentXP / 100) + 1),
+            'level' => $newLevel,
             'current_level_xp' => $assignmentXP % 100,
+            'rank_title' => $newRankTitle,
         ]);
     }
 }

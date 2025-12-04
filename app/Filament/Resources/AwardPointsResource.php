@@ -135,10 +135,15 @@ class AwardPointsResource extends Resource
                         $newLevel = max(1, intval($newTotalXp / 100) + 1);
                         $newCurrentLevelXp = $newTotalXp % 100;
 
+                        // Update profile object in memory first to calculate correct rank title
+                        $profile->level = $newLevel;
+                        $newRankTitle = $profile->calculateRankTitle();
+
                         $profile->update([
                             'total_xp' => $newTotalXp,
                             'level' => $newLevel,
                             'current_level_xp' => $newCurrentLevelXp,
+                            'rank_title' => $newRankTitle,
                         ]);
 
                         Notification::make()
@@ -181,10 +186,15 @@ class AwardPointsResource extends Resource
                         $newLevel = max(1, intval($newTotalXp / 100) + 1);
                         $newCurrentLevelXp = $newTotalXp % 100;
 
+                        // Update profile object in memory first to calculate correct rank title
+                        $profile->level = $newLevel;
+                        $newRankTitle = $profile->calculateRankTitle();
+
                         $profile->update([
                             'total_xp' => $newTotalXp,
                             'level' => $newLevel,
                             'current_level_xp' => $newCurrentLevelXp,
+                            'rank_title' => $newRankTitle,
                         ]);
 
                         Notification::make()

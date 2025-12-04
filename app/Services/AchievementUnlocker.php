@@ -76,12 +76,18 @@ class AchievementUnlocker
 
         // Add the XP reward
         $newTotalXP = $profile->total_xp + $achievement->xp_reward;
+        $newLevel = max(1, intval($newTotalXP / 100) + 1);
+
+        // Update profile object in memory first to calculate correct rank title
+        $profile->level = $newLevel;
+        $newRankTitle = $profile->calculateRankTitle();
 
         // Update profile with new total XP and recalculate level
         $profile->update([
             'total_xp' => $newTotalXP,
-            'level' => max(1, intval($newTotalXP / 100) + 1),
+            'level' => $newLevel,
             'current_level_xp' => $newTotalXP % 100,
+            'rank_title' => $newRankTitle,
         ]);
     }
 
@@ -124,12 +130,18 @@ class AchievementUnlocker
 
         // Take the maximum of achievement XP vs current total (to preserve manually awarded points)
         $newTotalXP = max($totalAchievementXP, $profile->total_xp);
+        $newLevel = max(1, intval($newTotalXP / 100) + 1);
+
+        // Update profile object in memory first to calculate correct rank title
+        $profile->level = $newLevel;
+        $newRankTitle = $profile->calculateRankTitle();
 
         // Update profile
         $profile->update([
             'total_xp' => $newTotalXP,
-            'level' => max(1, intval($newTotalXP / 100) + 1),
+            'level' => $newLevel,
             'current_level_xp' => $newTotalXP % 100,
+            'rank_title' => $newRankTitle,
         ]);
     }
 }

@@ -36,6 +36,8 @@ interface UserStats {
     assignmentsCompleted: number;
     achievementsUnlocked: number;
     currentStreak: number;
+    rank: number;
+    rankTitle: string;
 }
 
 interface UserProgress {
@@ -90,6 +92,7 @@ const coverPhotoInput = ref<HTMLInputElement | null>(null);
 // Animated stats
 const animatedStats = ref([
     { label: 'XP', value: 0, target: props.stats.totalXP, icon: '⭐', suffix: '' },
+    { label: 'Rank', value: 0, target: props.stats.rank, icon: '🏅', suffix: '', isRank: true },
     { label: 'Level', value: 0, target: props.stats.level, icon: '👑', suffix: '' },
     { label: 'Courses', value: 0, target: props.stats.coursesEnrolled, icon: '📚', suffix: '' },
     { label: 'Assignments', value: 0, target: props.stats.assignmentsCompleted, icon: '✓', suffix: '' },
@@ -314,7 +317,7 @@ const getCoverPhotoUrl = () => {
             </div>
 
             <!-- Stats Grid - Interactive -->
-            <div class="grid gap-4 md:grid-cols-5">
+            <div class="grid gap-4 md:grid-cols-6">
                 <button
                     v-for="(stat, index) in animatedStats"
                     :key="index"
@@ -324,7 +327,8 @@ const getCoverPhotoUrl = () => {
                         class="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"/>
                     <div class="relative z-10">
                         <div class="mb-3 text-4xl">{{ stat.icon }}</div>
-                        <div class="text-3xl font-bold text-foreground">{{ stat.value.toLocaleString() }}</div>
+                        <div v-if="stat.isRank" class="text-lg font-bold text-foreground">{{ stats.rankTitle }}</div>
+                        <div v-else class="text-3xl font-bold text-foreground">{{ stat.value.toLocaleString() }}</div>
                         <div class="text-xs text-muted-foreground mt-2">{{ stat.label }}{{ stat.suffix }}</div>
                     </div>
                 </button>
@@ -404,7 +408,7 @@ const getCoverPhotoUrl = () => {
                                 <p class="text-muted-foreground text-sm">🎯 No achievements yet</p>
                                 <p class="text-muted-foreground text-xs mt-2">Complete challenges to unlock achievements!</p>
                             </div>
-                            <div v-else class="space-y-3">
+                            <div v-else class="grid grid-cols-3 gap-4">
                                 <button
                                     v-for="achievement in achievements.slice(0, 5)"
                                     :key="achievement.id"

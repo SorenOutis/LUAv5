@@ -34,6 +34,8 @@ class UserController extends Controller
                 'assignmentsCompleted' => $user->lessonCompletions()->count(),
                 'achievementsUnlocked' => $user->achievements()->count(),
                 'currentStreak' => optional($user->profile)->streak_days ?? 0,
+                'rank' => optional($user->profile)->rank ?? 0,
+                'rankTitle' => optional($user->profile)->rank_title ?? 'Novice',
             ],
             'progress' => $user->enrollments()
                 ->with('course')
@@ -119,6 +121,8 @@ class UserController extends Controller
                 'assignmentsCompleted' => $user->lessonCompletions()->count(),
                 'achievementsUnlocked' => $user->achievements()->count(),
                 'currentStreak' => optional($user->profile)->streak_days ?? 0,
+                'rank' => optional($user->profile)->rank ?? 0,
+                'rankTitle' => optional($user->profile)->rank_title ?? 'Novice',
             ],
             'progress' => $user->enrollments()
                 ->with('course')
