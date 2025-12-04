@@ -319,11 +319,9 @@ const getCoverPhotoUrl = () => {
                     v-for="(stat, index) in animatedStats"
                     :key="index"
                     @click="createParticle"
-                    class="group relative overflow-hidden rounded-lg border-2 border-sidebar-border/70 dark:border-sidebar-border bg-card p-6 text-center transition-all duration-300 hover:border-sidebar-border hover:shadow-md dark:hover:shadow-lg cursor-pointer hover:scale-105"
-                >
+                    class="group relative overflow-hidden rounded-lg border-2 border-sidebar-border/70 dark:border-sidebar-border bg-card p-6 text-center transition-all duration-300 hover:border-sidebar-border hover:shadow-md dark:hover:shadow-lg cursor-pointer hover:scale-105">
                     <div
-                        class="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                    />
+                        class="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"/>
                     <div class="relative z-10">
                         <div class="mb-3 text-4xl">{{ stat.icon }}</div>
                         <div class="text-3xl font-bold text-foreground">{{ stat.value.toLocaleString() }}</div>

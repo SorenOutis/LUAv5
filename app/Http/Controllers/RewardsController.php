@@ -69,14 +69,6 @@ class RewardsController extends Controller
         $nextMilestoneCount = $allAchievements->count();
         $progressPercentage = $nextMilestoneCount > 0 ? ceil(($totalBadges / $nextMilestoneCount) * 100) : 0;
 
-        // Save XP to user_profiles table
-        $userProfile = $user->profile;
-        if ($userProfile) {
-            $userProfile->update([
-                'total_xp' => $totalXPFromRewards,
-            ]);
-        }
-
         $stats = [
             'totalRewards' => $totalBadges,
             'totalBadges' => $totalBadges,
