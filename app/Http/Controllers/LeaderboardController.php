@@ -18,7 +18,6 @@ class LeaderboardController extends Controller
         // Exclude admin and staff users - only show students
         $allUsers = User::with('profile', 'streak')
             ->whereHas('profile')
-            ->where('id', '>', 1) // Exclude first user (admin)
             ->get()
             ->filter(function ($user) {
                 // Additional exclusions: users with any admin-related roles
@@ -159,6 +158,18 @@ class LeaderboardController extends Controller
         if (!$tier) {
             // Fallback to the tier with the highest sort_order (lowest tier/worst rank)
             $tier = RankingTier::orderBy('sort_order', 'desc')->first();
+        }
+
+        // Fallback to default tier if table is empty
+        if (!$tier) {
+            return [
+                'id' => 0,
+                'name' => 'Unranked',
+                'icon' => null,
+                'color' => '#gray',
+                'minRank' => 0,
+                'maxRank' => null,
+            ];
         }
 
         return [

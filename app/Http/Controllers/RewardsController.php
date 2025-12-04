@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Achievement;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -11,111 +12,66 @@ class RewardsController extends Controller
     {
         $user = Auth::user();
 
+        // Get all achievements
+        $allAchievements = Achievement::where('is_active', true)->get();
+
+        // Get user's unlocked achievements with pivot data
+        $unlockedAchievements = $user->achievements()->wherePivot('unlocked_at', '!=', null)->get();
+
+        // Build badges with locked/unlocked status and earned dates
+        $badges = $allAchievements->map(function ($achievement) use ($unlockedAchievements) {
+            $isUnlocked = $unlockedAchievements->contains('id', $achievement->id);
+            $pivot = $isUnlocked ? $unlockedAchievements->find($achievement->id)->pivot : null;
+
+            return [
+                'id' => $achievement->id,
+                'name' => $achievement->name,
+                'description' => $achievement->description,
+                'icon' => $achievement->icon,
+                'rarity' => strtolower($achievement->difficulty),
+                'isUnlocked' => $isUnlocked,
+                'earnedAt' => $isUnlocked && $pivot ? $pivot->unlocked_at->format('M d, Y') : null,
+                'xpReward' => $achievement->xp_reward,
+                'category' => $achievement->category,
+            ];
+        })->sortByDesc('isUnlocked')->values();
+
+        // Get recent rewards (unlocked achievements ordered by recent)
+        $rewards = $unlockedAchievements
+            ->sortByDesc(function ($achievement) {
+                return $achievement->pivot->unlocked_at;
+            })
+            ->take(10)
+            ->map(function ($achievement) {
+                return [
+                    'id' => $achievement->id,
+                    'name' => $achievement->name,
+                    'description' => $achievement->description,
+                    'icon' => $achievement->icon,
+                    'type' => strtolower($achievement->category),
+                    'earnedAt' => $achievement->pivot->unlocked_at->format('M d, Y'),
+                    'xpValue' => $achievement->xp_reward,
+                ];
+            })
+            ->values();
+
+        // Calculate stats
+        $totalBadges = $unlockedAchievements->count();
+        $totalXPFromRewards = $unlockedAchievements->sum('xp_reward');
+        $nextMilestoneCount = $allAchievements->count();
+        $progressPercentage = $nextMilestoneCount > 0 ? ceil(($totalBadges / $nextMilestoneCount) * 100) : 0;
+
+        $stats = [
+            'totalRewards' => $totalBadges,
+            'totalBadges' => $totalBadges,
+            'totalXPFromRewards' => $totalXPFromRewards,
+            'nextMilestone' => "Complete {$nextMilestoneCount} Achievements ({$progressPercentage}%)",
+        ];
+
         return Inertia::render('Rewards', [
-            'rewards' => [
-                [
-                    'id' => 1,
-                    'name' => 'First Lesson Completed',
-                    'description' => 'You earned this reward for completing your first lesson',
-                    'icon' => '🎓',
-                    'type' => 'badge',
-                    'earnedAt' => 'Dec 1, 2023',
-                    'xpValue' => 50,
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'Course Completion Certificate',
-                    'description' => 'HTML & CSS Basics - Certificate of Completion',
-                    'icon' => '🏅',
-                    'type' => 'certificate',
-                    'earnedAt' => 'Dec 30, 2023',
-                    'xpValue' => 200,
-                ],
-                [
-                    'id' => 3,
-                    'name' => 'Advanced Features Unlocked',
-                    'description' => 'You unlocked access to premium course content',
-                    'icon' => '🔓',
-                    'type' => 'unlock',
-                    'earnedAt' => 'Jan 1, 2024',
-                    'xpValue' => 150,
-                ],
-                [
-                    'id' => 4,
-                    'name' => 'Bonus XP - Holiday Bonus',
-                    'description' => 'Special holiday bonus for your learning',
-                    'icon' => '🎉',
-                    'type' => 'bonus',
-                    'earnedAt' => 'Dec 25, 2023',
-                    'xpValue' => 500,
-                ],
-                [
-                    'id' => 5,
-                    'name' => 'Weekly Streak Bonus',
-                    'description' => 'You maintained your learning streak',
-                    'icon' => '🔥',
-                    'type' => 'bonus',
-                    'earnedAt' => 'Jan 2, 2024',
-                    'xpValue' => 100,
-                ],
-                [
-                    'id' => 6,
-                    'name' => 'Perfect Quiz Score',
-                    'description' => '100% on JavaScript Basics Quiz',
-                    'icon' => '💯',
-                    'type' => 'badge',
-                    'earnedAt' => 'Dec 28, 2023',
-                    'xpValue' => 75,
-                ],
-            ],
-            'badges' => [
-                [
-                    'id' => 1,
-                    'name' => 'Quick Learner',
-                    'description' => 'Complete 5 lessons in one day',
-                    'icon' => '⚡',
-                    'rarity' => 'uncommon',
-                    'earnedAt' => 'Dec 28, 2023',
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'Dedicated Student',
-                    'description' => 'Maintain 7-day streak',
-                    'icon' => '🔥',
-                    'rarity' => 'uncommon',
-                    'earnedAt' => 'Dec 15, 2023',
-                ],
-                [
-                    'id' => 3,
-                    'name' => 'Course Master',
-                    'description' => 'Complete a full course',
-                    'icon' => '🏆',
-                    'rarity' => 'rare',
-                    'earnedAt' => 'Dec 30, 2023',
-                ],
-                [
-                    'id' => 4,
-                    'name' => 'Knowledge Seeker',
-                    'description' => 'Enroll in 3 courses',
-                    'icon' => '📚',
-                    'rarity' => 'common',
-                    'earnedAt' => 'Dec 20, 2023',
-                ],
-                [
-                    'id' => 5,
-                    'name' => 'Rising Star',
-                    'description' => 'Reach level 15',
-                    'icon' => '⭐',
-                    'rarity' => 'rare',
-                    'earnedAt' => 'Dec 22, 2023',
-                ],
-            ],
-            'stats' => [
-                'totalRewards' => 6,
-                'totalBadges' => 5,
-                'totalXPFromRewards' => 1175,
-                'nextMilestone' => '10 Rewards Earned',
-            ],
+            'rewards' => $rewards,
+            'badges' => $badges,
+            'stats' => $stats,
         ]);
     }
 }

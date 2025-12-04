@@ -14,8 +14,8 @@ class RankingTierSeeder extends Seeder
     {
         $tiers = [
             [
-                'name' => 'Radiant',
-                'icon' => '👑',
+                'name' => 'SUPREME',
+                'icon' => '🏆',
                 'color' => '#FFD700',
                 'min_rank' => 1,
                 'max_rank' => 5,
@@ -23,8 +23,8 @@ class RankingTierSeeder extends Seeder
                 'sort_order' => 1,
             ],
             [
-                'name' => 'Immortal',
-                'icon' => '💎',
+                'name' => 'ETERNAL',
+                'icon' => '🔥',
                 'color' => '#FF1493',
                 'min_rank' => 6,
                 'max_rank' => 15,
@@ -32,7 +32,7 @@ class RankingTierSeeder extends Seeder
                 'sort_order' => 2,
             ],
             [
-                'name' => 'Ascendant',
+                'name' => 'APEX',
                 'icon' => '⭐',
                 'color' => '#4169E1',
                 'min_rank' => 16,
@@ -41,8 +41,8 @@ class RankingTierSeeder extends Seeder
                 'sort_order' => 3,
             ],
             [
-                'name' => 'Diamond',
-                'icon' => '💠',
+                'name' => 'DIAMOND',
+                'icon' => '💎',
                 'color' => '#00CED1',
                 'min_rank' => 26,
                 'max_rank' => 35,
@@ -50,8 +50,8 @@ class RankingTierSeeder extends Seeder
                 'sort_order' => 4,
             ],
             [
-                'name' => 'Platinum',
-                'icon' => '🥈',
+                'name' => 'PLATINUM',
+                'icon' => '🪨',
                 'color' => '#A9A9A9',
                 'min_rank' => 36,
                 'max_rank' => 45,
@@ -59,7 +59,7 @@ class RankingTierSeeder extends Seeder
                 'sort_order' => 5,
             ],
             [
-                'name' => 'Gold',
+                'name' => 'GOLD',
                 'icon' => '🥇',
                 'color' => '#FFD700',
                 'min_rank' => 46,
@@ -68,7 +68,7 @@ class RankingTierSeeder extends Seeder
                 'sort_order' => 6,
             ],
             [
-                'name' => 'Silver',
+                'name' => 'SILVER',
                 'icon' => '🔶',
                 'color' => '#C0C0C0',
                 'min_rank' => 61,
@@ -77,7 +77,7 @@ class RankingTierSeeder extends Seeder
                 'sort_order' => 7,
             ],
             [
-                'name' => 'Bronze',
+                'name' => 'BRONZE',
                 'icon' => '🥉',
                 'color' => '#CD7F32',
                 'min_rank' => 81,
@@ -86,7 +86,7 @@ class RankingTierSeeder extends Seeder
                 'sort_order' => 8,
             ],
             [
-                'name' => 'Iron',
+                'name' => 'IRON',
                 'icon' => '⚙️',
                 'color' => '#696969',
                 'min_rank' => 101,
@@ -95,8 +95,8 @@ class RankingTierSeeder extends Seeder
                 'sort_order' => 9,
             ],
             [
-                'name' => 'Plastic',
-                'icon' => '📦',
+                'name' => 'PLASTIC',
+                'icon' => '🗑️',
                 'color' => '#A0A0A0',
                 'min_rank' => 131,
                 'max_rank' => null,

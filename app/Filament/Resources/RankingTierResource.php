@@ -39,7 +39,7 @@ class RankingTierResource extends Resource
             TextInput::make('name')
                 ->label('Tier Name')
                 ->required()
-                ->placeholder('e.g., Radiant, Immortal, Ascendant'),
+                ->placeholder('e.g., Supreme, Eternal, Apex'),
 
             TextInput::make('icon')
                 ->label('Emoji Icon')

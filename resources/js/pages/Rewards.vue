@@ -27,7 +27,10 @@ interface Badge {
     description: string;
     icon: string;
     rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
-    earnedAt: string;
+    isUnlocked: boolean;
+    earnedAt: string | null;
+    xpReward: number;
+    category: string;
 }
 
 interface Props {
@@ -88,6 +91,7 @@ const getTypeColor = (type: string) => {
 </script>
 
 <template>
+
     <Head title="Rewards" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
@@ -139,19 +143,28 @@ const getTypeColor = (type: string) => {
             <div>
                 <div class="mb-4">
                     <h2 class="text-lg font-semibold mb-2">Badges</h2>
-                    <CardDescription>Special recognition for your achievements</CardDescription>
+                    <CardDescription>Special recognition for your achievements. Gray badges are locked until earned.
+                    </CardDescription>
                 </div>
                 <div class="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
                     <div v-for="badge in badges" :key="badge.id">
-                        <Card :class="['border-sidebar-border/70 dark:border-sidebar-border h-full hover:shadow-md transition-shadow', getRarityBg(badge.rarity)]">
+                        <Card
+                            :class="['border-sidebar-border/70 dark:border-sidebar-border h-full hover:shadow-md transition-shadow relative', badge.isUnlocked ? getRarityBg(badge.rarity) : 'bg-gray-200 dark:bg-gray-800 opacity-50']">
                             <CardContent class="pt-6 flex flex-col items-center justify-center text-center h-full">
-                                <div class="text-5xl mb-2">{{ badge.icon }}</div>
+                                <div :class="['text-5xl mb-2 transition-opacity', !badge.isUnlocked && 'opacity-40']">{{
+                                    badge.icon }}</div>
+                                <div v-if="!badge.isUnlocked" class="absolute top-2 right-2 text-lg">🔒</div>
                                 <h3 class="font-semibold text-sm mb-1">{{ badge.name }}</h3>
                                 <p class="text-xs text-muted-foreground mb-3">{{ badge.description }}</p>
-                                <p :class="['text-xs font-bold capitalize', getRarityColor(badge.rarity)]">
+                                <p
+                                    :class="['text-xs font-bold capitalize', badge.isUnlocked ? getRarityColor(badge.rarity) : 'text-gray-500']">
                                     {{ badge.rarity }}
                                 </p>
-                                <p class="text-xs text-muted-foreground mt-2">{{ badge.earnedAt }}</p>
+                                <p class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">{{ badge.xpReward }} XP</p>
+                                <p
+                                    :class="['text-xs mt-2', badge.isUnlocked ? 'text-muted-foreground' : 'text-gray-500']">
+                                    {{ badge.isUnlocked ? `Earned ${badge.earnedAt}` : 'Locked' }}
+                                </p>
                             </CardContent>
                         </Card>
                     </div>
@@ -166,9 +179,10 @@ const getTypeColor = (type: string) => {
                 </CardHeader>
                 <CardContent>
                     <div class="space-y-3">
-                        <div v-for="reward in rewards" :key="reward.id" class="flex items-center gap-4 p-3 rounded-lg hover:bg-accent/10 transition-colors">
+                        <div v-for="reward in rewards" :key="reward.id"
+                            class="flex items-center gap-4 p-3 rounded-lg hover:bg-accent/10 transition-colors">
                             <div class="text-3xl flex-shrink-0">{{ reward.icon }}</div>
-                            
+
                             <div class="flex-1 min-w-0">
                                 <h4 class="font-semibold text-sm">{{ reward.name }}</h4>
                                 <p class="text-sm text-muted-foreground">{{ reward.description }}</p>
@@ -176,7 +190,8 @@ const getTypeColor = (type: string) => {
                             </div>
 
                             <div class="flex items-center gap-2 flex-shrink-0">
-                                <span :class="['px-2 py-1 text-xs rounded-full font-medium', getTypeColor(reward.type)]">
+                                <span
+                                    :class="['px-2 py-1 text-xs rounded-full font-medium', getTypeColor(reward.type)]">
                                     {{ reward.type }}
                                 </span>
                                 <div class="text-right">
@@ -192,28 +207,45 @@ const getTypeColor = (type: string) => {
             </Card>
 
             <!-- Reward Milestones -->
-            <Card class="border-sidebar-border/70 dark:border-sidebar-border bg-gradient-to-r from-accent/20 to-accent/5">
+            <Card
+                class="border-sidebar-border/70 dark:border-sidebar-border bg-gradient-to-r from-accent/20 to-accent/5">
                 <CardHeader>
                     <CardTitle>Reward Milestones</CardTitle>
                     <CardDescription>Your reward progression path</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div class="grid gap-3 md:grid-cols-4">
-                        <div class="p-4 rounded-lg border border-accent/30 bg-accent/5">
-                            <p class="text-sm text-muted-foreground mb-1">First Reward</p>
-                            <p class="font-bold">✓ Earned</p>
+                        <div
+                            :class="['p-4 rounded-lg border', stats.totalBadges >= 1 ? 'border-accent/30 bg-accent/5' : 'border-sidebar-border/30 bg-muted/50']">
+                            <p class="text-sm text-muted-foreground mb-1">First Achievement</p>
+                            <p :class="['font-bold', stats.totalBadges >= 1 ? 'text-accent' : 'text-muted-foreground']">
+                                {{ stats.totalBadges >= 1 ? '✓ Earned' : 'Locked' }}
+                            </p>
                         </div>
-                        <div class="p-4 rounded-lg border border-accent/30 bg-accent/5">
-                            <p class="text-sm text-muted-foreground mb-1">5 Badges</p>
-                            <p class="font-bold">✓ Earned</p>
+                        <div
+                            :class="['p-4 rounded-lg border', stats.totalBadges >= 5 ? 'border-accent/30 bg-accent/5' : 'border-sidebar-border/30 bg-muted/50']">
+                            <p class="text-sm text-muted-foreground mb-1">5 Achievements</p>
+                            <p :class="['font-bold', stats.totalBadges >= 5 ? 'text-accent' : 'text-muted-foreground']">
+                                {{ stats.totalBadges >= 5 ? '✓ Earned' : `${5 - stats.totalBadges} more` }}
+                            </p>
                         </div>
-                        <div class="p-4 rounded-lg border border-sidebar-border/30 bg-muted/50">
-                            <p class="text-sm text-muted-foreground mb-1">Golden Badge</p>
-                            <p class="font-bold text-muted-foreground">3 more badges</p>
+                        <div
+                            :class="['p-4 rounded-lg border', stats.totalBadges >= 10 ? 'border-accent/30 bg-accent/5' : 'border-sidebar-border/30 bg-muted/50']">
+                            <p class="text-sm text-muted-foreground mb-1">10 Achievements</p>
+                            <p
+                                :class="['font-bold', stats.totalBadges >= 10 ? 'text-accent' : 'text-muted-foreground']">
+                                {{ stats.totalBadges >= 10 ? '✓ Earned' : `${Math.max(0, 10 - stats.totalBadges)} more`
+                                }}
+                            </p>
                         </div>
-                        <div class="p-4 rounded-lg border border-sidebar-border/30 bg-muted/50">
-                            <p class="text-sm text-muted-foreground mb-1">Platinum Status</p>
-                            <p class="font-bold text-muted-foreground">Coming soon</p>
+                        <div
+                            :class="['p-4 rounded-lg border', stats.totalBadges >= 25 ? 'border-accent/30 bg-accent/5' : 'border-sidebar-border/30 bg-muted/50']">
+                            <p class="text-sm text-muted-foreground mb-1">Master Collector</p>
+                            <p
+                                :class="['font-bold', stats.totalBadges >= 25 ? 'text-accent' : 'text-muted-foreground']">
+                                {{ stats.totalBadges >= 25 ? '✓ Earned' : `${Math.max(0, 25 - stats.totalBadges)} more`
+                                }}
+                            </p>
                         </div>
                     </div>
                 </CardContent>
