@@ -229,6 +229,11 @@ const progressPercentage = computed(() => {
     return (props.userStats.currentXP / props.userStats.maxXPForLevel) * 100;
 });
 
+const totalXPProgress = computed(() => {
+    const maxTotalXP = 500000;
+    return (props.userStats.totalXP / maxTotalXP) * 100;
+});
+
 const nextAchievementProgress = computed(() => {
     if (props.leaderboard.length === 0) return 0;
     const topXP = props.leaderboard[0]?.xp || 1;
@@ -310,6 +315,21 @@ watch(searchQuery, (newQuery) => {
 }, { debounce: 300 });
 </script>
 
+<style scoped>
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.animate-shimmer {
+    animation: shimmer 2s infinite;
+}
+</style>
+
 <template>
 
     <Head title="Dashboard" />
@@ -365,19 +385,36 @@ watch(searchQuery, (newQuery) => {
                         </div>
                     </div>
                     
-                    <!-- XP Progress Bar -->
+                    <!-- XP Progress Bar with Energy Effect - Total XP to 1M -->
                     <div class="mt-4 space-y-2">
                         <div class="flex items-center justify-between text-xs text-muted-foreground">
-                            <span class="font-medium">Experience Progress</span>
-                            <span class="font-semibold text-foreground">{{ Math.round(progressPercentage) }}%</span>
+                            <span class="font-medium">Total Experience Progress</span>
+                            <span class="font-semibold text-foreground">{{ Math.round(totalXPProgress) }}%</span>
                         </div>
-                        <div class="relative h-2 bg-background/50 rounded-full overflow-hidden border border-accent/20">
-                            <div class="h-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 rounded-full transition-all duration-1000 ease-out"
-                                :style="{ width: `${progressPercentage}%` }" />
+                        <div class="relative h-3 bg-background/50 rounded-full overflow-hidden border border-accent/20 shadow-inner">
+                            <!-- Background shimmer effect -->
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
+                            
+                            <!-- Main progress fill with dynamic animation -->
+                            <div class="h-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 rounded-full transition-all duration-1000 ease-out relative"
+                                :style="{ width: `${totalXPProgress}%` }">
+                                <!-- Inner glow effect -->
+                                <div class="absolute inset-0 bg-gradient-to-t from-transparent to-white/30 rounded-full"></div>
+                                
+                                <!-- Energy particles - animated fill effect -->
+                                <div class="absolute inset-0 rounded-full overflow-hidden">
+                                    <div class="absolute top-0 left-0 right-0 bottom-0 animate-pulse opacity-60"
+                                        style="background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: shimmer 2s infinite;"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Outer glow for energy effect -->
+                            <div v-if="totalXPProgress > 0" class="absolute top-0 left-0 h-full rounded-full blur-md opacity-40"
+                                :style="{ width: `${totalXPProgress}%`, background: 'linear-gradient(90deg, rgba(250,204,21,0.6), rgba(234,179,8,0.4))' }"></div>
                         </div>
                         <div class="flex justify-between text-xs text-muted-foreground">
-                            <span>{{ userStats.currentXP.toLocaleString() }} XP</span>
-                            <span>{{ userStats.maxXPForLevel.toLocaleString() }} XP</span>
+                            <span>{{ userStats.totalXP.toLocaleString() }} XP</span>
+                            <span>500,000 XP</span>
                         </div>
                     </div>
                 </div>
