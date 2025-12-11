@@ -32,11 +32,11 @@ const mainNavItems: NavItem[] = [
         href: '/courses',
         icon: BookOpen,
     },
-    {
-        title: 'Quests',
-        href: '/quests',
-        icon: Target,
-    },
+    // {
+    //     title: 'Quests',
+    //     href: '/quests',
+    //     icon: Target,
+    // },
     {
         title: 'Leaderboard',
         href: '/leaderboard',
