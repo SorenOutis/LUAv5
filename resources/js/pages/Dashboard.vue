@@ -23,6 +23,7 @@ import {
 import { Search } from 'lucide-vue-next';
 import axios from 'axios';
 import { watch, onMounted, onUnmounted, ref as vueRef } from 'vue';
+import { useToast } from '@/composables/useToast';
 
 interface UserStats {
     totalXP: number;
@@ -107,6 +108,8 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const { achievement, quest, levelup, xp: addXP } = useToast();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -313,6 +316,23 @@ watch(searchQuery, (newQuery) => {
         searchResults.value = [];
     }
 }, { debounce: 300 });
+
+// Demo functions for toasts
+const demoAchievementToast = () => {
+    achievement('Achievement Unlocked!', 'You completed your first quiz', '🏆');
+};
+
+const demoQuestToast = () => {
+    quest('Quest Completed!', 'You finished the Python Basics quest');
+};
+
+const demoLevelUpToast = () => {
+    levelup(10, 250);
+};
+
+const demoXPToast = () => {
+    addXP(50, 'Completing assignment');
+};
 </script>
 
 <style scoped>
