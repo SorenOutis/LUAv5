@@ -2,8 +2,10 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, usePage } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import SkeletonStats from '@/components/SkeletonStats.vue';
+import SkeletonCard from '@/components/SkeletonCard.vue';
 import Button from '@/components/ui/button/Button.vue';
 import Card from '@/components/ui/card/Card.vue';
 import CardContent from '@/components/ui/card/CardContent.vue';
@@ -48,6 +50,8 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const page = usePage();
+const isLoading = computed(() => page.props.loading === true);
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -91,8 +95,9 @@ const getLevelProgressPercentage = () => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-            <!-- Level Progress Section -->
-            <Card
+            <!-- Level Progress Section / Skeleton -->
+            <SkeletonStats v-if="isLoading" :count="1" />
+            <Card v-else
                 class="border-sidebar-border/70 dark:border-sidebar-border bg-gradient-to-r from-accent/20 to-accent/5">
                 <CardHeader>
                     <CardTitle>Level Progress</CardTitle>
@@ -131,8 +136,9 @@ const getLevelProgressPercentage = () => {
                 </CardContent>
             </Card>
 
-            <!-- Stats Grid -->
-            <div class="grid gap-4 md:grid-cols-3">
+            <!-- Stats Grid / Skeleton -->
+            <SkeletonStats v-if="isLoading" :count="3" />
+            <div v-else class="grid gap-4 md:grid-cols-3">
                 <Card class="border-sidebar-border/70 dark:border-sidebar-border">
                     <CardHeader class="pb-2">
                         <CardTitle class="text-sm font-medium">Assignments</CardTitle>
@@ -191,7 +197,8 @@ const getLevelProgressPercentage = () => {
                     </div>
                 </div>
 
-                <div class="grid gap-4 md:grid-cols-2">
+                <SkeletonCard v-if="isLoading" :count="5" />
+                <div v-else class="grid gap-4 md:grid-cols-2">
                     <div v-for="metric in getFilteredMetrics()" :key="metric.id">
                         <Card class="border-sidebar-border/70 dark:border-sidebar-border h-full">
                             <CardContent class="pt-6">

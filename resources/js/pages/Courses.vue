@@ -2,8 +2,8 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, router, usePage } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
 import Button from '@/components/ui/button/Button.vue';
 import Card from '@/components/ui/card/Card.vue';
 import CardContent from '@/components/ui/card/CardContent.vue';
@@ -12,6 +12,8 @@ import CardHeader from '@/components/ui/card/CardHeader.vue';
 import CardTitle from '@/components/ui/card/CardTitle.vue';
 import Progress from '@/components/ui/progress/Progress.vue';
 import EnrollmentConfirmDialog from '@/components/enrollments/EnrollmentConfirmDialog.vue';
+import SkeletonStats from '@/components/SkeletonStats.vue';
+import SkeletonCard from '@/components/SkeletonCard.vue';
 
 interface Course {
     id: number;
@@ -42,6 +44,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const page = usePage();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -58,6 +61,7 @@ const selectedFilter = ref<'enrolled' | 'pending' | 'completed' | 'available'>('
 const enrollmentDialogOpen = ref(false);
 const selectedCourseForEnrollment = ref<{ id: number; name: string } | null>(null);
 const isEnrolling = ref(false);
+const isLoading = computed(() => page.props.loading === true);
 
 const getDifficultyColor = (difficulty: string) => {
     const colors: Record<string, string> = {
@@ -107,7 +111,8 @@ const confirmEnrollment = () => {
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <!-- Stats Section -->
-            <div class="grid gap-4 md:grid-cols-4">
+            <SkeletonStats v-if="isLoading" :count="4" />
+            <div v-else class="grid gap-4 md:grid-cols-4">
                 <Card class="border-sidebar-border/70 dark:border-sidebar-border">
                     <CardHeader class="pb-2">
                         <CardTitle class="text-sm font-medium">Enrolled</CardTitle>
@@ -172,7 +177,8 @@ const confirmEnrollment = () => {
             </div>
 
             <!-- Courses Grid -->
-            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <SkeletonCard v-if="isLoading" :count="6" />
+            <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <div v-for="course in getFilteredCourses()" :key="course.id">
                     <Card class="border-sidebar-border/70 dark:border-sidebar-border h-full hover:shadow-md transition-shadow">
                         <CardHeader>

@@ -2,8 +2,10 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
+import SkeletonStats from '@/components/SkeletonStats.vue';
+import SkeletonCard from '@/components/SkeletonCard.vue';
 import Button from '@/components/ui/button/Button.vue';
 import Card from '@/components/ui/card/Card.vue';
 import CardContent from '@/components/ui/card/CardContent.vue';
@@ -46,6 +48,8 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const page = usePage();
+const isLoading = computed(() => page.props.loading === true);
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -106,8 +110,9 @@ const restOfLeaderboard = computed(() => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-            <!-- Your Rank Card -->
-            <Card
+            <!-- Your Rank Card / Skeleton -->
+            <SkeletonStats v-if="isLoading" :count="1" />
+            <Card v-else
                 class="border-sidebar-border/70 dark:border-sidebar-border bg-gradient-to-r from-accent/20 to-accent/5">
                 <CardContent class="pt-6">
                     <div class="flex items-center justify-between">
@@ -157,8 +162,9 @@ const restOfLeaderboard = computed(() => {
                 </button>
             </div>
 
-            <!-- Top 3 Podium -->
-            <div v-if="topThree.length >= 1" class="grid gap-4 md:grid-cols-3 mb-6">
+            <!-- Top 3 Podium / Skeleton -->
+            <SkeletonCard v-if="isLoading" :count="3" />
+            <div v-else-if="topThree.length >= 1" class="grid gap-4 md:grid-cols-3 mb-6">
                 <!-- 2nd Place -->
                 <div v-if="topThree[1]" class="order-1 md:order-1">
                     <Card
@@ -256,8 +262,9 @@ const restOfLeaderboard = computed(() => {
                 </div>
             </div>
 
-            <!-- Full Leaderboard -->
-            <Card class="border-sidebar-border/70 dark:border-sidebar-border">
+            <!-- Full Leaderboard / Skeleton -->
+            <SkeletonCard v-if="isLoading" :count="10" />
+            <Card v-else class="border-sidebar-border/70 dark:border-sidebar-border">
                 <CardHeader>
                     <CardTitle>Rankings</CardTitle>
                     <CardDescription>{{ selectedTier ? selectedTier + ' Tier' : 'All Tiers' }} • Showing {{ displayCount

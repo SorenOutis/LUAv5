@@ -2,8 +2,10 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import { ref, computed, onMounted, withDefaults } from 'vue';
+import SkeletonStats from '@/components/SkeletonStats.vue';
+import SkeletonCard from '@/components/SkeletonCard.vue';
 import Button from '@/components/ui/button/Button.vue';
 import Card from '@/components/ui/card/Card.vue';
 import CardContent from '@/components/ui/card/CardContent.vue';
@@ -67,6 +69,9 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     isOwnProfile: true,
 });
+
+const page = usePage();
+const isLoading = computed(() => page.props.loading === true);
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -316,8 +321,9 @@ const getCoverPhotoUrl = () => {
                 </div>
             </div>
 
-            <!-- Stats Grid - Interactive -->
-            <div class="grid gap-4 md:grid-cols-6">
+            <!-- Stats Grid - Interactive / Skeleton -->
+            <SkeletonStats v-if="isLoading" :count="6" />
+            <div v-else class="grid gap-4 md:grid-cols-6">
                 <button
                     v-for="(stat, index) in animatedStats"
                     :key="index"
@@ -338,8 +344,9 @@ const getCoverPhotoUrl = () => {
             <div class="grid gap-6 lg:grid-cols-3">
                 <!-- Left Column: Courses & Progress -->
                 <div class="lg:col-span-2 space-y-6">
-                    <!-- Course Progress -->
-                    <Card class="border-sidebar-border/70 dark:border-sidebar-border shadow-md">
+                    <!-- Course Progress / Skeleton -->
+                    <SkeletonCard v-if="isLoading" :count="1" />
+                    <Card v-else class="border-sidebar-border/70 dark:border-sidebar-border shadow-md">
                         <CardHeader>
                             <CardTitle class="text-foreground flex items-center gap-2">
                                 <span>📚</span> Course Progress
@@ -371,8 +378,9 @@ const getCoverPhotoUrl = () => {
                         </CardContent>
                     </Card>
 
-                    <!-- Achievement Summary -->
-                    <Card class="border-sidebar-border/70 dark:border-sidebar-border shadow-md">
+                    <!-- Achievement Summary / Skeleton -->
+                    <SkeletonCard v-if="isLoading" :count="1" />
+                    <Card v-else class="border-sidebar-border/70 dark:border-sidebar-border shadow-md">
                         <CardHeader>
                             <CardTitle class="text-foreground flex items-center gap-2">
                                 <span>🏆</span> Achievement Summary
@@ -396,8 +404,9 @@ const getCoverPhotoUrl = () => {
 
                 <!-- Right Column: Achievements & Member Info -->
                 <div class="space-y-6">
-                    <!-- Achievements -->
-                    <Card class="border-sidebar-border/70 dark:border-sidebar-border shadow-md">
+                    <!-- Achievements / Skeleton -->
+                    <SkeletonCard v-if="isLoading" :count="1" />
+                    <Card v-else class="border-sidebar-border/70 dark:border-sidebar-border shadow-md">
                         <CardHeader>
                             <CardTitle class="text-foreground text-base flex items-center gap-2">
                                 <span>⭐</span> Recent Achievements

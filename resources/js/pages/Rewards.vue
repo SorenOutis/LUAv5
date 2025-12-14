@@ -2,8 +2,10 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, usePage } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import SkeletonStats from '@/components/SkeletonStats.vue';
+import SkeletonCard from '@/components/SkeletonCard.vue';
 import Button from '@/components/ui/button/Button.vue';
 import Card from '@/components/ui/card/Card.vue';
 import CardContent from '@/components/ui/card/CardContent.vue';
@@ -45,6 +47,8 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const page = usePage();
+const isLoading = computed(() => page.props.loading === true);
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -96,8 +100,9 @@ const getTypeColor = (type: string) => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-            <!-- Stats Section -->
-            <div class="grid gap-4 md:grid-cols-4">
+            <!-- Stats Section / Skeleton -->
+            <SkeletonStats v-if="isLoading" :count="4" />
+            <div v-else class="grid gap-4 md:grid-cols-4">
                 <Card class="border-sidebar-border/70 dark:border-sidebar-border">
                     <CardHeader class="pb-2">
                         <CardTitle class="text-sm font-medium">Total Rewards</CardTitle>
@@ -146,7 +151,8 @@ const getTypeColor = (type: string) => {
                     <CardDescription>Special recognition for your achievements. Gray badges are locked until earned.
                     </CardDescription>
                 </div>
-                <div class="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
+                <SkeletonCard v-if="isLoading" :count="10" />
+                <div v-else class="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
                     <div v-for="badge in badges" :key="badge.id">
                         <Card
                             :class="['border-sidebar-border/70 dark:border-sidebar-border h-full hover:shadow-md transition-shadow relative', badge.isUnlocked ? getRarityBg(badge.rarity) : 'bg-gray-200 dark:bg-gray-800 opacity-50']">
@@ -171,8 +177,9 @@ const getTypeColor = (type: string) => {
                 </div>
             </div>
 
-            <!-- Recent Rewards -->
-            <Card class="border-sidebar-border/70 dark:border-sidebar-border">
+            <!-- Recent Rewards / Skeleton -->
+            <SkeletonCard v-if="isLoading" :count="10" />
+            <Card v-else class="border-sidebar-border/70 dark:border-sidebar-border">
                 <CardHeader>
                     <CardTitle>Recent Rewards</CardTitle>
                     <CardDescription>Your recently earned rewards and unlocks</CardDescription>

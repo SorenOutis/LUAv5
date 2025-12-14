@@ -2,8 +2,8 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, usePage } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
 import Button from '@/components/ui/button/Button.vue';
 import Card from '@/components/ui/card/Card.vue';
 import CardContent from '@/components/ui/card/CardContent.vue';
@@ -12,6 +12,8 @@ import CardHeader from '@/components/ui/card/CardHeader.vue';
 import CardTitle from '@/components/ui/card/CardTitle.vue';
 import Progress from '@/components/ui/progress/Progress.vue';
 import StreakCard from '@/components/StreakCard.vue';
+import SkeletonStats from '@/components/SkeletonStats.vue';
+import SkeletonCard from '@/components/SkeletonCard.vue';
 
 interface Quest {
     id: number;
@@ -43,6 +45,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const page = usePage();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -56,6 +59,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const selectedFilter = ref<'active' | 'completed'>('active');
+const isLoading = computed(() => page.props.loading === true);
 
 const getDifficultyColor = (difficulty: string) => {
     const colors: Record<string, string> = {
@@ -94,7 +98,8 @@ const getFilteredQuests = () => {
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <!-- Stats Section -->
-            <div class="grid gap-4 md:grid-cols-4">
+            <SkeletonStats v-if="isLoading" :count="4" />
+            <div v-else class="grid gap-4 md:grid-cols-4">
                 <Card class="border-sidebar-border/70 dark:border-sidebar-border">
                     <CardHeader class="pb-2">
                         <CardTitle class="text-sm font-medium">Active</CardTitle>
@@ -142,7 +147,8 @@ const getFilteredQuests = () => {
             </div>
 
             <!-- Quests List -->
-            <div class="space-y-3">
+            <SkeletonCard v-if="isLoading" :count="5" />
+            <div v-else class="space-y-3">
                 <div v-for="quest in getFilteredQuests()" :key="quest.id">
                     <Card class="border-sidebar-border/70 dark:border-sidebar-border hover:shadow-md transition-shadow">
                         <CardContent class="pt-6">

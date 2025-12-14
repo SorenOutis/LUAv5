@@ -2,8 +2,10 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
+import SkeletonStats from '@/components/SkeletonStats.vue';
+import SkeletonCard from '@/components/SkeletonCard.vue';
 import Button from '@/components/ui/button/Button.vue';
 import Card from '@/components/ui/card/Card.vue';
 import CardContent from '@/components/ui/card/CardContent.vue';
@@ -41,6 +43,8 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const page = usePage();
+const isLoading = computed(() => page.props.loading === true);
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -114,9 +118,10 @@ const getCategoryCount = (category: string, filterStatus: 'all' | 'unlocked' | '
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="relative h-full flex-1">
             <!-- Blurred Content -->
-            <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4 blur-sm pointer-events-none">
-            <!-- Stats Section -->
-            <div class="grid gap-4 md:grid-cols-4">
+            <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4" :class="isLoading && 'blur-sm pointer-events-none'">
+            <!-- Stats Section / Skeleton -->
+            <SkeletonStats v-if="isLoading" :count="4" />
+            <div v-else class="grid gap-4 md:grid-cols-4">
                 <Card class="border-sidebar-border/70 dark:border-sidebar-border">
                     <CardHeader class="pb-2">
                         <CardTitle class="text-sm font-medium">Unlocked</CardTitle>
@@ -193,8 +198,9 @@ const getCategoryCount = (category: string, filterStatus: 'all' | 'unlocked' | '
                 </button>
             </div>
 
-            <!-- Achievements Grid -->
-            <div class="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <!-- Achievements Grid / Skeleton -->
+            <SkeletonCard v-if="isLoading" :count="12" />
+            <div v-else class="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 <div v-for="achievement in getFilteredAchievements" :key="achievement.id">
                     <Card :class="[
                         'border-sidebar-border/70 dark:border-sidebar-border h-full hover:shadow-md transition-all duration-150 cursor-pointer',
