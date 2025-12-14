@@ -126,7 +126,7 @@ onMounted(() => {
                             <button 
                                 v-if="unreadCount > 0"
                                 @click="markAllAsRead"
-                                class="text-xs text-accent hover:underline transition-colors"
+                                class="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
                                 title="Mark all as read"
                             >
                                 Mark all read

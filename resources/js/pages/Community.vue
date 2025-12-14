@@ -324,7 +324,7 @@ const getTimeAgo = (date: string) => {
                     </CardHeader>
 
                     <CardContent class="pt-6 space-y-4">
-                        <div class="prose dark:prose-invert prose-sm max-w-none whitespace-pre-wrap">
+                        <div class="prose dark:prose-invert prose-sm max-w-none whitespace-pre-wrap break-words text-left">
                             {{ selectedPost.content }}
                         </div>
 
