@@ -44,9 +44,10 @@ class AnnouncementResource extends Resource
                 ->helperText('Brief summary of the announcement')
                 ->columnSpanFull(),
             
-            RichEditor::make('content')
+            Textarea::make('content')
                 ->required()
                 ->label('Content')
+                ->rows(5)
                 ->columnSpanFull(),
             
             DateTimePicker::make('published_at')
