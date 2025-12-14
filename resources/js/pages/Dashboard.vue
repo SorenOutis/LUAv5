@@ -13,6 +13,7 @@ import CardHeader from '@/components/ui/card/CardHeader.vue';
 import CardTitle from '@/components/ui/card/CardTitle.vue';
 import StreakCard from '@/components/StreakCard.vue';
 import DailyBonusModal from '@/components/DailyBonusModal.vue';
+import ImprovedLeaderboard from '@/components/ImprovedLeaderboard.vue';
 import {
     Dialog,
     DialogContent,
@@ -643,6 +644,9 @@ const demoXPToast = () => {
                 </Card>
             </div>
 
+            <!-- Improved Leaderboard -->
+            <ImprovedLeaderboard :leaderboard="leaderboard" />
+
             <!-- Main Content Grid -->
             <div class="grid gap-4 lg:grid-cols-3">
                 <!-- Courses Progress - Main Section -->
@@ -755,38 +759,8 @@ const demoXPToast = () => {
                     </Card>
                 </div>
 
-                <!-- Sidebar - Leaderboard & Achievements -->
+                <!-- Sidebar - Achievements -->
                 <div class="space-y-4">
-                    <!-- Leaderboard -->
-                    <Card
-                        class="border-sidebar-border/70 dark:border-sidebar-border transition-all duration-200 hover:border-sidebar-border hover:shadow-md dark:hover:shadow-lg">
-                        <CardHeader>
-                            <CardTitle>Leaderboard</CardTitle>
-                            <CardDescription>Top learners this month</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div v-if="leaderboard.length === 0" class="text-center py-8">
-                                <p class="text-muted-foreground text-sm">No leaderboard data yet</p>
-                            </div>
-                            <div v-else class="space-y-3">
-                                <div v-for="leader in topFiveLeaderboard" :key="leader.rank"
-                                    :class="['flex items-center gap-3 p-2 rounded cursor-pointer transition-all duration-150', leader.isUser ? 'bg-accent/30 border border-accent' : 'hover:bg-accent/10 border border-transparent hover:border-accent/30']"
-                                    @click="handleLeaderboardClick(leader)">
-                                    <div class="font-bold text-lg w-6">{{ leader.badge }}</div>
-                                    <div class="flex-1">
-                                        <p :class="['text-sm font-medium', leader.isUser && 'font-bold']">{{ leader.name
-                                            }}</p>
-                                        <p class="text-xs text-muted-foreground">Lvl {{ leader.level }}</p>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-sm font-semibold">{{ leader.xp.toLocaleString() }}</p>
-                                        <p class="text-xs text-muted-foreground">XP</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
                     <!-- Unlocked Achievements -->
                     <Card
                         class="border-sidebar-border/70 dark:border-sidebar-border transition-all duration-200 hover:border-sidebar-border hover:shadow-md dark:hover:shadow-lg">
