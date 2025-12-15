@@ -72,6 +72,24 @@ const getDifficultyColor = (difficulty: string) => {
     return colors[difficulty] || 'bg-gray-100 text-gray-800';
 };
 
+const getDifficultyGradient = (difficulty: string) => {
+    const gradients: Record<string, string> = {
+        'Beginner': 'from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950',
+        'Intermediate': 'from-yellow-50 to-amber-50 dark:from-yellow-950 dark:to-amber-950',
+        'Advanced': 'from-red-50 to-rose-50 dark:from-red-950 dark:to-rose-950',
+    };
+    return gradients[difficulty] || 'from-gray-50 to-slate-50';
+};
+
+const getDifficultyAccent = (difficulty: string) => {
+    const accents: Record<string, string> = {
+        'Beginner': 'border-l-4 border-l-green-500',
+        'Intermediate': 'border-l-4 border-l-yellow-500',
+        'Advanced': 'border-l-4 border-l-red-500',
+    };
+    return accents[difficulty] || 'border-l-4 border-l-gray-500';
+};
+
 const getFilteredCourses = () => {
     switch (selectedFilter.value) {
         case 'pending':
@@ -180,18 +198,43 @@ const confirmEnrollment = () => {
             <SkeletonCard v-if="isLoading" :count="6" />
             <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <div v-for="course in getFilteredCourses()" :key="course.id">
-                    <Card class="border-sidebar-border/70 dark:border-sidebar-border h-full hover:shadow-md transition-shadow">
+                    <Card :class="['border-sidebar-border/70 dark:border-sidebar-border h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1', `bg-gradient-to-br ${getDifficultyGradient(course.difficulty)}`, getDifficultyAccent(course.difficulty)]">
+                        <!-- Thumbnail Section -->
+                        <div v-if="course.thumbnail" class="relative h-32 bg-gradient-to-br overflow-hidden rounded-t-lg"
+                             :class="getDifficultyGradient(course.difficulty)">
+                            <img :src="course.thumbnail" :alt="course.name" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity" />
+                        </div>
+                        
+                        <!-- Completion Ring (Enrolled/Pending/Completed) -->
+                        <div v-if="selectedFilter !== 'available'" class="absolute top-4 right-4 z-10">
+                            <div class="relative w-16 h-16 flex items-center justify-center">
+                                <svg class="transform -rotate-90 w-16 h-16" viewBox="0 0 64 64">
+                                    <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-300 dark:text-gray-700" />
+                                    <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" stroke-width="2" 
+                                            :style="{strokeDasharray: `${2 * Math.PI * 28}`, strokeDashoffset: `${2 * Math.PI * 28 * (1 - course.progress / 100)}`}"
+                                            :class="[
+                                                course.difficulty === 'Beginner' ? 'text-green-500' : 
+                                                course.difficulty === 'Intermediate' ? 'text-yellow-500' : 
+                                                'text-red-500'
+                                            ]"
+                                            class="transition-all duration-500" />
+                                </svg>
+                                <span class="absolute text-xs font-bold">{{ course.progress }}%</span>
+                            </div>
+                        </div>
+
                         <CardHeader>
-                            <div class="flex items-start justify-between">
+                            <div class="flex items-start justify-between gap-4">
                                 <div class="flex-1">
                                     <CardTitle class="text-lg">{{ course.name }}</CardTitle>
                                     <CardDescription>by {{ course.instructor }}</CardDescription>
                                 </div>
-                                <span :class="['px-2 py-1 text-xs rounded-full font-medium', getDifficultyColor(course.difficulty)]">
+                                <span :class="['px-3 py-1 text-xs rounded-full font-medium whitespace-nowrap flex-shrink-0 shadow-sm', getDifficultyColor(course.difficulty)]">
                                     {{ course.difficulty }}
                                 </span>
                             </div>
                         </CardHeader>
+
                         <CardContent class="space-y-4">
                             <p class="text-sm text-muted-foreground">{{ course.description }}</p>
 
