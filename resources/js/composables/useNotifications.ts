@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export interface DynamicNotification {
     id: number;
-    type: 'course' | 'leaderboard' | 'achievement' | 'reward' | 'community' | 'assignment';
+    type: 'course' | 'leaderboard' | 'achievement' | 'reward' | 'community' | 'assignment' | 'announcement' | 'community_post';
     title: string;
     message: string;
     timestamp: string;
@@ -24,8 +24,25 @@ export function useNotifications() {
     const fetchNotifications = async () => {
         isLoading.value = true;
         try {
-            const response = await axios.get('/api/notifications');
-            notifications.value = response.data;
+            const [notificationsResponse, announcementsResponse] = await Promise.all([
+                axios.get('/api/notifications'),
+                axios.get('/api/announcements-and-posts/latest'),
+            ]);
+            
+            // Combine notifications with announcements and community posts
+            const combined = [
+                ...notificationsResponse.data,
+                ...announcementsResponse.data,
+            ];
+            
+            // Sort by most recent
+            combined.sort((a, b) => {
+                const dateA = new Date(a.timestamp).getTime();
+                const dateB = new Date(b.timestamp).getTime();
+                return dateB - dateA;
+            });
+            
+            notifications.value = combined;
             isLoading.value = false;
         } catch (error) {
             console.error('Failed to fetch notifications:', error);
@@ -67,14 +84,40 @@ export function useNotifications() {
     const setupEventStream = setupRefreshInterval;
 
     const markAsRead = async (notificationId: number) => {
-        try {
-            await axios.post(`/api/notifications/${notificationId}/read`);
-            const notification = notifications.value.find(n => n.id === notificationId);
-            if (notification) {
-                notification.read = true;
+        // Update frontend state immediately
+        const notification = notifications.value.find(n => n.id === notificationId);
+        if (notification) {
+            notification.read = true;
+        }
+
+        // Handle different notification types
+        if (notificationId >= 10000) {
+            // Community post
+            try {
+                await axios.post('/api/announcements/mark-read', {
+                    announcement_id: notificationId - 10000,
+                    type: 'community_post',
+                });
+            } catch (error) {
+                console.error('Failed to mark community post as read:', error);
             }
-        } catch (error) {
-            console.error('Failed to mark notification as read:', error);
+        } else if (notification?.type === 'announcement') {
+            // Announcement
+            try {
+                await axios.post('/api/announcements/mark-read', {
+                    announcement_id: notificationId,
+                    type: 'announcement',
+                });
+            } catch (error) {
+                console.error('Failed to mark announcement as read:', error);
+            }
+        } else {
+            // Regular notification
+            try {
+                await axios.post(`/api/notifications/${notificationId}/read`);
+            } catch (error) {
+                console.error('Failed to mark notification as read:', error);
+            }
         }
     };
 
@@ -88,9 +131,25 @@ export function useNotifications() {
     };
 
     const markAllAsRead = async () => {
+        // Mark all notifications in the frontend state
+        notifications.value.forEach(n => n.read = true);
+        
+        // Prepare items to mark as read
+        const announcementItems = notifications.value.filter(n => n.type === 'announcement' || n.type === 'community_post');
+        
         try {
+            // Mark announcements and community posts as read
+            if (announcementItems.length > 0) {
+                await axios.post('/api/announcements/mark-all-read', {
+                    items: announcementItems.map(item => ({
+                        id: item.type === 'community_post' ? item.id - 10000 : item.id,
+                        type: item.type,
+                    })),
+                });
+            }
+            
+            // Mark all regular notifications as read in the database
             await axios.post('/api/notifications/mark-all-read');
-            notifications.value.forEach(n => n.read = true);
         } catch (error) {
             console.error('Failed to mark all as read:', error);
         }

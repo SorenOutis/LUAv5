@@ -101,6 +101,7 @@ Route::prefix('api')->group(function () {
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('users/search', [\App\Http\Controllers\Api\UserSearchController::class, 'search']);
         Route::get('announcements/latest', [\App\Http\Controllers\AnnouncementController::class, 'getLatest']);
+        Route::get('announcements-and-posts/latest', [\App\Http\Controllers\Api\AnnouncementNotificationController::class, 'getLatest']);
         Route::get('dashboard/stats', [\App\Http\Controllers\DashboardController::class, 'getStats']);
         Route::post('daily-bonus/claim', [\App\Http\Controllers\Api\DailyBonusController::class, 'claim']);
         
@@ -110,6 +111,10 @@ Route::prefix('api')->group(function () {
         Route::delete('notifications/{id}', [\App\Http\Controllers\Api\NotificationController::class, 'destroy']);
         Route::post('notifications/mark-all-read', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
         Route::get('notifications/stream', [\App\Http\Controllers\Api\NotificationStreamController::class, 'stream']);
+        
+        // Announcement and Community Post Read Routes
+        Route::post('announcements/mark-read', [\App\Http\Controllers\Api\AnnouncementMarkReadController::class, 'markAnnouncementAsRead']);
+        Route::post('announcements/mark-all-read', [\App\Http\Controllers\Api\AnnouncementMarkReadController::class, 'markAllAnnouncementsAsRead']);
         
         // Streak Leaderboard Route
         Route::get('streaks/leaderboard', [\App\Http\Controllers\Api\StreakLeaderboardController::class, 'index']);

@@ -146,18 +146,27 @@ onMounted(() => {
                     <div v-if="notifications.length === 0" class="p-4 text-center text-sm text-muted-foreground">
                         No notifications yet
                     </div>
-                    <div v-else class="max-h-96 overflow-y-auto">
+                    <div v-else class="max-h-96 overflow-y-auto overflow-x-hidden">
                         <div 
                             v-for="notification in notifications" 
-                            :key="notification.id"
-                            :class="['p-3 border-b border-sidebar-border/30 last:border-b-0 hover:bg-accent/5 cursor-pointer transition-colors group', notification.read ? '' : 'bg-accent/10']"
+                            :key="`${notification.type}-${notification.id}`"
+                            :class="[
+                                'p-3 border-b border-sidebar-border/30 last:border-b-0 hover:bg-accent/5 cursor-pointer transition-colors group',
+                                notification.read ? '' : 'bg-accent/10',
+                                notification.type === 'announcement' ? 'border-l-4 border-l-amber-500' : '',
+                                notification.type === 'community_post' ? 'border-l-4 border-l-blue-500' : ''
+                            ]"
                             @click="markAsRead(notification.id)"
                         >
                             <div class="flex gap-3">
                                 <div class="text-xl flex-shrink-0">{{ notification.icon }}</div>
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-start justify-between gap-2">
-                                        <p class="text-sm font-medium text-foreground">{{ notification.title }}</p>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-foreground">{{ notification.title }}</p>
+                                            <p v-if="notification.type === 'announcement'" class="text-xs text-amber-600 dark:text-amber-400">Announcement</p>
+                                            <p v-else-if="notification.type === 'community_post'" class="text-xs text-blue-600 dark:text-blue-400">Community</p>
+                                        </div>
                                         <div class="flex items-center gap-2">
                                             <div v-if="!notification.read" class="h-2 w-2 bg-blue-500 rounded-full mt-1 flex-shrink-0"></div>
                                             <button
@@ -171,7 +180,7 @@ onMounted(() => {
                                             </button>
                                         </div>
                                     </div>
-                                    <p class="text-xs text-muted-foreground mt-1">{{ notification.message }}</p>
+                                    <p class="text-xs text-muted-foreground mt-1 break-words">{{ notification.message }}</p>
                                     <p class="text-xs text-muted-foreground mt-1">{{ notification.timestamp }}</p>
                                 </div>
                             </div>
