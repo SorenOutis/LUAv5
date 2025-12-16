@@ -66,6 +66,10 @@ Route::get('community/{post}', [\App\Http\Controllers\CommunityController::class
     ->middleware(['auth', 'verified'])
     ->name('community.show');
 
+Route::get('coding', [\App\Http\Controllers\CodingController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('coding');
+
 Route::post('community', [\App\Http\Controllers\CommunityController::class, 'store'])
     ->middleware(['auth', 'verified'])
     ->name('community.store');

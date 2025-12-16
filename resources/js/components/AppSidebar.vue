@@ -15,7 +15,7 @@ import {
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, FileText, User, Zap, Trophy, Star, Gift, MessageSquare, TrendingUp, Target, Users } from 'lucide-vue-next';
+import { BookOpen, Folder, LayoutGrid, FileText, User, Zap, Trophy, Star, Gift, MessageSquare, TrendingUp, Target, Users, Code2 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const page = usePage();
@@ -31,6 +31,11 @@ const mainNavItems: NavItem[] = [
         title: 'Courses',
         href: '/courses',
         icon: BookOpen,
+    },
+    {
+        title: 'Coding',
+        href: '/coding',
+        icon: Code2,
     },
     // {
     //     title: 'Quests',
