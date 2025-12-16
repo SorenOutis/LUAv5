@@ -99,6 +99,34 @@ const handleSubmitPost = () => {
 const handleReact = (post: Post, reactionType: string) => {
     router.post(`/community/${post.id}/react`, {
         reaction_type: reactionType,
+    }, {
+        onSuccess: () => {
+            // Check if user already has this reaction
+            const existingReaction = post.reactions?.find(r => r.user_id === currentUserId);
+            
+            if (existingReaction) {
+                // If same reaction, remove it
+                if (existingReaction.reaction_type === reactionType) {
+                    post.reactions = post.reactions.filter(r => r.user_id !== currentUserId);
+                } else {
+                    // Change existing reaction to new type
+                    existingReaction.reaction_type = reactionType;
+                }
+            } else {
+                // Add new reaction
+                post.reactions = post.reactions || [];
+                post.reactions.push({
+                    id: Math.random(),
+                    reaction_type: reactionType,
+                    user_id: currentUserId,
+                });
+            }
+            
+            // Update selectedPost if it's the same post
+            if (selectedPost.value?.id === post.id) {
+                selectedPost.value = { ...post };
+            }
+        },
     });
 };
 
@@ -213,7 +241,10 @@ const getTimeAgo = (date: string) => {
                     <div class="flex items-start gap-4">
                         <!-- User Avatar -->
                         <div class="flex-shrink-0">
-                            <div class="h-10 w-10 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center text-lg">
+                            <div v-if="post.user.profile_photo_path" class="h-10 w-10 rounded-full border border-accent/30 overflow-hidden">
+                                <img :src="post.user.profile_photo_path" :alt="post.user.name" class="w-full h-full object-cover" />
+                            </div>
+                            <div v-else class="h-10 w-10 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center text-lg">
                                 {{ post.user.name.charAt(0).toUpperCase() }}
                             </div>
                         </div>
@@ -308,7 +339,10 @@ const getTimeAgo = (date: string) => {
                     <CardHeader class="sticky top-0 bg-background border-b border-sidebar-border/30">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center gap-3">
-                                <div class="h-10 w-10 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center">
+                                <div v-if="selectedPost.user.profile_photo_path" class="h-10 w-10 rounded-full border border-accent/30 overflow-hidden">
+                                    <img :src="selectedPost.user.profile_photo_path" :alt="selectedPost.user.name" class="w-full h-full object-cover" />
+                                </div>
+                                <div v-else class="h-10 w-10 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center">
                                     {{ selectedPost.user.name.charAt(0).toUpperCase() }}
                                 </div>
                                 <div>

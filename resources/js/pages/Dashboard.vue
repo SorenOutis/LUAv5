@@ -385,6 +385,7 @@ const demoXPToast = () => {
                 <div class="absolute -right-20 -top-20 w-40 h-40 bg-accent/5 rounded-full blur-3xl"></div>
                 <div class="absolute -left-20 -bottom-20 w-40 h-40 bg-accent/5 rounded-full blur-3xl"></div>
                 
+                
                 <div class="relative z-10">
                     <div class="flex items-start justify-between gap-6">
                         <!-- User Info Section -->
