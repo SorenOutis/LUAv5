@@ -47,22 +47,25 @@ class AssignmentSubmissionObserver
             'rank_title' => 'Plastic',
         ]);
 
-        // Calculate total XP from all assignment submissions with XP
-        $assignmentXP = $user->assignmentSubmissions()
-            ->whereNotNull('xp')
-            ->sum('xp');
+        // Calculate XP change from this submission
+        $newSubmissionXP = $submission->xp ?? 0;
+        $oldSubmissionXP = $submission->getOriginal('xp') ?? 0;
+        $xpDifference = $newSubmissionXP - $oldSubmissionXP;
 
-        // Update profile with total XP from assignments and recalculate level
-        $newLevel = max(1, intval($assignmentXP / 100) + 1);
+        // Add the difference to the existing total XP (don't replace it)
+        $totalXP = max(0, ($profile->total_xp ?? 0) + $xpDifference);
+
+        // Update profile with new total XP and recalculate level
+        $newLevel = max(1, intval($totalXP / 100) + 1);
         
         // Update profile object in memory first to calculate correct rank title
         $profile->level = $newLevel;
         $newRankTitle = $profile->calculateRankTitle();
         
         $profile->update([
-            'total_xp' => $assignmentXP,
+            'total_xp' => $totalXP,
             'level' => $newLevel,
-            'current_level_xp' => $assignmentXP % 100,
+            'current_level_xp' => $totalXP % 100,
             'rank_title' => $newRankTitle,
         ]);
     }
