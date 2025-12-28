@@ -102,6 +102,10 @@ Route::post('assignments/{assignment}/upload', [\App\Http\Controllers\Assignment
     ->middleware(['auth', 'verified'])
     ->name('assignment.upload');
 
+Route::get('games', [\App\Http\Controllers\GamesController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('games');
+
 Route::get('notifications', function () {
     return Inertia::render('Notifications');
 })
