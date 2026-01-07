@@ -18,13 +18,24 @@ interface ModalState {
     message: string;
 }
 
+interface ConfirmModalState {
+    isOpen: boolean;
+    onConfirm: (() => void) | null;
+}
+
 const logoutModal = ref<ModalState>({
     isOpen: false,
     title: 'Logging out...',
     message: 'Please wait while we log you out',
 });
 
+const confirmModal = ref<ConfirmModalState>({
+    isOpen: false,
+    onConfirm: null,
+});
+
 provide('logoutModal', logoutModal);
+provide('confirmModal', confirmModal);
 
 withDefaults(defineProps<Props>(), {
     breadcrumbs: () => [],
@@ -38,7 +49,48 @@ withDefaults(defineProps<Props>(), {
             :impersonator-name="$page.props.impersonator_name"
         />
 
-        <!-- Logout Modal Overlay -->
+        <!-- Confirmation Modal -->
+        <div
+            v-if="confirmModal.isOpen"
+            class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-300"
+            @click.self="confirmModal.isOpen = false"
+        >
+            <div
+                class="fixed inset-0 z-50 flex items-center justify-center p-4"
+            >
+                <div
+                    class="animate-scale-in relative w-full max-w-sm rounded-2xl border border-border bg-card p-8 shadow-2xl"
+                >
+                    <!-- Content -->
+                    <div class="space-y-4 text-center">
+                        <h2 class="text-2xl font-bold text-foreground">
+                            Log out?
+                        </h2>
+                        <p class="text-sm text-muted-foreground">
+                            Are you sure you want to log out of your account?
+                        </p>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="mt-8 flex gap-3">
+                        <button
+                            @click="confirmModal.isOpen = false"
+                            class="flex-1 rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            @click="confirmModal.onConfirm?.()"
+                            class="flex-1 rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                        >
+                            Log out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logout Loading Modal -->
         <div
             v-if="logoutModal.isOpen"
             class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-300"

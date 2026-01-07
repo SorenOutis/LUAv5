@@ -23,15 +23,28 @@ interface ModalState {
     message: string;
 }
 
+interface ConfirmModalState {
+    isOpen: boolean;
+    onConfirm: (() => void) | null;
+}
+
 const logoutModal = inject<Ref<ModalState>>('logoutModal');
+const confirmModal = inject<Ref<ConfirmModalState>>('confirmModal');
 
 const handleLogout = (e: Event) => {
     e.preventDefault();
-    if (logoutModal) {
-        logoutModal.value.isOpen = true;
+    if (confirmModal) {
+        confirmModal.value.onConfirm = () => {
+            if (confirmModal) {
+                confirmModal.value.isOpen = false;
+            }
+            if (logoutModal) {
+                logoutModal.value.isOpen = true;
+            }
+            router.post(logout());
+        };
+        confirmModal.value.isOpen = true;
     }
-    // Modal shows while logout request is processing
-    router.post(logout());
 };
 
 defineProps<Props>();
