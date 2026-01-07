@@ -129,6 +129,17 @@ Route::prefix('api')->group(function () {
         Route::delete('notifications/{id}', [\App\Http\Controllers\Api\NotificationController::class, 'destroy']);
         Route::post('notifications/mark-all-read', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
         Route::get('notifications/stream', [\App\Http\Controllers\Api\NotificationStreamController::class, 'stream']);
+        Route::post('notifications/test', function () {
+            \App\Models\Notification::create([
+                'user_id' => auth()->id(),
+                'type' => 'test',
+                'title' => 'Test Notification',
+                'message' => 'This is a test notification - ' . now()->format('Y-m-d H:i:s'),
+                'icon' => '🧪',
+                'data' => ['test' => true],
+            ]);
+            return response()->json(['success' => true, 'message' => 'Test notification created']);
+        });
         
         // Announcement and Community Post Read Routes
         Route::post('announcements/mark-read', [\App\Http\Controllers\Api\AnnouncementMarkReadController::class, 'markAnnouncementAsRead']);

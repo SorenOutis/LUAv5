@@ -44,4 +44,9 @@ class Notification extends Model
         $this->update(['read_at' => now()]);
         return $this;
     }
+
+    public function scopeUnread($query)
+    {
+        return $query->whereNull('read_at');
+    }
 }

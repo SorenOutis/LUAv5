@@ -1,0 +1,14 @@
+{
+    "agents": [
+        "claude_code",
+        "cursor",
+        "opencode"
+    ],
+    "editors": [
+        "opencode"
+    ],
+    "guidelines": [
+        "filament/filament"
+    ],
+    "herd_mcp": true
+}

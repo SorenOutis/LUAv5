@@ -26,7 +26,8 @@ withDefaults(
 );
 
 const { appearance, updateAppearance } = useAppearance();
-const { notifications, unreadCount, fetchNotifications, setupEventStream, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
+const { notifications: notificationsList, unreadCount, fetchNotifications, setupEventStream, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
+const notifications = computed(() => notificationsList.value);
 const currentDateTime = ref<string>('');
 const userStatus = ref<string>('online');
 const isNotificationOpen = ref<boolean>(false);
@@ -155,7 +156,11 @@ onMounted(() => {
                                 'p-3 border-b border-sidebar-border/30 last:border-b-0 hover:bg-accent/5 cursor-pointer transition-colors group',
                                 notification.read ? '' : 'bg-accent/10',
                                 notification.type === 'announcement' ? 'border-l-4 border-l-amber-500' : '',
-                                notification.type === 'community_post' ? 'border-l-4 border-l-blue-500' : ''
+                                notification.type === 'community_post' ? 'border-l-4 border-l-blue-500' : '',
+                                notification.type === 'achievement' ? 'border-l-4 border-l-purple-500' : '',
+                                notification.type === 'xp' ? 'border-l-4 border-l-green-500' : '',
+                                notification.type === 'streak' ? 'border-l-4 border-l-orange-500' : '',
+                                notification.type === 'level_up' ? 'border-l-4 border-l-indigo-600' : ''
                             ]"
                             @click="markAsRead(notification.id)"
                         >
@@ -167,6 +172,10 @@ onMounted(() => {
                                             <p class="text-sm font-medium text-foreground">{{ notification.title }}</p>
                                             <p v-if="notification.type === 'announcement'" class="text-xs text-amber-600 dark:text-amber-400">Announcement</p>
                                             <p v-else-if="notification.type === 'community_post'" class="text-xs text-blue-600 dark:text-blue-400">Community</p>
+                                            <p v-else-if="notification.type === 'achievement'" class="text-xs text-purple-600 dark:text-purple-400">Achievement</p>
+                                            <p v-else-if="notification.type === 'xp'" class="text-xs text-green-600 dark:text-green-400">✨ XP Earned</p>
+                                            <p v-else-if="notification.type === 'streak'" class="text-xs text-orange-600 dark:text-orange-400">🔥 Streak</p>
+                                            <p v-else-if="notification.type === 'level_up'" class="text-xs text-indigo-600 dark:text-indigo-400">⚡ Level Up</p>
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <div v-if="!notification.read" class="h-2 w-2 bg-blue-500 rounded-full mt-1 flex-shrink-0"></div>
@@ -255,7 +264,7 @@ onMounted(() => {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuRadioGroup :model-value="appearance" @update:model-value="updateAppearance">
+                         <DropdownMenuRadioGroup :model-value="appearance" @update:model-value="(value) => updateAppearance(value as 'light' | 'dark' | 'system')">
                             <DropdownMenuRadioItem value="light">
                                 Light
                             </DropdownMenuRadioItem>

@@ -97,7 +97,7 @@ class NotificationService
         
         Notification::create([
             'user_id' => $user->id,
-            'type' => 'achievement',
+            'type' => 'level_up',
             'title' => 'Level Up!',
             'message' => $message,
             'icon' => '⚡',
@@ -114,7 +114,7 @@ class NotificationService
         
         Notification::create([
             'user_id' => $user->id,
-            'type' => 'achievement',
+            'type' => 'xp',
             'title' => 'XP Gained',
             'message' => $message,
             'icon' => '✨',
@@ -128,7 +128,7 @@ class NotificationService
         
         Notification::create([
             'user_id' => $user->id,
-            'type' => 'achievement',
+            'type' => 'streak',
             'title' => 'Streak Increased!',
             'message' => $message,
             'icon' => '🔥',

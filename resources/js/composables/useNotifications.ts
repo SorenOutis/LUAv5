@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export interface DynamicNotification {
     id: number;
-    type: 'course' | 'leaderboard' | 'achievement' | 'reward' | 'community' | 'assignment' | 'announcement' | 'community_post';
+    type: 'course' | 'leaderboard' | 'achievement' | 'reward' | 'community' | 'assignment' | 'announcement' | 'community_post' | 'xp' | 'streak' | 'level_up';
     title: string;
     message: string;
     timestamp: string;
@@ -25,6 +25,7 @@ const getInitialNotifications = (): DynamicNotification[] => {
 const notifications = ref<DynamicNotification[]>(getInitialNotifications());
 const isLoading = ref(false);
 const refreshInterval = ref<NodeJS.Timeout | null>(null);
+const lastNotificationCount = ref(notifications.value.length);
 
 export function useNotifications() {
     const unreadCount = computed(() => 
@@ -39,19 +40,56 @@ export function useNotifications() {
         }
     };
 
+    const sendBrowserNotification = (title: string, options?: NotificationOptions) => {
+        if ('Notification' in window && Notification.permission === 'granted') {
+            try {
+                new Notification(title, {
+                    icon: '/notification-icon.png',
+                    ...options,
+                });
+            } catch (error) {
+                console.error('Failed to send browser notification:', error);
+            }
+        }
+    };
+
     const fetchNotifications = async () => {
         isLoading.value = true;
         try {
             const [notificationsResponse, announcementsResponse] = await Promise.all([
                 axios.get('/api/notifications'),
-                axios.get('/api/announcements-and-posts/latest'),
+                axios.get('/api/announcements-and-posts/latest').catch(() => ({ data: [] })),
             ]);
+            
+            console.log('Fetched notifications:', notificationsResponse.data);
+            console.log('Fetched announcements:', announcementsResponse.data);
+            
+            // Transform database notifications to match interface
+            const dbNotifications = (notificationsResponse.data || []).map((n: any) => ({
+                id: n.id,
+                type: n.type || 'notification',
+                title: n.title,
+                message: n.message,
+                timestamp: n.timestamp || n.createdAt || new Date().toLocaleString(),
+                read: !!n.read,
+                icon: n.icon || '📧',
+                data: n.data || {},
+            }));
+
+            // Transform announcements
+            const announcementNotifications = (announcementsResponse.data || []).map((a: any) => ({
+                ...a,
+                read: a.read || false,
+                timestamp: a.timestamp || new Date().toLocaleString(),
+            }));
             
             // Combine notifications with announcements and community posts
             const combined = [
-                ...notificationsResponse.data,
-                ...announcementsResponse.data,
+                ...dbNotifications,
+                ...announcementNotifications,
             ];
+            
+            console.log('Combined notifications:', combined);
             
             // Sort by most recent
             combined.sort((a, b) => {
@@ -60,12 +98,40 @@ export function useNotifications() {
                 return dateB - dateA;
             });
             
+            // Check for new notifications (achievement, xp, streak, level_up)
+            const newNotifications = combined.filter(n => !notifications.value.some(existing => existing.id === n.id && existing.type === n.type));
+            const importantNewNotifications = newNotifications.filter(n => 
+                ['achievement', 'xp', 'streak', 'level_up', 'reward'].includes(n.type)
+            );
+            
+            // Send browser notifications for important new notifications
+            importantNewNotifications.forEach(notification => {
+                sendBrowserNotification(notification.title, {
+                    body: notification.message,
+                    badge: '✨',
+                });
+            });
+            
             notifications.value = combined;
+            lastNotificationCount.value = combined.length;
             saveNotificationsToStorage(combined);
             isLoading.value = false;
+            
+            console.log('Final notifications state:', notifications.value);
+            console.log('Unread count:', unreadCount.value);
         } catch (error) {
             console.error('Failed to fetch notifications:', error);
             isLoading.value = false;
+        }
+    };
+
+    const requestNotificationPermission = async () => {
+        if ('Notification' in window && Notification.permission === 'default') {
+            try {
+                await Notification.requestPermission();
+            } catch (error) {
+                console.error('Failed to request notification permission:', error);
+            }
         }
     };
 
@@ -75,13 +141,16 @@ export function useNotifications() {
             clearInterval(refreshInterval.value);
         }
 
+        // Request notification permission
+        requestNotificationPermission();
+
         // Fetch initial notifications
         fetchNotifications();
 
-        // Set up polling for real-time updates (3 seconds for instant feedback)
+        // Set up polling for real-time updates (2 seconds for instant feedback on XP, achievements, streak)
         refreshInterval.value = setInterval(() => {
             fetchNotifications();
-        }, 3000);
+        }, 2000);
 
         // Handle visibility changes - pause refresh when tab is hidden
         document.addEventListener('visibilitychange', () => {
@@ -95,7 +164,7 @@ export function useNotifications() {
                 fetchNotifications();
                 refreshInterval.value = setInterval(() => {
                     fetchNotifications();
-                }, 3000);
+                }, 2000);
             }
         });
     };

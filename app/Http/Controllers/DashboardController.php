@@ -139,6 +139,27 @@ class DashboardController extends Controller
                 'timestamp' => $completion->completed_at->diffForHumans(),
             ]);
 
+        // Get database notifications
+        $notifications = $user->notifications()
+            ->latest()
+            ->take(10)
+            ->get()
+            ->map(fn ($notification) => [
+                'id' => $notification->id,
+                'title' => $notification->title,
+                'message' => $notification->message,
+                'type' => $notification->type,
+                'icon' => $notification->icon,
+                'data' => $notification->data,
+                'readAt' => $notification->read_at,
+                'createdAt' => $notification->created_at->diffForHumans(),
+            ]);
+
+        // Get unread notification count
+        $unreadNotificationCount = $user->notifications()
+            ->whereNull('read_at')
+            ->count();
+
         return Inertia::render('Dashboard', [
             'userName' => $user->name,
             'userStats' => [
@@ -165,6 +186,8 @@ class DashboardController extends Controller
             'leaderboard' => $leaderboard,
             'achievements' => $allAchievements,
             'recentActivity' => $recentActivity,
+            'notifications' => $notifications,
+            'unreadNotificationCount' => $unreadNotificationCount,
         ]);
     }
 

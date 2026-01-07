@@ -98,6 +98,17 @@ interface DailyBonusData {
     xpAmount: number;
 }
 
+interface Notification {
+    id: number;
+    title: string;
+    message: string;
+    type: string;
+    icon: string;
+    data: any;
+    readAt: string | null;
+    createdAt: string;
+}
+
 interface Props {
     userName: string;
     userStats: UserStats;
@@ -108,6 +119,8 @@ interface Props {
     recentActivity: Activity[];
     streak?: StreakData;
     dailyBonus?: DailyBonusData;
+    notifications?: Notification[];
+    unreadNotificationCount?: number;
 }
 
 const props = defineProps<Props>();
@@ -127,6 +140,9 @@ const isDailyBonusModalOpen = ref(false);
 const refreshIntervals = vueRef<NodeJS.Timeout[]>([]);
 const autoRefreshEnabled = ref(true);
 const refreshInterval = 30000; // 30 seconds
+const notifications = ref<Notification[]>(props.notifications || []);
+const unreadNotificationCount = ref(props.unreadNotificationCount || 0);
+const isNotificationsPanelOpen = ref(false);
 
 const fetchAnnouncements = async () => {
     isLoadingAnnouncements.value = true;
@@ -137,6 +153,54 @@ const fetchAnnouncements = async () => {
         console.error('Failed to fetch announcements:', error);
     } finally {
         isLoadingAnnouncements.value = false;
+    }
+};
+
+const fetchNotifications = async () => {
+    try {
+        const response = await axios.get('/api/notifications');
+        notifications.value = response.data.map((n: any) => ({
+            ...n,
+            readAt: n.read ? new Date().toISOString() : null,
+        }));
+        unreadNotificationCount.value = notifications.value.filter(n => !n.readAt).length;
+    } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+    }
+};
+
+const markNotificationAsRead = async (notificationId: number) => {
+    try {
+        await axios.post(`/api/notifications/${notificationId}/read`);
+        const notification = notifications.value.find(n => n.id === notificationId);
+        if (notification) {
+            notification.readAt = new Date().toISOString();
+            unreadNotificationCount.value = notifications.value.filter(n => !n.readAt).length;
+        }
+    } catch (error) {
+        console.error('Failed to mark notification as read:', error);
+    }
+};
+
+const markAllNotificationsAsRead = async () => {
+    try {
+        await axios.post('/api/notifications/mark-all-read');
+        notifications.value.forEach(n => {
+            n.readAt = new Date().toISOString();
+        });
+        unreadNotificationCount.value = 0;
+    } catch (error) {
+        console.error('Failed to mark all notifications as read:', error);
+    }
+};
+
+const deleteNotification = async (notificationId: number) => {
+    try {
+        await axios.delete(`/api/notifications/${notificationId}`);
+        notifications.value = notifications.value.filter(n => n.id !== notificationId);
+        unreadNotificationCount.value = notifications.value.filter(n => !n.readAt).length;
+    } catch (error) {
+        console.error('Failed to delete notification:', error);
     }
 };
 
@@ -189,8 +253,15 @@ const startAutoRefresh = () => {
             fetchDashboardData();
         }
     }, refreshInterval);
+
+    // Fetch notifications every 30 seconds
+    const notificationsInterval = setInterval(() => {
+        if (autoRefreshEnabled.value) {
+            fetchNotifications();
+        }
+    }, refreshInterval);
     
-    refreshIntervals.value = [announcementsInterval, dashboardInterval];
+    refreshIntervals.value = [announcementsInterval, dashboardInterval, notificationsInterval];
 };
 
 const stopAutoRefresh = () => {
@@ -206,6 +277,7 @@ const handleVisibilityChange = () => {
         // Fetch fresh data when tab becomes visible
         fetchAnnouncements();
         fetchDashboardData();
+        fetchNotifications();
     }
 };
 
@@ -213,6 +285,7 @@ const handleVisibilityChange = () => {
 onMounted(() => {
     fetchAnnouncements();
     fetchDashboardData();
+    fetchNotifications();
     
     // Show daily bonus modal if user hasn't received it today
     if (props.dailyBonus && !props.dailyBonus.hasReceivedToday) {
@@ -827,9 +900,58 @@ const demoXPToast = () => {
                     </Card>
                 </div>
 
-                <!-- Sidebar - Achievements -->
+                <!-- Sidebar - Notifications -->
                 <div class="space-y-4">
-                    <!-- Unlocked Achievements -->
+                    <!-- Notifications Card -->
+                    <Card
+                        class="border-sidebar-border/70 dark:border-sidebar-border transition-all duration-200 hover:border-sidebar-border hover:shadow-md dark:hover:shadow-lg">
+                        <CardHeader class="flex flex-row items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <CardTitle class="text-sm">Notifications</CardTitle>
+                                <span v-if="unreadNotificationCount > 0" 
+                                    class="inline-flex items-center justify-center h-5 w-5 text-xs font-semibold rounded-full bg-red-500 text-white">
+                                    {{ unreadNotificationCount > 9 ? '9+' : unreadNotificationCount }}
+                                </span>
+                            </div>
+                            <button v-if="unreadNotificationCount > 0"
+                                @click="markAllNotificationsAsRead"
+                                class="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                                Mark all as read
+                            </button>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="space-y-2 max-h-64 overflow-y-auto">
+                                <div v-if="notifications.length === 0" class="text-xs text-muted-foreground text-center py-4">
+                                    No notifications yet
+                                </div>
+                                <div v-for="notification in notifications.slice(0, 5)" :key="notification.id"
+                                    :class="['p-2 rounded border cursor-pointer transition-all duration-150 hover:bg-accent/10', !notification.readAt ? 'bg-accent/5 border-accent/30' : 'border-sidebar-border/50']"
+                                    @click="!notification.readAt && markNotificationAsRead(notification.id)">
+                                    <div class="flex items-start gap-2">
+                                        <span v-if="notification.icon" class="text-lg flex-shrink-0">{{ notification.icon }}</span>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-xs font-medium text-foreground truncate">{{ notification.title }}</p>
+                                            <p class="text-xs text-muted-foreground line-clamp-2 mt-0.5">{{ notification.message }}</p>
+                                            <p class="text-xs text-muted-foreground mt-1">{{ notification.createdAt }}</p>
+                                        </div>
+                                        <button @click.stop="deleteNotification(notification.id)"
+                                            class="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 p-0.5">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div v-if="notifications.length > 5" class="text-center pt-2 border-t border-sidebar-border/50">
+                                    <a href="/notifications" class="text-xs text-accent hover:text-accent/80 transition-colors font-medium">
+                                        View all notifications
+                                    </a>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <!-- Achievements -->
                     <Card
                         class="border-sidebar-border/70 dark:border-sidebar-border transition-all duration-200 hover:border-sidebar-border hover:shadow-md dark:hover:shadow-lg">
                         <CardHeader>

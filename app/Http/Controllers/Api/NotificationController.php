@@ -10,19 +10,24 @@ class NotificationController extends Controller
 {
     public function index(Request $request)
     {
-        return auth()->user()
-            ->notifications()
-            ->get()
-            ->map(fn($notification) => [
-                'id' => $notification->id,
-                'type' => $notification->type,
-                'title' => $notification->title,
-                'message' => $notification->message,
-                'timestamp' => $notification->created_at->diffForHumans(),
-                'read' => $notification->isRead(),
-                'icon' => $notification->icon,
-                'data' => $notification->data,
-            ]);
+        return response()->json(
+            auth()->user()
+                ->notifications()
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(fn($notification) => [
+                    'id' => $notification->id,
+                    'type' => $notification->type,
+                    'title' => $notification->title,
+                    'message' => $notification->message,
+                    'timestamp' => $notification->created_at->diffForHumans(),
+                    'createdAt' => $notification->created_at->toIso8601String(),
+                    'read' => $notification->isRead(),
+                    'readAt' => $notification->read_at?->toIso8601String(),
+                    'icon' => $notification->icon,
+                    'data' => $notification->data,
+                ])
+        );
     }
 
     public function markAsRead($id)
