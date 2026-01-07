@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import AnimationContainer from '@/components/AnimationContainer.vue';
 import AppContent from '@/components/AppContent.vue';
 import AppShell from '@/components/AppShell.vue';
 import AppSidebar from '@/components/AppSidebar.vue';
 import AppSidebarHeader from '@/components/AppSidebarHeader.vue';
-import AnimationContainer from '@/components/AnimationContainer.vue';
+import ImpersonationBanner from '@/components/ImpersonationBanner.vue';
 import type { BreadcrumbItemType } from '@/types';
-import { ref, provide } from 'vue';
+import { provide, ref } from 'vue';
 
 interface Props {
     breadcrumbs?: BreadcrumbItemType[];
@@ -20,7 +21,7 @@ interface ModalState {
 const logoutModal = ref<ModalState>({
     isOpen: false,
     title: 'Logging out...',
-    message: 'Please wait while we log you out'
+    message: 'Please wait while we log you out',
 });
 
 provide('logoutModal', logoutModal);
@@ -32,26 +33,37 @@ withDefaults(defineProps<Props>(), {
 
 <template>
     <AppShell variant="sidebar">
+        <!-- Impersonation Banner -->
+        <ImpersonationBanner
+            :impersonator-name="$page.props.impersonator_name"
+        />
+
         <!-- Logout Modal Overlay -->
         <div
             v-if="logoutModal.isOpen"
             class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-300"
         >
             <!-- Modal -->
-            <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div
+                class="fixed inset-0 z-50 flex items-center justify-center p-4"
+            >
                 <div
-                    class="relative w-full max-w-sm bg-card border border-border rounded-2xl shadow-2xl p-8 animate-scale-in"
+                    class="animate-scale-in relative w-full max-w-sm rounded-2xl border border-border bg-card p-8 shadow-2xl"
                 >
                     <!-- Spinner -->
-                    <div class="flex justify-center mb-6">
-                        <div class="relative w-16 h-16">
-                            <div class="absolute inset-0 rounded-full border-4 border-border/30" />
-                            <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-primary border-r-primary animate-spin" />
+                    <div class="mb-6 flex justify-center">
+                        <div class="relative h-16 w-16">
+                            <div
+                                class="absolute inset-0 rounded-full border-4 border-border/30"
+                            />
+                            <div
+                                class="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-primary border-r-primary"
+                            />
                         </div>
                     </div>
 
                     <!-- Content -->
-                    <div class="text-center space-y-3">
+                    <div class="space-y-3 text-center">
                         <h2 class="text-2xl font-bold text-foreground">
                             {{ logoutModal.title }}
                         </h2>
@@ -61,10 +73,19 @@ withDefaults(defineProps<Props>(), {
                     </div>
 
                     <!-- Loading dots animation -->
-                    <div class="flex justify-center gap-1.5 mt-6">
-                        <div class="w-2 h-2 bg-primary rounded-full animate-bounce" style="animation-delay: 0s" />
-                        <div class="w-2 h-2 bg-primary rounded-full animate-bounce" style="animation-delay: 0.2s" />
-                        <div class="w-2 h-2 bg-primary rounded-full animate-bounce" style="animation-delay: 0.4s" />
+                    <div class="mt-6 flex justify-center gap-1.5">
+                        <div
+                            class="h-2 w-2 animate-bounce rounded-full bg-primary"
+                            style="animation-delay: 0s"
+                        />
+                        <div
+                            class="h-2 w-2 animate-bounce rounded-full bg-primary"
+                            style="animation-delay: 0.2s"
+                        />
+                        <div
+                            class="h-2 w-2 animate-bounce rounded-full bg-primary"
+                            style="animation-delay: 0.4s"
+                        />
                     </div>
                 </div>
             </div>

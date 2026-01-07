@@ -30,6 +30,15 @@ Route::get('users/{user}', [\App\Http\Controllers\UserController::class, 'show']
     ->middleware(['auth', 'verified'])
     ->name('users.show');
 
+// Impersonation Routes
+Route::post('impersonate/{user}', [\App\Http\Controllers\ImpersonationController::class, 'start'])
+    ->middleware(['auth', 'verified'])
+    ->name('impersonate.start');
+
+Route::get('impersonate/exit', \App\Http\Controllers\ImpersonationExitController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('impersonate.exit');
+
 Route::get('courses', [\App\Http\Controllers\CoursesController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('courses');
@@ -115,14 +124,14 @@ Route::get('notifications', function () {
 // API Routes
 Route::prefix('api')->group(function () {
     Route::get('logo', [\App\Http\Controllers\LogoController::class, 'getActive']);
-    
+
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('users/search', [\App\Http\Controllers\Api\UserSearchController::class, 'search']);
         Route::get('announcements/latest', [\App\Http\Controllers\AnnouncementController::class, 'getLatest']);
         Route::get('announcements-and-posts/latest', [\App\Http\Controllers\Api\AnnouncementNotificationController::class, 'getLatest']);
         Route::get('dashboard/stats', [\App\Http\Controllers\DashboardController::class, 'getStats']);
         Route::post('daily-bonus/claim', [\App\Http\Controllers\Api\DailyBonusController::class, 'claim']);
-        
+
         // Notification Routes
         Route::get('notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
         Route::post('notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
@@ -134,17 +143,18 @@ Route::prefix('api')->group(function () {
                 'user_id' => auth()->id(),
                 'type' => 'test',
                 'title' => 'Test Notification',
-                'message' => 'This is a test notification - ' . now()->format('Y-m-d H:i:s'),
+                'message' => 'This is a test notification - '.now()->format('Y-m-d H:i:s'),
                 'icon' => '🧪',
                 'data' => ['test' => true],
             ]);
+
             return response()->json(['success' => true, 'message' => 'Test notification created']);
         });
-        
+
         // Announcement and Community Post Read Routes
         Route::post('announcements/mark-read', [\App\Http\Controllers\Api\AnnouncementMarkReadController::class, 'markAnnouncementAsRead']);
         Route::post('announcements/mark-all-read', [\App\Http\Controllers\Api\AnnouncementMarkReadController::class, 'markAllAnnouncementsAsRead']);
-        
+
         // Streak Leaderboard Route
         Route::get('streaks/leaderboard', [\App\Http\Controllers\Api\StreakLeaderboardController::class, 'index']);
 
