@@ -10,6 +10,14 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+Route::post('verification/mark', [\App\Http\Controllers\VerificationController::class, 'mark'])->name('verification.mark');
+
+// Protect login and register routes with verification
+Route::middleware('require.verification')->group(function () {
+    Route::get('login', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::get('register', [\Laravel\Fortify\Http\Controllers\RegisteredUserController::class, 'create'])->name('register');
+});
+
 Route::get('terms-of-service', function () {
     return Inertia::render('auth/TermsOfService');
 })->name('terms');

@@ -45,11 +45,21 @@ const openVerification = (redirectTo: 'login' | 'register') => {
 
 const handleVerified = () => {
     showVerification.value = false;
-    if (verificationRedirectTo.value === 'login') {
-        router.visit(login());
-    } else {
-        router.visit(register());
-    }
+    
+    // Mark verification in session before navigating
+    router.post('verification/mark', {}, {
+        onSuccess: () => {
+            if (verificationRedirectTo.value === 'login') {
+                router.visit(login());
+            } else {
+                router.visit(register());
+            }
+        },
+        onError: (errors) => {
+            console.error('Verification failed:', errors);
+            showVerification.value = true;
+        }
+    });
 };
 
 onMounted(() => {

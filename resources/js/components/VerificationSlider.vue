@@ -2,7 +2,7 @@
 import Button from '@/components/ui/button/Button.vue';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { AlertCircle, CheckCircle2 } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 interface Props {
     modelValue: boolean;
@@ -23,9 +23,15 @@ const holdProgress = ref(0);
 const holdDuration = 2000; // 2 seconds to verify
 const attemptCount = ref(0);
 const maxAttempts = 3;
+const cooldownTime = 30; // 30 seconds cooldown
+const cooldownRemaining = ref(0);
 
 let holdInterval: ReturnType<typeof setInterval> | null = null;
 let holdStartTime: number = 0;
+let cooldownInterval: ReturnType<typeof setInterval> | null = null;
+
+const STORAGE_KEY = 'verification_attempts';
+const STORAGE_COOLDOWN_KEY = 'verification_cooldown';
 
 const isVerified = computed(() => holdProgress.value >= 100);
 const isFailed = computed(() => attemptCount.value >= maxAttempts);
@@ -60,74 +66,136 @@ const stopHold = () => {
         // Reset if not held long enough
         setTimeout(() => {
             attemptCount.value += 1;
+            saveAttemptsToStorage();
+            
+            if (attemptCount.value >= maxAttempts) {
+                startCooldown();
+            }
             holdProgress.value = 0;
         }, 200);
     }
 };
 
+const startCooldown = () => {
+    const cooldownExpiry = Date.now() + cooldownTime * 1000;
+    localStorage.setItem(STORAGE_COOLDOWN_KEY, cooldownExpiry.toString());
+    
+    cooldownRemaining.value = cooldownTime;
+    
+    if (cooldownInterval) {
+        clearInterval(cooldownInterval);
+    }
+    
+    cooldownInterval = setInterval(() => {
+        cooldownRemaining.value -= 1;
+        if (cooldownRemaining.value <= 0) {
+            if (cooldownInterval) {
+                clearInterval(cooldownInterval);
+                cooldownInterval = null;
+            }
+            // Reset attempts when cooldown expires
+            attemptCount.value = 0;
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(STORAGE_COOLDOWN_KEY);
+        }
+    }, 1000);
+};
+
+const checkCooldown = () => {
+    const cooldownExpiry = localStorage.getItem(STORAGE_COOLDOWN_KEY);
+    if (!cooldownExpiry) return false;
+    
+    const expiryTime = parseInt(cooldownExpiry);
+    const now = Date.now();
+    
+    if (now < expiryTime) {
+        cooldownRemaining.value = Math.ceil((expiryTime - now) / 1000);
+        startCooldown();
+        return true;
+    } else {
+        localStorage.removeItem(STORAGE_COOLDOWN_KEY);
+        return false;
+    }
+};
+
+const saveAttemptsToStorage = () => {
+    localStorage.setItem(STORAGE_KEY, attemptCount.value.toString());
+};
+
+const loadAttemptsFromStorage = () => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+        attemptCount.value = parseInt(stored);
+    }
+};
+
+const resetCooldown = () => {
+    if (cooldownInterval) {
+        clearInterval(cooldownInterval);
+        cooldownInterval = null;
+    }
+    cooldownRemaining.value = 0;
+    localStorage.removeItem(STORAGE_COOLDOWN_KEY);
+};
+
 const handleClose = () => {
-    resetSlider();
+    // Don't reset cooldown/attempts when closing - only reset UI state
+    holdProgress.value = 0;
+    isHolding.value = false;
+    if (holdInterval) {
+        clearInterval(holdInterval);
+        holdInterval = null;
+    }
     emit('update:modelValue', false);
 };
 
 const handleContinue = async () => {
+    // Only reset when verification is successful
+    resetSlider();
     emit('verified');
 };
 
 const resetSlider = () => {
     holdProgress.value = 0;
     attemptCount.value = 0;
+    localStorage.removeItem(STORAGE_KEY);
+    resetCooldown();
 };
+
+const initializeModal = () => {
+    loadAttemptsFromStorage();
+    if (checkCooldown()) {
+        // Cooldown is still active
+    }
+};
+
+onMounted(() => {
+    initializeModal();
+});
+
+watch(() => props.modelValue, (newValue) => {
+    if (newValue) {
+        // Modal is opening, reinitialize to check for active cooldown
+        initializeModal();
+    }
+});
 </script>
 
 <template>
     <Dialog :open="modelValue" @update:open="handleClose">
         <DialogContent
-            class="max-w-md overflow-hidden rounded-2xl border-0 bg-white p-0 shadow-2xl dark:bg-slate-900"
+            class="max-w-md overflow-hidden border bg-card p-0 shadow-lg"
         >
-            <!-- Gradient background -->
-            <div
-                class="absolute inset-0 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800"
-            ></div>
-
-            <!-- Decorative elements -->
-            <div
-                class="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-gradient-to-br from-amber-300 to-orange-300 opacity-20 blur-3xl dark:opacity-10"
-            ></div>
-            <div
-                class="absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-gradient-to-tr from-yellow-300 to-amber-300 opacity-20 blur-3xl dark:opacity-10"
-            ></div>
-
             <!-- Content -->
-            <div class="relative z-10 space-y-6 p-8">
-                <!-- Close button -->
-                <button
-                    @click="handleClose"
-                    class="absolute top-4 right-4 text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-300"
-                >
-                    <svg
-                        class="h-5 w-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12"
-                        />
-                    </svg>
-                </button>
-
+            <div class="relative space-y-6 p-8">
                 <!-- Header -->
                 <div class="space-y-2 text-center">
                     <h2
-                        class="bg-gradient-to-r from-amber-600 via-orange-500 to-yellow-600 bg-clip-text text-3xl font-bold text-transparent"
+                        class="text-2xl font-bold text-foreground"
                     >
                         Verify Your Identity
                     </h2>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                    <p class="text-sm text-muted-foreground">
                         Please hold the button to continue
                     </p>
                 </div>
@@ -141,10 +209,10 @@ const resetSlider = () => {
                         v-for="i in maxAttempts"
                         :key="i"
                         :class="[
-                            'h-1.5 rounded-full transition-all duration-300',
+                            'h-2 w-2 rounded-full transition-all duration-300',
                             i <= attemptCount
-                                ? 'w-2 bg-gray-300 dark:bg-gray-600'
-                                : 'w-3 bg-gradient-to-r from-amber-400 to-orange-400',
+                                ? 'bg-border'
+                                : 'bg-primary',
                         ]"
                     ></div>
                 </div>
@@ -153,26 +221,26 @@ const resetSlider = () => {
                 <div class="space-y-3">
                     <!-- Main Hold Button -->
                     <button
-                        v-if="!isFailed"
+                        v-if="!isFailed && cooldownRemaining === 0"
                         @mousedown="startHold"
                         @mouseup="stopHold"
                         @mouseleave="stopHold"
                         @touchstart.prevent="startHold"
                         @touchend.prevent="stopHold"
-                        :disabled="isVerified || isFailed"
+                        :disabled="isVerified"
                         :class="[
-                            'relative h-14 w-full overflow-hidden rounded-full border-2 shadow-md transition-all duration-300 select-none',
+                            'relative h-12 w-full overflow-hidden rounded-md border transition-all duration-300 select-none font-medium',
                             isVerified
-                                ? 'border-green-400 bg-gradient-to-r from-green-400 via-emerald-400 to-green-500 dark:border-green-600 dark:from-green-600 dark:via-emerald-500 dark:to-green-600'
-                                : 'border-gray-200 bg-gradient-to-r from-gray-100 to-gray-50 dark:border-slate-600 dark:from-slate-700 dark:to-slate-600',
-                            isHolding && 'scale-[1.02] shadow-lg',
+                                ? 'border-ring bg-primary text-primary-foreground'
+                                : 'border-input bg-input text-foreground hover:bg-accent',
+                            isHolding && 'scale-[1.02] shadow-md',
                         ]"
                     >
                         <!-- Progress Fill -->
                         <div
                             v-if="!isVerified"
                             :style="{ width: `${holdProgress}%` }"
-                            class="absolute inset-y-0 left-0 bg-gradient-to-r from-amber-400 via-orange-400 to-yellow-400 transition-all duration-75 ease-out dark:from-amber-500 dark:via-orange-500 dark:to-yellow-500"
+                            class="absolute inset-y-0 left-0 bg-primary/30 transition-all duration-75 ease-out"
                         ></div>
 
                         <!-- Content -->
@@ -182,21 +250,21 @@ const resetSlider = () => {
                             <!-- Progress Percentage -->
                             <span
                                 v-if="!isVerified && holdProgress > 0"
-                                class="text-sm font-bold text-orange-700 dark:text-orange-600"
+                                class="text-sm font-bold"
                             >
                                 {{ Math.round(holdProgress) }}%
                             </span>
                             <!-- Hold Text -->
                             <span
                                 v-if="!isVerified && holdProgress === 0"
-                                class="text-sm font-semibold text-gray-600 dark:text-gray-400"
+                                class="text-sm font-semibold"
                             >
                                 Hold to Verify
                             </span>
                             <!-- Hold Progress Text -->
                             <span
                                 v-if="isHolding && !isVerified"
-                                class="text-sm font-bold text-orange-700 dark:text-orange-600"
+                                class="text-sm font-bold"
                             >
                                 Keep holding...
                             </span>
@@ -204,43 +272,63 @@ const resetSlider = () => {
                             <CheckCircle2
                                 v-if="isVerified"
                                 :size="24"
-                                class="text-white"
                                 stroke-width="2.5"
                             />
                             <!-- Verified Text -->
                             <span
                                 v-if="isVerified"
-                                class="font-bold text-white"
+                                class="font-bold"
                             >
                                 Verified!
                             </span>
                         </div>
                     </button>
 
-                    <!-- Failed State -->
-                    <div v-else class="space-y-4 text-center">
+                    <!-- Cooldown State -->
+                    <div v-if="isFailed && cooldownRemaining > 0" class="space-y-4 text-center">
                         <div class="flex justify-center">
-                            <div class="relative">
-                                <div
-                                    class="absolute inset-0 rounded-full bg-gradient-to-r from-red-400 to-rose-400 opacity-40 blur-lg"
-                                ></div>
-                                <div
-                                    class="relative rounded-full border border-red-200 bg-gradient-to-br from-red-50 to-rose-50 p-3 dark:border-red-800 dark:from-red-950 dark:to-rose-950"
-                                >
-                                    <AlertCircle
-                                        class="h-8 w-8 text-red-600 dark:text-red-400"
-                                    />
-                                </div>
+                            <div class="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+                                <AlertCircle
+                                    class="h-8 w-8 text-destructive"
+                                />
                             </div>
                         </div>
                         <div>
                             <p
-                                class="font-semibold text-red-600 dark:text-red-400"
+                                class="font-semibold text-destructive"
                             >
                                 Too Many Attempts
                             </p>
                             <p
-                                class="mt-1 text-sm text-gray-600 dark:text-gray-400"
+                                class="mt-2 text-sm text-muted-foreground"
+                            >
+                                Please wait before trying again
+                            </p>
+                            <p
+                                class="mt-3 text-2xl font-bold text-primary"
+                            >
+                                {{ cooldownRemaining }}s
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Failed State (No Cooldown) -->
+                    <div v-else-if="isFailed && cooldownRemaining === 0" class="space-y-4 text-center">
+                        <div class="flex justify-center">
+                            <div class="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+                                <AlertCircle
+                                    class="h-8 w-8 text-destructive"
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <p
+                                class="font-semibold text-destructive"
+                            >
+                                Too Many Attempts
+                            </p>
+                            <p
+                                class="mt-1 text-sm text-muted-foreground"
                             >
                                 Please try again later or contact support.
                             </p>
@@ -256,7 +344,9 @@ const resetSlider = () => {
                     <Button
                         v-if="isVerified"
                         @click="handleContinue"
-                        class="w-full rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 py-3 text-base font-semibold text-white shadow-lg transition-all duration-300 hover:from-green-700 hover:to-emerald-700 hover:shadow-xl dark:from-green-600 dark:to-emerald-600 dark:hover:from-green-700 dark:hover:to-emerald-700"
+                        variant="default"
+                        size="lg"
+                        class="w-full"
                     >
                         Continue
                     </Button>
@@ -264,7 +354,7 @@ const resetSlider = () => {
 
                 <!-- Security message -->
                 <div
-                    class="text-center text-xs text-gray-500 dark:text-gray-400"
+                    class="text-center text-xs text-muted-foreground"
                 >
                     <p>🔒 This verification helps keep your account secure</p>
                 </div>
