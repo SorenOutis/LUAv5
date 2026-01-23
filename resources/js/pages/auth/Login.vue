@@ -247,6 +247,7 @@ onMounted(() => {
                         v-bind="store.form()"
                         :reset-on-success="['password']"
                         @submit="isLoggingIn = true; modal.isOpen = true;"
+                        @error="modal.isOpen = false; isLoggingIn = false;"
                         v-slot="{ errors, processing }"
                         class="flex flex-col gap-6"
                     >
