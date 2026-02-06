@@ -7,6 +7,7 @@ use Laravel\Fortify\Features;
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 test('login screen can be rendered', function () {
+    session(['verification_verified' => true]);
     $response = $this->get(route('login'));
 
     $response->assertStatus(200);

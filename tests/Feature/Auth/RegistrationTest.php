@@ -3,6 +3,7 @@
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 test('registration screen can be rendered', function () {
+    session(['verification_verified' => true]);
     $response = $this->get(route('register'));
 
     $response->assertStatus(200);

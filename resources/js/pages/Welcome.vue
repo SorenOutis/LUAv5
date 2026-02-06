@@ -202,7 +202,7 @@ onMounted(() => {
                         <button @click="showModal = true"
                             class="px-8 py-3 rounded-xl font-semibold border border-border text-foreground hover:bg-accent transition-all duration-300 text-center animate-fade-in-heading"
                             style="animation-delay: 0.5s">
-                            Learn More
+                            Watch Video
                         </button>
                     </div>
                 </div>
@@ -376,8 +376,8 @@ onMounted(() => {
                             </svg>
                         </button>
                         <div class="text-center">
-                            <h2 class="text-3xl font-bold text-foreground mb-2">Learn More</h2>
-                            <p class="text-muted-foreground mb-6">Exciting features coming soon...</p>
+                            <h2 class="text-3xl font-bold text-foreground mb-2">No Video</h2>
+                            <p class="text-muted-foreground mb-6">Video coming soon...</p>
                             <button @click="showModal = false"
                                 class="px-6 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">
                                 Close
