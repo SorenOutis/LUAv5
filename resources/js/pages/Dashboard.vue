@@ -528,10 +528,12 @@ const demoXPToast = () => {
                         <!-- Header Row -->
                         <div class="flex items-start justify-between gap-3">
                             <div class="flex-1 min-w-0">
-                                <h4 class="text-lg md:text-2xl font-bold text-foreground leading-tight">{{ timeBasedGreeting }}, <span
-                                        class="text-primary font-bold">{{ userName }}!</span></h4>
+                                <h4 class="text-lg md:text-2xl font-bold text-foreground leading-tight">{{
+                                    timeBasedGreeting }}, <span class="text-primary font-bold">{{ userName }}!</span>
+                                </h4>
                                 <!-- Description - hide on mobile, show on desktop -->
-                                <p class="hidden md:block text-sm text-muted-foreground mt-1">Keep up your amazing progress and reach new
+                                <p class="hidden md:block text-sm text-muted-foreground mt-1">Keep up your amazing
+                                    progress and reach new
                                     milestones</p>
                             </div>
 
@@ -540,8 +542,10 @@ const demoXPToast = () => {
                                 class="flex-shrink-0 flex flex-col items-center justify-center p-2 md:p-4 bg-background/50 backdrop-blur-sm rounded-lg border border-primary/30">
                                 <div class="hidden md:block text-xs text-muted-foreground mb-1">Current Level</div>
                                 <div class="flex items-baseline gap-1">
-                                    <span class="text-3xl md:text-5xl font-bold text-primary">{{ userStats.level }}</span>
-                                    <svg class="h-5 md:h-8 w-5 md:w-8 text-primary flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                    <span class="text-3xl md:text-5xl font-bold text-primary">{{ userStats.level
+                                        }}</span>
+                                    <svg class="h-5 md:h-8 w-5 md:w-8 text-primary flex-shrink-0" fill="currentColor"
+                                        viewBox="0 0 24 24">
                                         <path d="M13 10V3L4 14h7v7l9-11h-7z" />
                                     </svg>
                                 </div>
@@ -573,7 +577,8 @@ const demoXPToast = () => {
                     <div class="mt-3 md:mt-4 space-y-2">
                         <div class="flex items-center justify-between text-xs text-muted-foreground gap-2">
                             <span class="font-medium">XP Progress</span>
-                            <span class="font-semibold text-foreground flex-shrink-0">{{ Math.round(totalXPProgress) }}%</span>
+                            <span class="font-semibold text-foreground flex-shrink-0">{{ Math.round(totalXPProgress)
+                                }}%</span>
                         </div>
                         <div
                             class="relative h-4 bg-background/50 rounded-full overflow-hidden border border-primary/40 shadow-lg shadow-primary/20">
@@ -609,9 +614,9 @@ const demoXPToast = () => {
                                 class="absolute top-0 left-0 h-full rounded-full blur-lg opacity-50 energy-glow bg-primary">
                             </div>
                         </div>
-                        <div class="flex justify-between text-xs text-muted-foreground gap-2">
-                            <span class="truncate">{{ userStats.totalXP.toLocaleString() }} XP</span>
-                            <span class="flex-shrink-0">500,000 XP</span>
+                        <div class="flex justify-between text-xs text-muted-foreground">
+                            <span>{{ userStats.totalXP.toLocaleString() }} XP</span>
+                            <span>500,000 XP</span>
                         </div>
                     </div>
                 </div>
