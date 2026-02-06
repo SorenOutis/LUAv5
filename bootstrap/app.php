@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\RequireVerificationFlow;
 use App\Http\Middleware\ShareImpersonationState;
 use App\Http\Middleware\UpdateUserStreak;
 use Illuminate\Foundation\Application;
@@ -17,6 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+
+        $middleware->alias([
+            'require.verification' => RequireVerificationFlow::class,
+        ]);
 
         $middleware->web(append: [
             UpdateUserStreak::class,
