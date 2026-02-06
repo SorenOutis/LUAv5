@@ -14,6 +14,7 @@ import CardTitle from '@/components/ui/card/CardTitle.vue';
 import StreakCard from '@/components/StreakCard.vue';
 import StreakHeatmap from '@/components/StreakHeatmap.vue';
 import DailyBonusModal from '@/components/DailyBonusModal.vue';
+import StreakDayModal from '@/components/StreakDayModal.vue';
 import ImprovedLeaderboard from '@/components/ImprovedLeaderboard.vue';
 import {
     Dialog,
@@ -137,6 +138,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 const announcements = ref<Activity[]>([]);
 const isLoadingAnnouncements = ref(false);
 const isDailyBonusModalOpen = ref(false);
+const isStreakDayModalOpen = ref(false);
+const streakData = ref({ currentStreak: 0, longestStreak: 0 });
 const refreshIntervals = vueRef<NodeJS.Timeout[]>([]);
 const autoRefreshEnabled = ref(true);
 const refreshInterval = 30000; // 30 seconds
@@ -235,6 +238,26 @@ const handleBonusClaimed = (result: any) => {
         // Refresh dashboard data after bonus claimed
         fetchDashboardData();
     }
+};
+
+const handleBonusModalClosed = async (result: any) => {
+    // Show streak modal after daily bonus modal closes
+    if (result?.streakData) {
+        streakData.value = {
+            currentStreak: result.streakData.currentStreak,
+            longestStreak: result.streakData.longestStreak,
+        };
+    } else if (props.streak) {
+        streakData.value = {
+            currentStreak: props.streak.currentStreak,
+            longestStreak: props.streak.longestStreak,
+        };
+    }
+    
+    // Add a small delay to make the transition smoother
+    setTimeout(() => {
+        isStreakDayModalOpen.value = true;
+    }, 300);
 };
 
 const startAutoRefresh = () => {
@@ -448,6 +471,15 @@ const demoXPToast = () => {
         :xp-amount="props.dailyBonus?.xpAmount ?? 20"
         @update:open="isDailyBonusModalOpen = $event"
         @bonus-claimed="handleBonusClaimed"
+        @closed="handleBonusModalClosed"
+    />
+
+    <!-- Streak Day Modal -->
+    <StreakDayModal 
+        :open="isStreakDayModalOpen"
+        :current-streak="streakData.currentStreak"
+        :longest-streak="streakData.longestStreak"
+        @update:open="isStreakDayModalOpen = $event"
     />
 
     <AppLayout :breadcrumbs="breadcrumbs">

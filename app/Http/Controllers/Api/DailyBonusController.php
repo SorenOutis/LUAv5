@@ -16,6 +16,15 @@ class DailyBonusController extends Controller
         $user = auth()->user();
         $result = $service->awardDailyBonus($user);
 
+        // Include streak information in response
+        if ($result['success']) {
+            $streak = $user->streak()->first();
+            $result['streak'] = [
+                'currentStreak' => $streak?->current_streak ?? 0,
+                'longestStreak' => $streak?->longest_streak ?? 0,
+            ];
+        }
+
         return response()->json($result, $result['success'] ? 200 : 400);
     }
 }
