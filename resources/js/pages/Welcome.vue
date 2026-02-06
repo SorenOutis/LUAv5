@@ -5,11 +5,15 @@ import { ref, onMounted, computed } from 'vue';
 import { useLogo } from '@/composables/useLogo';
 import { useAppearance } from '@/composables/useAppearance';
 import VerificationSlider from '@/components/VerificationSlider.vue';
+import RotatingText from '@/components/RotatingText.vue';
+import NavigationBar from '@/components/NavigationBar.vue';
+import { Trophy, TrendingUp, Users, Zap, Gamepad2, BarChart3, Award, Moon, Sun } from 'lucide-vue-next';
 
 const mouseX = ref(0);
 const mouseY = ref(0);
 const showModal = ref(false);
 const showVerification = ref(false);
+const showAuthChoice = ref(false);
 const verificationRedirectTo = ref<'login' | 'register'>('login');
 const { hasLogo, logo, getLightLogo, getDarkLogo } = useLogo();
 const { appearance, updateAppearance } = useAppearance();
@@ -45,21 +49,26 @@ const openVerification = (redirectTo: 'login' | 'register') => {
 
 const handleVerified = () => {
     showVerification.value = false;
-    
-    // Mark verification in session before navigating
+
+    // Mark verification in session before showing auth choice
     router.post('verification/mark', {}, {
         onSuccess: () => {
-            if (verificationRedirectTo.value === 'login') {
-                router.visit(login());
-            } else {
-                router.visit(register());
-            }
+            showAuthChoice.value = true;
         },
         onError: (errors) => {
             console.error('Verification failed:', errors);
             showVerification.value = true;
         }
     });
+};
+
+const redirectToAuth = (path: 'login' | 'register') => {
+    showAuthChoice.value = false;
+    if (path === 'login') {
+        router.visit(login());
+    } else {
+        router.visit(register());
+    }
 };
 
 onMounted(() => {
@@ -81,12 +90,10 @@ onMounted(() => {
         <link rel="preconnect" href="https://rsms.me/" />
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
     </Head>
-    <div
-        class="min-h-screen bg-background text-foreground transition-colors duration-500 overflow-hidden relative">
+    <div class="min-h-screen bg-background text-foreground transition-colors duration-500 overflow-hidden relative">
         <!-- Animated Background Gradient Orbs -->
         <div class="fixed inset-0 -z-10 overflow-hidden">
-            <div
-                class="absolute w-80 h-80 rounded-full blur-3xl opacity-20 bg-primary top-20 -left-40 animate-blob" />
+            <div class="absolute w-80 h-80 rounded-full blur-3xl opacity-20 bg-primary top-20 -left-40 animate-blob" />
             <div class="absolute w-80 h-80 rounded-full blur-3xl opacity-20 bg-secondary bottom-20 -right-40 animate-blob"
                 style="animation-delay: 2s" />
             <div class="absolute w-80 h-80 rounded-full blur-3xl opacity-20 bg-accent top-1/2 left-1/2 animate-blob"
@@ -98,161 +105,97 @@ onMounted(() => {
             background: `radial-gradient(600px at ${mouseX}px ${mouseY}px, rgb(var(--color-primary-rgb) / 0.1), transparent 80%)`,
         }" />
 
-        <!-- Header Navigation -->
-        <header
-            class="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border shadow-sm transition-all duration-500">
-            <nav class="max-w-7xl mx-auto px-6 lg:px-8 py-4 flex items-center justify-between">
-                <!-- Logo -->
-                <div class="flex items-center gap-3 group cursor-pointer">
-                    <!-- Dynamic Logo or Fallback -->
-                    <div v-if="hasLogo && logo"
-                        class="h-10 w-10 rounded-full overflow-hidden shadow-lg group-hover:shadow-xl transition-shadow duration-300 flex-shrink-0">
-                        <img v-if="isDarkMode && getDarkLogo()" :src="getDarkLogo()" :alt="logo.name"
-                            class="h-full w-full object-cover group-hover:opacity-80 transition-opacity duration-300" />
-                        <img v-else-if="!isDarkMode && getLightLogo()" :src="getLightLogo()" :alt="logo.name"
-                            class="h-full w-full object-cover group-hover:opacity-80 transition-opacity duration-300" />
-                        <img v-else-if="getDarkLogo()" :src="getDarkLogo()" :alt="logo.name"
-                            class="h-full w-full object-cover group-hover:opacity-80 transition-opacity duration-300" />
-                        <img v-else-if="getLightLogo()" :src="getLightLogo()" :alt="logo.name"
-                            class="h-full w-full object-cover group-hover:opacity-80 transition-opacity duration-300" />
-                        <div v-else
-                            class="h-full w-full bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 dark:from-blue-400 dark:via-purple-500 dark:to-pink-500 flex items-center justify-center">
-                            <span class="text-white font-bold text-lg">✦</span>
-                        </div>
-                    </div>
-                    <!-- Fallback Logo -->
-                    <div v-else
-                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
-                        <span class="text-primary-foreground font-bold text-lg">✦</span>
-                    </div>
-                    <span
-                        class="font-bold text-xl text-primary">
-                        LevelUp Academy
-                    </span>
-                </div>
-
-                <!-- Nav Links -->
-                <div class="flex items-center gap-3">
-                    <!-- Theme Toggle Button -->
-                    <button @click="toggleTheme"
-                        class="p-2.5 rounded-lg bg-accent text-accent-foreground hover:bg-accent/80 transition-all duration-300 border border-border"
-                        :aria-label="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'">
-                        <svg v-if="!isDarkMode" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                        </svg>
-                        <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zm5.657-9.193a1 1 0 00-1.414 0l-.707.707A1 1 0 005.05 6.464l.707-.707a1 1 0 011.414 0zm0 18.186a1 1 0 001.414 0l.707-.707a1 1 0 00-1.414-1.414l-.707.707a1 1 0 000 1.414zM5.05 6.464a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </button>
-
-                    <Link v-if="$page.props.auth.user" :href="dashboard()"
-                        class="px-4 py-2 rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-colors duration-300">
-                        Dashboard
-                    </Link>
-                    <template v-else>
-                        <button @click="openVerification('login')"
-                            class="px-4 py-2 rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-colors duration-300">
-                            Log in
-                        </button>
-                        <button v-if="canRegister" @click="openVerification('register')"
-                            class="px-4 py-2 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300">
-                            Get Started
-                        </button>
-                    </template>
-                </div>
-            </nav>
-        </header>
+        <!-- Navigation Bar -->
+        <NavigationBar @open-verification="openVerification" @toggle-theme="toggleTheme" />
 
         <!-- Main Content -->
-        <main class="max-w-7xl mx-auto px-6 lg:px-8 py-24 lg:py-32 relative z-10">
-            <!-- Hero Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
-                <!-- Left Content -->
-                <div class="space-y-8">
+        <main class="max-w-7xl mx-auto px-6 lg:px-8 py-32 lg:py-40 relative z-10">
+            <!-- Hero Section - Full Width Centered -->
+            <div class="mb-20">
+                <div class="space-y-8 text-center">
                     <div class="space-y-4">
-                        <div class="inline-block">
+                        <div class="flex justify-center">
                             <span
-                                class="px-3 py-1 rounded-full text-sm font-semibold bg-primary/10 text-primary border border-primary/30">
+                                class="animate-fade-in-heading px-3 py-1 rounded-full text-sm font-semibold bg-primary/10 text-primary border border-primary/30">
                                 Welcome to the Future
                             </span>
                         </div>
-                        <h1 class="text-5xl lg:text-7xl font-bold leading-tight space-y-2 tracking-tight">
-                            <span class="block">Level Up Your</span>
-                            <span
-                                class="block text-primary">
-                                Learning Journey
+                        <h1 class="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-balance mb-6 animate-fade-in-heading"
+                            style="animation-delay: 0.1s">
+                            <span class="text-foreground">Elevate your</span>
+                            <br />
+                            <span class="inline-flex items-center justify-center flex-wrap gap-2 mt-4 sm:mt-6 md:mt-8">
+                                <span class="text-foreground">Learning</span>
+                                <RotatingText :texts="['Mastery', 'Growth', 'Excellence', 'Achievement', 'Success']"
+                                    :interval="2000"
+                                    mainClassName="px-2 sm:px-2 md:px-3 bg-white text-black overflow-hidden py-1 sm:py-1 md:py-2 justify-center rounded-lg shadow-lg inline-block"
+                                    splitLevelClassName="overflow-hidden pb-1 sm:pb-1 md:pb-1 inline-block" />
                             </span>
                         </h1>
                     </div>
 
-                    <p
-                        class="text-xl text-muted-foreground leading-relaxed max-w-2xl font-light tracking-wide">
+                    <p class="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto font-light tracking-wide animate-fade-in-heading"
+                        style="animation-delay: 0.2s">
                         Unlock your potential with our gamified learning platform. Track your
                         progress, earn achievements, compete on leaderboards, and master new skills.
                     </p>
 
                     <!-- Feature Grid -->
-                    <div class="grid grid-cols-2 gap-4 pt-4">
-                        <div v-for="(feature, index) in [
-                            { icon: '🎯', title: 'Gamified', desc: 'Earn XP & Streaks' },
-                            { icon: '📈', title: 'Track Progress', desc: 'Real-time Stats' },
-                            { icon: '🏆', title: 'Compete', desc: 'Leaderboards' },
-                            { icon: '⚡', title: 'Lightning Fast', desc: 'Smooth & Snappy' },
-                        ]" :key="index"
-                            class="group p-5 rounded-xl bg-card border border-border hover:shadow-md transition-all duration-300 backdrop-blur-sm">
-                            <div class="text-2xl mb-2">{{ feature.icon }}</div>
-                            <h3
-                                class="font-semibold text-foreground group-hover:text-primary transition-colors">
-                                {{ feature.title }}
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 max-w-4xl mx-auto">
+                        <div class="group p-5 rounded-xl bg-card border border-border hover:shadow-md transition-all duration-300 backdrop-blur-sm animate-fade-in-heading"
+                            style="animation-delay: 0.3s">
+                            <Trophy class="w-6 h-6 mb-2 text-primary group-hover:scale-110 transition-transform" />
+                            <h3 class="font-semibold text-foreground group-hover:text-primary transition-colors">
+                                Gamified
                             </h3>
                             <p class="text-sm text-muted-foreground">
-                                {{ feature.desc }}
+                                Earn XP & Streaks
+                            </p>
+                        </div>
+                        <div class="group p-5 rounded-xl bg-card border border-border hover:shadow-md transition-all duration-300 backdrop-blur-sm animate-fade-in-heading"
+                            style="animation-delay: 0.35s">
+                            <TrendingUp class="w-6 h-6 mb-2 text-primary group-hover:scale-110 transition-transform" />
+                            <h3 class="font-semibold text-foreground group-hover:text-primary transition-colors">
+                                Track Progress
+                            </h3>
+                            <p class="text-sm text-muted-foreground">
+                                Real-time Stats
+                            </p>
+                        </div>
+                        <div class="group p-5 rounded-xl bg-card border border-border hover:shadow-md transition-all duration-300 backdrop-blur-sm animate-fade-in-heading"
+                            style="animation-delay: 0.4s">
+                            <Users class="w-6 h-6 mb-2 text-primary group-hover:scale-110 transition-transform" />
+                            <h3 class="font-semibold text-foreground group-hover:text-primary transition-colors">
+                                Compete
+                            </h3>
+                            <p class="text-sm text-muted-foreground">
+                                Leaderboards
+                            </p>
+                        </div>
+                        <div class="group p-5 rounded-xl bg-card border border-border hover:shadow-md transition-all duration-300 backdrop-blur-sm animate-fade-in-heading"
+                            style="animation-delay: 0.45s">
+                            <Zap class="w-6 h-6 mb-2 text-primary group-hover:scale-110 transition-transform" />
+                            <h3 class="font-semibold text-foreground group-hover:text-primary transition-colors">
+                                Lightning Fast
+                            </h3>
+                            <p class="text-sm text-muted-foreground">
+                                Smooth & Snappy
                             </p>
                         </div>
                     </div>
 
                     <!-- CTA Buttons -->
-                    <div class="flex flex-col sm:flex-row gap-3 pt-4">
+                    <div class="flex flex-col sm:flex-row gap-3 pt-6 justify-center">
                         <button v-if="canRegister" @click="openVerification('register')"
-                            class="px-8 py-3 rounded-xl font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 text-center transform hover:scale-105">
+                            class="px-8 py-3 rounded-xl font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 text-center transform hover:scale-105 animate-fade-in-heading"
+                            style="animation-delay: 0.5s">
                             Start Your Journey
                         </button>
                         <button @click="showModal = true"
-                            class="px-8 py-3 rounded-xl font-semibold border border-border text-foreground hover:bg-accent transition-all duration-300 text-center">
+                            class="px-8 py-3 rounded-xl font-semibold border border-border text-foreground hover:bg-accent transition-all duration-300 text-center animate-fade-in-heading"
+                            style="animation-delay: 0.5s">
                             Learn More
                         </button>
-                    </div>
-                </div>
-
-                <!-- Right Illustration -->
-                <div class="relative h-96 lg:h-full lg:min-h-[500px]">
-                    <!-- Floating Cards -->
-                    <div class="absolute inset-0 perspective">
-                        <!-- Card 1 -->
-                        <div class="absolute w-48 h-32 rounded-2xl bg-primary text-primary-foreground p-6 shadow-2xl top-0 right-0 animate-float"
-                            style="animation-delay: 0s">
-                            <div class="text-2xl mb-2">⚡</div>
-                            <h3 class="font-bold text-sm mb-1">Instant Progress</h3>
-                            <p class="text-xs opacity-90">Track your growth</p>
-                        </div>
-
-                        <!-- Card 2 -->
-                        <div class="absolute w-48 h-32 rounded-2xl bg-secondary text-secondary-foreground p-6 shadow-2xl bottom-12 left-0 animate-float"
-                            style="animation-delay: 1s">
-                            <div class="text-2xl mb-2">🔥</div>
-                            <h3 class="font-bold text-sm mb-1">Daily Streaks</h3>
-                            <p class="text-xs opacity-90">Build consistency</p>
-                        </div>
-
-                        <!-- Card 3 -->
-                        <div class="absolute w-48 h-32 rounded-2xl bg-accent text-accent-foreground p-6 shadow-2xl bottom-0 right-12 animate-float"
-                            style="animation-delay: 2s">
-                            <div class="text-2xl mb-2">🏆</div>
-                            <h3 class="font-bold text-sm mb-1">Earn Badges</h3>
-                            <p class="text-xs opacity-90">Gain recognition</p>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -277,41 +220,49 @@ onMounted(() => {
 
             <!-- Features Section -->
             <div class="mt-28">
-                <div class="text-center mb-16 space-y-4">
-                    <h2 class="text-4xl lg:text-5xl font-bold tracking-tight">Why Choose LevelUp Academy?</h2>
-                    <p class="text-lg text-muted-foreground max-w-2xl mx-auto font-light">
+                <div class="text-center mb-12 space-y-4 md:mb-16">
+                    <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">Why Choose LevelUp Academy?
+                    </h2>
+                    <p class="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto font-light">
                         Everything you need to succeed in one powerful platform
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div v-for="(feature, index) in [
-                        {
-                            icon: '🎮',
-                            title: 'Gamification',
-                            desc: 'Earn points, unlock badges, and build streaks to stay motivated',
-                        },
-                        {
-                            icon: '📊',
-                            title: 'Advanced Analytics',
-                            desc: 'Track progress with detailed insights and performance metrics',
-                        },
-                        {
-                            icon: '🏅',
-                            title: 'Leaderboards',
-                            desc: 'Compete with peers and earn recognition for achievements',
-                        },
-                    ]" :key="index"
-                        class="group p-8 rounded-2xl bg-card border border-border hover:shadow-xl hover:-translate-y-1 backdrop-blur-sm transition-all duration-500 cursor-default">
-                        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300 inline-block">
-                            {{ feature.icon }}
-                        </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
+                    <div
+                        class="group p-4 md:p-8 rounded-xl md:rounded-2xl bg-card border border-border hover:shadow-xl hover:-translate-y-1 backdrop-blur-sm transition-all duration-500 cursor-default">
+                        <Gamepad2
+                            class="w-7 md:w-10 h-7 md:h-10 mb-2 md:mb-4 text-primary group-hover:scale-110 transition-transform duration-300" />
                         <h3
-                            class="text-xl font-bold mb-3 text-foreground group-hover:text-primary transition-colors">
-                            {{ feature.title }}
+                            class="text-sm md:text-xl font-bold mb-2 md:mb-3 text-foreground group-hover:text-primary transition-colors">
+                            Gamification
                         </h3>
-                        <p class="text-muted-foreground leading-relaxed font-light">
-                            {{ feature.desc }}
+                        <p class="text-xs md:text-sm text-muted-foreground leading-relaxed font-light">
+                            Earn points, unlock badges, and build streaks to stay motivated
+                        </p>
+                    </div>
+                    <div
+                        class="group p-4 md:p-8 rounded-xl md:rounded-2xl bg-card border border-border hover:shadow-xl hover:-translate-y-1 backdrop-blur-sm transition-all duration-500 cursor-default">
+                        <BarChart3
+                            class="w-7 md:w-10 h-7 md:h-10 mb-2 md:mb-4 text-primary group-hover:scale-110 transition-transform duration-300" />
+                        <h3
+                            class="text-sm md:text-xl font-bold mb-2 md:mb-3 text-foreground group-hover:text-primary transition-colors">
+                            Advanced Analytics
+                        </h3>
+                        <p class="text-xs md:text-sm text-muted-foreground leading-relaxed font-light">
+                            Track progress with detailed insights and performance metrics
+                        </p>
+                    </div>
+                    <div
+                        class="group p-4 md:p-8 rounded-xl md:rounded-2xl bg-card border border-border hover:shadow-xl hover:-translate-y-1 backdrop-blur-sm transition-all duration-500 cursor-default md:col-span-1 col-span-2 sm:col-span-1">
+                        <Award
+                            class="w-7 md:w-10 h-7 md:h-10 mb-2 md:mb-4 text-primary group-hover:scale-110 transition-transform duration-300" />
+                        <h3
+                            class="text-sm md:text-xl font-bold mb-2 md:mb-3 text-foreground group-hover:text-primary transition-colors">
+                            Leaderboards
+                        </h3>
+                        <p class="text-xs md:text-sm text-muted-foreground leading-relaxed font-light">
+                            Compete with peers and earn recognition for achievements
                         </p>
                     </div>
                 </div>
@@ -336,22 +287,19 @@ onMounted(() => {
         </main>
 
         <!-- Footer -->
-        <footer
-            class="mt-32 py-12 border-t border-border bg-background/80 backdrop-blur-xl">
+        <footer class="mt-16 py-12 border-t border-border bg-background/80 backdrop-blur-xl">
             <div class="max-w-7xl mx-auto px-6 lg:px-8">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                     <!-- Logo Column -->
                     <div class="flex items-start">
                         <div class="flex items-center gap-2">
-                                <div
-                                    class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                                    <span class="text-primary-foreground font-bold">✦</span>
-                                </div>
-                                <span
-                                    class="font-bold text-lg text-primary">
-                                    LevelUp Academy
-                                </span>
+                            <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                                <span class="text-primary-foreground font-bold">✦</span>
                             </div>
+                            <span class="font-bold text-lg text-primary">
+                                LevelUp Academy
+                            </span>
+                        </div>
                     </div>
 
                     <!-- Links Column 1 -->
@@ -382,8 +330,7 @@ onMounted(() => {
                 </div>
 
                 <!-- Bottom Section -->
-                <div
-                    class="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
                     <p class="text-muted-foreground text-sm">
                         © 2025 LevelUp Academy. All rights reserved.
                     </p>
@@ -433,6 +380,33 @@ onMounted(() => {
             </Transition>
         </Teleport>
 
+        <!-- Auth Choice Modal (After Verification) -->
+        <Teleport to="body">
+            <Transition name="modal">
+                <div v-if="showAuthChoice" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <!-- Backdrop -->
+                    <div class="fixed inset-0 bg-black/40 backdrop-blur-sm" />
+                    <!-- Modal Content -->
+                    <div class="relative bg-card border border-border rounded-2xl shadow-2xl p-8 max-w-md w-full">
+                        <div class="text-center">
+                            <h2 class="text-3xl font-bold text-foreground mb-2">Welcome!</h2>
+                            <p class="text-muted-foreground mb-8">You're verified. What would you like to do?</p>
+                            <div class="flex flex-col gap-3">
+                                <button @click="redirectToAuth('login')"
+                                    class="px-6 py-3 rounded-xl font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 transform hover:scale-105">
+                                    Log In
+                                </button>
+                                <button v-if="canRegister" @click="redirectToAuth('register')"
+                                    class="px-6 py-3 rounded-xl font-semibold border border-primary text-primary hover:bg-primary/10 transition-all duration-300 transform hover:scale-105">
+                                    Create Account
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Transition>
+        </Teleport>
+
         <!-- Verification Slider Modal -->
         <VerificationSlider v-model="showVerification" :redirect-to="verificationRedirectTo"
             @verified="handleVerified" />
@@ -453,6 +427,30 @@ onMounted(() => {
 
     66% {
         transform: translate(-20px, 20px) scale(0.9);
+    }
+}
+
+@keyframes fade-in-heading {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes rotate-in {
+    from {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
@@ -496,5 +494,13 @@ onMounted(() => {
 
 .perspective {
     perspective: 1000px;
+}
+
+.animate-fade-in-heading {
+    animation: fade-in-heading 0.8s ease-out forwards;
+}
+
+.animate-rotate-in {
+    animation: rotate-in 0.6s ease-out forwards;
 }
 </style>

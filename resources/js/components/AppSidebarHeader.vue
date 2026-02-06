@@ -76,13 +76,20 @@ onMounted(() => {
 
         <div class="flex items-center gap-4">
              <!-- Status and DateTime -->
-             <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                 <div class="flex items-center gap-1">
-                     <div class="h-2 w-2 rounded-full bg-green-500"></div>
-                     <span class="capitalize">{{ userStatus }}</span>
-                 </div>
-                 <span class="text-xs">•</span>
-                 <span>{{ currentDateTime }}</span>
+             <div class="hidden md:flex items-center gap-2 text-sm text-muted-foreground whitespace-nowrap">
+                  <div class="flex items-center gap-1">
+                      <div class="h-2 w-2 rounded-full bg-green-500"></div>
+                      <span class="capitalize">{{ userStatus }}</span>
+                  </div>
+                  <span class="text-xs">•</span>
+                  <span>{{ currentDateTime }}</span>
+             </div>
+             <div class="md:hidden flex flex-col items-end gap-0 text-xs text-muted-foreground">
+                  <div class="flex items-center gap-1">
+                      <div class="h-1.5 w-1.5 rounded-full bg-green-500"></div>
+                      <span class="capitalize text-xs">{{ userStatus }}</span>
+                  </div>
+                  <span class="leading-tight">{{ currentDateTime }}</span>
              </div>
 
             <div class="flex items-center gap-2 relative">

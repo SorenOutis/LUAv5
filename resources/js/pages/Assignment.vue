@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dialog';
 import { ref, computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
+import { useDateFormat } from '@/composables/useDateFormat';
 
 interface Submission {
       id: number;
@@ -47,6 +48,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const { formatDate, formatDateCompact } = useDateFormat();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -88,16 +90,6 @@ const filteredAssignments = computed(() => {
 
 const handleAssignmentClick = (assignment: Assignment) => {
     selectedAssignment.value = assignment;
-};
-
-const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
 };
 
 const isOverdue = (dueDate: string) => {
@@ -284,22 +276,23 @@ const submitAssignment = () => {
                                     <CardTitle :class="['text-lg', !assignment.is_active && 'line-through']">
                                         {{ assignment.title }}
                                     </CardTitle>
-                                    <CardDescription class="mt-1">
-                                        <svg
-                                            class="inline-block h-4 w-4 mr-1"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                            />
-                                        </svg>
-                                        Due: {{ formatDate(assignment.due_date) }}
-                                    </CardDescription>
+                                    <CardDescription class="mt-1 text-sm md:text-base">
+                                         <svg
+                                             class="inline-block h-4 w-4 mr-1"
+                                             fill="none"
+                                             stroke="currentColor"
+                                             viewBox="0 0 24 24"
+                                         >
+                                             <path
+                                                 stroke-linecap="round"
+                                                 stroke-linejoin="round"
+                                                 stroke-width="2"
+                                                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                             />
+                                         </svg>
+                                         <span class="hidden md:inline">Due: {{ formatDate(assignment.due_date) }}</span>
+                                         <span class="md:hidden">Due: {{ formatDateCompact(assignment.due_date) }}</span>
+                                     </CardDescription>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <div
@@ -327,10 +320,11 @@ const submitAssignment = () => {
                                 {{ assignment.description || 'No description provided' }}
                             </p>
                             <div class="mt-4">
-                                <div class="flex items-center justify-between mb-3">
-                                    <span class="text-xs text-muted-foreground">
-                                        Posted: {{ formatDate(assignment.created_at) }}
-                                    </span>
+                                <div class="flex items-center justify-between mb-3 text-xs md:text-sm">
+                                     <span class="text-muted-foreground">
+                                         <span class="hidden md:inline">Posted: {{ formatDate(assignment.created_at) }}</span>
+                                         <span class="md:hidden">Posted: {{ formatDateCompact(assignment.created_at) }}</span>
+                                     </span>
                                     <svg
                                         class="h-4 w-4 text-muted-foreground"
                                         fill="none"

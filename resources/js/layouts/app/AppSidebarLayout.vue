@@ -5,6 +5,7 @@ import AppShell from '@/components/AppShell.vue';
 import AppSidebar from '@/components/AppSidebar.vue';
 import AppSidebarHeader from '@/components/AppSidebarHeader.vue';
 import ImpersonationBanner from '@/components/ImpersonationBanner.vue';
+import MobileBottomNav from '@/components/MobileBottomNav.vue';
 import type { BreadcrumbItemType } from '@/types';
 import { provide, ref } from 'vue';
 
@@ -146,8 +147,13 @@ withDefaults(defineProps<Props>(), {
         <AppSidebar />
         <AppContent variant="sidebar" class="overflow-x-hidden">
             <AppSidebarHeader :breadcrumbs="breadcrumbs" />
-            <slot />
+            <div class="md:pb-0 pb-20">
+                <slot />
+            </div>
         </AppContent>
+
+        <!-- Mobile Bottom Navigation -->
+        <MobileBottomNav />
 
         <!-- Global animation container -->
         <AnimationContainer />

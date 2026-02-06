@@ -247,11 +247,11 @@ const getCoverPhotoUrl = () => {
                     </div>
                 </div>
 
-                <div class="relative z-20 flex items-start justify-between p-8 min-h-80">
-                    <div class="flex items-center gap-6">
+                <div class="relative z-20 flex flex-col md:flex-row md:items-start md:justify-between p-4 md:p-8 md:min-h-80">
+                    <div class="flex items-center gap-3 md:gap-6">
                         <!-- Avatar with glow -->
                         <div
-                            class="h-24 w-24 rounded-full bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center text-4xl font-bold text-accent-foreground shadow-lg relative transition-all duration-300 overflow-hidden group"
+                            class="h-16 md:h-24 w-16 md:w-24 rounded-full bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center text-2xl md:text-4xl font-bold text-accent-foreground shadow-lg relative transition-all duration-300 overflow-hidden group flex-shrink-0"
                             :class="[{ 'scale-110 shadow-xl': profileHovered }, isOwnProfile ? 'cursor-pointer' : '']"
                             @click="isOwnProfile && handleEditClick()"
                         >
@@ -263,24 +263,24 @@ const getCoverPhotoUrl = () => {
                             />
                             <span v-else>{{ user.name.charAt(0).toUpperCase() }}</span>
                             <div v-if="isOwnProfile" class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                 <span class="text-white text-lg">📸</span>
+                                 <span class="text-white text-sm md:text-lg">📸</span>
                              </div>
                         </div>
 
                         <!-- User Info -->
-                        <div class="flex-1">
-                            <div class="flex items-center gap-3 mb-2">
-                                <h1 class="text-4xl font-bold text-white drop-shadow-lg">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-1 md:gap-3 mb-1 md:mb-2 flex-wrap">
+                                <h1 class="text-xl md:text-4xl font-bold text-white drop-shadow-lg break-words">
                                     {{ user.name }}
                                 </h1>
-                                <span class="text-3xl drop-shadow-lg">👑</span>
+                                <span class="text-2xl md:text-3xl drop-shadow-lg flex-shrink-0">👑</span>
                             </div>
-                            <p class="text-white/90 mb-2 drop-shadow-md">{{ user.email }}</p>
-                            <p class="text-sm text-white/85 drop-shadow-md">
+                            <p class="text-white/90 mb-1 md:mb-2 drop-shadow-md text-xs md:text-base truncate">{{ user.email }}</p>
+                            <p class="text-xs md:text-sm text-white/85 drop-shadow-md">
                                 🎮 Player since {{ user.joinedDate }}
                             </p>
-                            <div class="mt-3 pt-3 border-t border-white/30">
-                                <p class="text-white font-semibold drop-shadow-md">Level {{ props.stats.level }} Champion</p>
+                            <div class="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-white/30">
+                                <p class="text-white font-semibold drop-shadow-md text-xs md:text-base">Level {{ props.stats.level }} Champion</p>
                             </div>
                         </div>
                     </div>
@@ -288,7 +288,7 @@ const getCoverPhotoUrl = () => {
                     <Button 
                         v-if="isOwnProfile"
                         @click="handleEditClick"
-                        class="transition-all duration-300 hover:scale-105"
+                        class="transition-all duration-300 hover:scale-105 mt-4 md:mt-0 w-full md:w-auto text-xs md:text-base px-2 md:px-4 py-1 md:py-2"
                     >
                         ✏️ Edit Profile
                     </Button>

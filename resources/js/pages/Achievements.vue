@@ -118,47 +118,47 @@ const getCategoryCount = (category: string, filterStatus: 'all' | 'unlocked' | '
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="relative h-full flex-1">
             <!-- Blurred Content -->
-            <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4" :class="isLoading && 'blur-sm pointer-events-none'">
+            <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4 blur-sm pointer-events-none">
             <!-- Stats Section / Skeleton -->
             <SkeletonStats v-if="isLoading" :count="4" />
-            <div v-else class="grid gap-4 md:grid-cols-4">
+            <div v-else class="grid gap-2 md:gap-4 grid-cols-2 md:grid-cols-4">
                 <Card class="border-sidebar-border/70 dark:border-sidebar-border">
-                    <CardHeader class="pb-2">
-                        <CardTitle class="text-sm font-medium">Unlocked</CardTitle>
+                    <CardHeader class="pb-1 md:pb-2">
+                        <CardTitle class="text-xs md:text-sm font-medium">Unlocked</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold">{{ stats.totalUnlocked }}</div>
-                        <p class="text-xs text-muted-foreground mt-1">Achievements</p>
+                        <div class="text-xl md:text-2xl font-bold">{{ stats.totalUnlocked }}</div>
+                        <p class="text-xs text-muted-foreground mt-0.5 md:mt-1 line-clamp-2">Achievements</p>
                     </CardContent>
                 </Card>
 
                 <Card class="border-sidebar-border/70 dark:border-sidebar-border">
-                    <CardHeader class="pb-2">
-                        <CardTitle class="text-sm font-medium">Total</CardTitle>
+                    <CardHeader class="pb-1 md:pb-2">
+                        <CardTitle class="text-xs md:text-sm font-medium">Total</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold">{{ stats.totalAchievements }}</div>
-                        <p class="text-xs text-muted-foreground mt-1">Available</p>
+                        <div class="text-xl md:text-2xl font-bold">{{ stats.totalAchievements }}</div>
+                        <p class="text-xs text-muted-foreground mt-0.5 md:mt-1 line-clamp-2">Available</p>
                     </CardContent>
                 </Card>
 
                 <Card class="border-sidebar-border/70 dark:border-sidebar-border">
-                    <CardHeader class="pb-2">
-                        <CardTitle class="text-sm font-medium">Completion</CardTitle>
+                    <CardHeader class="pb-1 md:pb-2">
+                        <CardTitle class="text-xs md:text-sm font-medium">Completion</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold">{{ stats.completionPercentage }}%</div>
-                        <p class="text-xs text-muted-foreground mt-1">Progress</p>
+                        <div class="text-xl md:text-2xl font-bold">{{ stats.completionPercentage }}%</div>
+                        <p class="text-xs text-muted-foreground mt-0.5 md:mt-1 line-clamp-2">Progress</p>
                     </CardContent>
                 </Card>
 
                 <Card class="border-sidebar-border/70 dark:border-sidebar-border">
-                    <CardHeader class="pb-2">
-                        <CardTitle class="text-sm font-medium">XP Earned</CardTitle>
+                    <CardHeader class="pb-1 md:pb-2">
+                        <CardTitle class="text-xs md:text-sm font-medium">XP Earned</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold">{{ stats.xpEarned }}</div>
-                        <p class="text-xs text-muted-foreground mt-1">From achievements</p>
+                        <div class="text-xl md:text-2xl font-bold">{{ stats.xpEarned }}</div>
+                        <p class="text-xs text-muted-foreground mt-0.5 md:mt-1 line-clamp-2">From achievements</p>
                     </CardContent>
                 </Card>
             </div>
@@ -295,31 +295,31 @@ const getCategoryCount = (category: string, filterStatus: 'all' | 'unlocked' | '
 
                     <!-- Coming Soon Overlay -->
                     <div
-                        class="absolute inset-0 flex h-full flex-1 flex-col items-center justify-start pt-16 rounded-xl">
-                        <div class="text-center space-y-6 max-w-md">
-                    <div class="space-y-2">
+                        class="absolute inset-0 flex h-full flex-1 flex-col items-center justify-start pt-8 md:pt-16 rounded-xl px-4">
+                        <div class="text-center space-y-4 md:space-y-6 max-w-md">
+                    <div class="space-y-1 md:space-y-2">
                        <h1
-                            class="text-5xl font-bold bg-gradient-to-r from-accent to-accent/60 dark:from-yellow-400 dark:to-yellow-500 bg-clip-text text-transparent">
-                            Coming Soon
-                        </h1>
-                       <p class="text-xl text-muted-foreground">
-                           Achievements feature is being prepared
-                       </p>
-                    </div>
+                             class="text-3xl md:text-5xl font-bold bg-gradient-to-r from-orange-500 to-yellow-500 dark:from-yellow-400 dark:to-yellow-500 bg-clip-text text-transparent">
+                             Coming Soon
+                         </h1>
+                        <p class="text-sm md:text-xl text-muted-foreground px-2">
+                            Achievements feature is being prepared
+                        </p>
+                     </div>
 
                     <div class="flex justify-center">
-                       <div class="text-6xl animate-bounce">🏆</div>
-                    </div>
+                       <div class="text-4xl md:text-6xl animate-bounce">🏆</div>
+                     </div>
 
-                    <p class="text-muted-foreground">
+                    <p class="text-xs md:text-base text-muted-foreground px-2 leading-relaxed">
                        We're working hard to bring you an amazing achievements system. Stay tuned for updates!
                     </p>
 
-                    <Button @click="$inertia.visit(dashboard().url)" variant="default" class="w-full">
+                    <Button @click="$inertia.visit(dashboard().url)" variant="default" class="w-full text-sm md:text-base">
                        ← Back to Dashboard
                     </Button>
-                    </div>
-                    </div>
+                     </div>
+                     </div>
                     </div>
                     </AppLayout>
                     </template>

@@ -539,26 +539,31 @@ const demoXPToast = () => {
                             <span class="font-medium">Total Experience Progress</span>
                             <span class="font-semibold text-foreground">{{ Math.round(totalXPProgress) }}%</span>
                         </div>
-                        <div class="relative h-3 bg-background/50 rounded-full overflow-hidden border border-accent/20 shadow-inner">
+                        <div class="relative h-4 bg-background/50 rounded-full overflow-hidden border border-yellow-500/40 shadow-lg shadow-yellow-500/20">
                             <!-- Background shimmer effect -->
-                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse"></div>
                             
                             <!-- Main progress fill with dynamic animation -->
-                            <div class="h-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 rounded-full transition-all duration-1000 ease-out relative"
+                            <div class="h-full bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 rounded-full transition-all duration-1000 ease-out relative energy-bar"
                                 :style="{ width: `${totalXPProgress}%` }">
                                 <!-- Inner glow effect -->
-                                <div class="absolute inset-0 bg-gradient-to-t from-transparent to-white/30 rounded-full"></div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-transparent to-white/40 rounded-full"></div>
                                 
-                                <!-- Energy particles - animated fill effect -->
+                                <!-- Lightning effect streaks -->
                                 <div class="absolute inset-0 rounded-full overflow-hidden">
-                                    <div class="absolute top-0 left-0 right-0 bottom-0 animate-pulse opacity-60"
-                                        style="background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: shimmer 2s infinite;"></div>
+                                    <!-- Horizontal lightning shimmer -->
+                                    <div class="absolute top-0 left-0 right-0 bottom-0 animate-lightning-shimmer opacity-70"
+                                        style="background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 20%, rgba(255,255,200,0.4) 50%, rgba(255,255,255,0.6) 80%, transparent 100%);"></div>
+                                    
+                                    <!-- Energy particles pulsing -->
+                                    <div class="absolute inset-0 opacity-50"
+                                        style="background: radial-gradient(circle at 30% 50%, rgba(255,255,100,0.4) 0%, transparent 70%); animation: energy-pulse 3s ease-in-out infinite;"></div>
                                 </div>
                             </div>
                             
                             <!-- Outer glow for energy effect -->
-                            <div v-if="totalXPProgress > 0" class="absolute top-0 left-0 h-full rounded-full blur-md opacity-40"
-                                :style="{ width: `${totalXPProgress}%`, background: 'linear-gradient(90deg, rgba(250,204,21,0.6), rgba(234,179,8,0.4))' }"></div>
+                            <div v-if="totalXPProgress > 0" class="absolute top-0 left-0 h-full rounded-full blur-lg opacity-50 energy-glow"
+                                :style="{ width: `${totalXPProgress}%`, background: 'linear-gradient(90deg, rgba(250,204,21,0.8), rgba(234,179,8,0.5))' }"></div>
                         </div>
                         <div class="flex justify-between text-xs text-muted-foreground">
                             <span>{{ userStats.totalXP.toLocaleString() }} XP</span>
@@ -631,19 +636,17 @@ const demoXPToast = () => {
                 <Card
                     class="overflow-hidden border-sidebar-border/70 dark:border-sidebar-border transition-all duration-200 hover:border-sidebar-border hover:shadow-md dark:hover:shadow-lg cursor-pointer hover:scale-105"
                     @mouseenter="isLevelCardHovered = true" @mouseleave="isLevelCardHovered = false">
-                    <CardHeader class="pb-2 flex flex-row items-center justify-between space-y-0">
-                        <CardTitle class="text-sm font-medium">Level</CardTitle>
-                        <svg class="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                    </CardHeader>
+                    <CardHeader class="pb-2 flex flex-row items-center justify-between space-y-0 gap-1 px-4 md:px-6">
+                         <CardTitle class="text-xs md:text-sm font-medium min-w-0">Level</CardTitle>
+                         <svg class="h-4 w-4 text-yellow-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                             <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+                         </svg>
+                     </CardHeader>
                     <CardContent>
-                        <div class="flex items-baseline justify-between">
-                            <div class="text-3xl font-bold">{{ userStats.level }}</div>
-                            <span class="text-xs text-muted-foreground">{{ userStats.rank }}</span>
-                        </div>
+                         <div class="flex items-baseline justify-between gap-2">
+                             <div class="text-2xl md:text-3xl font-bold">{{ userStats.level }}</div>
+                             <span class="text-xs text-muted-foreground truncate">{{ userStats.rank }}</span>
+                         </div>
                         <div class="mt-4 space-y-2 overflow-hidden">
                             <!-- XP Bar Container (hidden by default, shown on hover) -->
                             <div class="transition-all duration-300 ease-out" :style="{
@@ -1121,5 +1124,54 @@ const demoXPToast = () => {
                 </div>
             </DialogContent>
         </Dialog>
-    </AppLayout>
-</template>
+        </AppLayout>
+        </template>
+
+        <style scoped>
+        @keyframes lightning-shimmer {
+        0% {
+        transform: translateX(-100%);
+        opacity: 0;
+        }
+        10% {
+        opacity: 1;
+        }
+        50% {
+        opacity: 0.8;
+        }
+        90% {
+        opacity: 1;
+        }
+        100% {
+        transform: translateX(100%);
+        opacity: 0;
+        }
+        }
+
+        @keyframes energy-pulse {
+        0% {
+        transform: scale(1);
+        opacity: 0.3;
+        }
+        50% {
+        transform: scale(1.05);
+        opacity: 0.6;
+        }
+        100% {
+        transform: scale(1);
+        opacity: 0.3;
+        }
+        }
+
+        .animate-lightning-shimmer {
+        animation: lightning-shimmer 2s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
+        }
+
+        .energy-bar {
+        box-shadow: inset 0 0 20px rgba(255, 255, 100, 0.3);
+        }
+
+        .energy-glow {
+        filter: blur(12px);
+        }
+        </style>

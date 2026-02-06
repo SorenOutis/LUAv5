@@ -275,21 +275,21 @@ const restOfLeaderboard = computed(() => {
                     <div class="space-y-2 max-h-[600px] overflow-y-auto pr-2">
                         <div v-for="(entry, index) in restOfLeaderboard.slice(0, displayCount - 3)" :key="entry.userId"
                             :class="[
-                                'flex items-center gap-4 p-3 rounded-lg transition-all duration-150',
+                                'flex flex-col md:flex-row md:items-center gap-2 md:gap-4 p-3 rounded-lg transition-all duration-150',
                                 entry.isCurrentUser
                                     ? 'bg-accent/20 border border-accent/50'
                                     : 'hover:bg-accent/10 border border-transparent'
                             ]">
-                            <div class="flex items-center gap-2 w-16 flex-shrink-0">
+                            <div class="flex items-center gap-2 md:w-16 md:flex-shrink-0">
                                 <span class="text-lg">{{ entry.rankTier.icon }}</span>
                                 <span class="font-bold text-sm">{{ entry.rank }}</span>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-2">
-                                    <p :class="['font-medium text-sm', entry.isCurrentUser && 'font-bold']">
+                                <div class="flex flex-wrap items-center gap-1 md:gap-2">
+                                    <p :class="['font-medium text-xs md:text-sm truncate', entry.isCurrentUser && 'font-bold']">
                                         {{ entry.name }}
                                     </p>
-                                    <span class="text-xs font-semibold px-2 py-0.5 rounded" :style="{
+                                    <span class="text-xs font-semibold px-2 py-0.5 rounded flex-shrink-0" :style="{
                                         color: entry.rankTier.color,
                                         backgroundColor: entry.rankTier.color + '20'
                                     }">
@@ -300,15 +300,17 @@ const restOfLeaderboard = computed(() => {
                                     Level {{ entry.level }} • {{ entry.streakDays }} day streak
                                 </p>
                             </div>
-                            <div class="text-right flex-shrink-0">
-                                <p class="font-semibold text-sm">
-                                    {{ entry.xp.toLocaleString() }}
-                                </p>
-                                <p class="text-xs text-muted-foreground capitalize">
-                                    XP
-                                </p>
+                            <div class="flex items-center justify-between md:text-right md:flex-shrink-0 gap-2">
+                                <div>
+                                    <p class="font-semibold text-sm">
+                                        {{ entry.xp.toLocaleString() }}
+                                    </p>
+                                    <p class="text-xs text-muted-foreground capitalize">
+                                        XP
+                                    </p>
+                                </div>
+                                <Button size="sm" variant="ghost" class="text-xs md:text-sm">View</Button>
                             </div>
-                            <Button size="sm" variant="ghost">View</Button>
                         </div>
                     </div>
 

@@ -130,9 +130,10 @@ const getStatusIcon = (status: string) => {
 </script>
 
 <template>
-    <Head title="Games" />
-    <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="space-y-6 px-4 sm:px-0">
+     <Head title="Games" />
+     <AppLayout :breadcrumbs="breadcrumbs">
+         <div class="relative">
+         <div class="space-y-6 px-4 sm:px-0 blur-sm pointer-events-none">
             <!-- Header Section -->
             <div class="space-y-2">
                 <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
@@ -373,7 +374,34 @@ const getStatusIcon = (status: string) => {
                 <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">
                     No games found matching your filters.
                 </p>
-            </div>
-        </div>
-    </AppLayout>
-</template>
+                </div>
+                </div>
+
+                <!-- Coming Soon Overlay -->
+                <div class="absolute inset-0 flex h-full flex-1 flex-col items-center justify-start pt-8 md:pt-16 rounded-xl px-4">
+                <div class="text-center space-y-4 md:space-y-6 max-w-md">
+                 <div class="space-y-1 md:space-y-2">
+                     <h1 class="text-3xl md:text-5xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+                         Coming Soon
+                     </h1>
+                     <p class="text-sm md:text-xl text-muted-foreground px-2">
+                         Games feature is being prepared
+                     </p>
+                 </div>
+
+                 <div class="flex justify-center">
+                     <div class="text-4xl md:text-6xl animate-bounce">🎮</div>
+                 </div>
+
+                 <p class="text-xs md:text-base text-muted-foreground px-2 leading-relaxed">
+                     We're working hard to bring you exciting games. Stay tuned for updates!
+                 </p>
+
+                 <Button @click="$inertia.visit(dashboard().url)" variant="default" class="w-full text-sm md:text-base">
+                     ← Back to Dashboard
+                 </Button>
+                </div>
+                </div>
+                </div>
+                </AppLayout>
+                </template>
