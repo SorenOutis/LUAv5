@@ -179,7 +179,7 @@ const scrollToTop = () => {
                             class="text-foreground/80 hover:text-foreground hover:bg-accent rounded-lg px-3 py-3 text-left transition-all duration-300 font-medium cursor-pointer transform hover:scale-[1.02] hover:translate-x-1">
                             {{ item.name }}
                         </button>
-                        <button @click="$emit('toggle-theme')" :style="{
+                        <button @click="toggleTheme" :style="{
                             animationDelay: isOpen ? `${(navigation.length) * 80 + 100}ms` : '0ms',
                         }" class="w-full text-foreground/80 hover:text-foreground hover:bg-accent rounded-lg px-3 py-3 text-left transition-all duration-300 font-medium cursor-pointer transform hover:scale-[1.02] hover:translate-x-1 flex items-center gap-2"
                             :aria-label="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'">
@@ -189,7 +189,7 @@ const scrollToTop = () => {
                         </button>
                         <div class="h-px bg-border my-2" />
                         <Link v-if="$page.props.auth.user" :href="dashboard()" :style="{
-                            animationDelay: isOpen ? `${(navigation.length + 1) * 80 + 100}ms` : '0ms',
+                            animationDelay: isOpen ? `${navigation.length * 80 + 150}ms` : '0ms',
                         }" class="relative bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-6 py-3 rounded-full flex items-center transition-all duration-300 hover:scale-105 hover:shadow-lg cursor-pointer group transform"
                             @click="isOpen = false">
                             <span class="mr-2">Dashboard</span>
@@ -197,7 +197,7 @@ const scrollToTop = () => {
                                 class="transition-transform duration-300 group-hover:translate-x-1" />
                         </Link>
                         <button v-else @click="$emit('open-verification', 'register')" :style="{
-                            animationDelay: isOpen ? `${(navigation.length + 1) * 80 + 100}ms` : '0ms',
+                            animationDelay: isOpen ? `${navigation.length * 80 + 150}ms` : '0ms',
                         }"
                             class="relative bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-6 py-3 rounded-full flex items-center transition-all duration-300 hover:scale-105 hover:shadow-lg cursor-pointer group transform">
                             <span class="mr-2">Get Started</span>

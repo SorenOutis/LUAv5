@@ -107,6 +107,13 @@ onMounted(() => {
 
         <!-- Navigation Bar -->
         <NavigationBar @open-verification="openVerification" @toggle-theme="toggleTheme" />
+        <!-- Theme Toggle Button (Upper Right - Desktop Only) -->
+        <button @click="toggleTheme"
+            class="hidden md:flex fixed top-8 right-8 z-40 p-2.5 rounded-lg bg-background/80 backdrop-blur-xl border border-border text-foreground hover:bg-accent transition-all duration-300"
+            :aria-label="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'">
+            <Moon v-if="isDarkMode" :size="20" />
+            <Sun v-else :size="20" />
+        </button>
 
         <!-- Main Content -->
         <main class="max-w-7xl mx-auto px-6 lg:px-8 py-32 lg:py-40 relative z-10">
@@ -125,14 +132,15 @@ onMounted(() => {
                             <span class="text-foreground">Elevate your</span>
                             <br />
                             <span class="inline-flex items-center justify-center flex-wrap gap-2 mt-4 sm:mt-6 md:mt-8">
-                                <span class="text-foreground">Learning</span>
-                                <RotatingText :texts="['Mastery', 'Growth', 'Excellence', 'Achievement', 'Success']"
+                                <span class="text-foreground">Business</span>
+                                <RotatingText :texts="['Growth', 'Innovation', 'Efficiency', 'Success', 'Performance']"
                                     :interval="2000"
                                     mainClassName="px-2 sm:px-2 md:px-3 bg-white text-black overflow-hidden py-1 sm:py-1 md:py-2 justify-center rounded-lg shadow-lg inline-block"
                                     splitLevelClassName="overflow-hidden pb-1 sm:pb-1 md:pb-1 inline-block" />
                             </span>
                         </h1>
                     </div>
+
 
                     <p class="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto font-light tracking-wide animate-fade-in-heading"
                         style="animation-delay: 0.2s">
@@ -287,7 +295,7 @@ onMounted(() => {
         </main>
 
         <!-- Footer -->
-        <footer class="mt-16 py-12 border-t border-border bg-background/80 backdrop-blur-xl">
+        <footer class="mt-32 py-12 border-t border-border bg-background/80 backdrop-blur-xl">
             <div class="max-w-7xl mx-auto px-6 lg:px-8">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                     <!-- Logo Column -->
