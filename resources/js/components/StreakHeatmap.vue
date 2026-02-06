@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { Flame, Sparkles } from 'lucide-vue-next';
 
 interface Props {
     loginDates: string[]; // Array of ISO date strings (e.g., "2024-01-15")
@@ -75,8 +76,8 @@ const getActivityLevel = (date: Date | null): 'none' | 'high' => {
 
 const getActivityColor = (level: string): string => {
     const colors = {
-        none: 'bg-gray-100 dark:bg-gray-800',
-        high: 'bg-orange-500 dark:bg-orange-600',
+        none: 'bg-muted',
+        high: 'bg-primary',
     };
     return colors[level as keyof typeof colors] || colors.none;
 };
@@ -137,28 +138,23 @@ const formatDateDisplay = (date: Date): string => {
             <h3 class="text-sm font-semibold text-muted-foreground">{{ props.year }} Activity</h3>
             <div class="flex items-center gap-4 text-sm">
                 <span class="text-muted-foreground">{{ totalDays }} days</span>
-                <span v-if="streak > 0" class="font-semibold">
-                    <span class="text-orange-500">🔥</span>
+                <span v-if="streak > 0" class="font-semibold flex items-center gap-1">
+                    <Flame class="w-4 h-4 text-primary fill-primary" />
                     {{ streak }} day max streak
                 </span>
             </div>
         </div>
 
         <!-- Heatmap Container -->
-        <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
+        <div class="overflow-x-auto rounded-lg border border-border bg-card p-3">
             <div class="flex gap-0.5">
                 <!-- Weeks -->
                 <div v-for="(week, weekIndex) in weeks" :key="weekIndex" class="flex flex-col gap-0.5">
                     <!-- Days in week -->
-                    <div
-                        v-for="(day, dayIndex) in week"
-                        :key="`${weekIndex}-${dayIndex}`"
-                        :class="[
-                            'h-3 w-3 rounded-sm transition-all hover:ring-2 hover:ring-offset-1 hover:ring-orange-500 dark:hover:ring-offset-gray-900',
-                            getActivityColor(getActivityLevel(day)),
-                        ]"
-                        :title="day ? formatDateDisplay(day) : ''"
-                    />
+                    <div v-for="(day, dayIndex) in week" :key="`${weekIndex}-${dayIndex}`" :class="[
+                        'h-3 w-3 rounded-sm transition-all hover:ring-2 hover:ring-offset-1 hover:ring-primary',
+                        getActivityColor(getActivityLevel(day)),
+                    ]" :title="day ? formatDateDisplay(day) : ''" />
                 </div>
             </div>
         </div>
@@ -167,19 +163,21 @@ const formatDateDisplay = (date: Date): string => {
         <div class="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
             <div class="flex items-center gap-1">
                 <span>No activity</span>
-                <div class="h-3 w-3 rounded-sm bg-gray-100 dark:bg-gray-800" />
+                <div class="h-3 w-3 rounded-sm bg-muted" />
                 <span>High activity</span>
-                <div class="h-3 w-3 rounded-sm bg-orange-500 dark:bg-orange-600" />
+                <div class="h-3 w-3 rounded-sm bg-primary" />
             </div>
         </div>
 
         <!-- Motivation message -->
-        <div v-if="totalDays === 0" class="rounded-lg bg-gray-50 p-3 text-center dark:bg-gray-800">
+        <div v-if="totalDays === 0" class="rounded-lg bg-muted/30 p-3 text-center">
             <p class="text-sm text-muted-foreground">Start logging in daily to build your activity heatmap!</p>
         </div>
-        <div v-else-if="streak >= 30" class="rounded-lg bg-orange-50 p-3 text-center dark:bg-orange-950">
-            <p class="text-sm font-medium text-orange-700 dark:text-orange-300">
-                🎉 {{ streak }} day streak! You're unstoppable!
+        <div v-else-if="streak >= 30"
+            class="rounded-lg bg-primary/10 p-3 text-center flex items-center justify-center gap-2">
+            <Sparkles class="w-4 h-4 text-primary" />
+            <p class="text-sm font-medium text-primary">
+                {{ streak }} day streak! You're unstoppable!
             </p>
         </div>
     </div>

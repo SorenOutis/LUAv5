@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { Zap, Star, Flame, Sparkles, Diamond, Crown, Trophy } from 'lucide-vue-next';
 
 interface Milestone {
     days: number;
     label: string;
-    icon: string;
+    icon: any;
     color: string;
 }
 
@@ -18,13 +19,13 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const milestones: Milestone[] = [
-    { days: 7, label: '7 Days', icon: '⚡', color: 'bg-yellow-100 dark:bg-yellow-900' },
-    { days: 14, label: '2 Weeks', icon: '🌟', color: 'bg-amber-100 dark:bg-amber-900' },
-    { days: 30, label: '1 Month', icon: '🔥', color: 'bg-orange-100 dark:bg-orange-900' },
-    { days: 60, label: '2 Months', icon: '⭐', color: 'bg-red-100 dark:bg-red-900' },
-    { days: 90, label: '3 Months', icon: '💎', color: 'bg-purple-100 dark:bg-purple-900' },
-    { days: 180, label: '6 Months', icon: '👑', color: 'bg-indigo-100 dark:bg-indigo-900' },
-    { days: 365, label: '1 Year', icon: '🏆', color: 'bg-blue-100 dark:bg-blue-900' },
+    { days: 7, label: '7 Days', icon: Zap, color: 'bg-yellow-100 dark:bg-yellow-900' },
+    { days: 14, label: '2 Weeks', icon: Star, color: 'bg-amber-100 dark:bg-amber-900' },
+    { days: 30, label: '1 Month', icon: Flame, color: 'bg-orange-100 dark:bg-orange-900' },
+    { days: 60, label: '2 Months', icon: Sparkles, color: 'bg-red-100 dark:bg-red-900' },
+    { days: 90, label: '3 Months', icon: Diamond, color: 'bg-purple-100 dark:bg-purple-900' },
+    { days: 180, label: '6 Months', icon: Crown, color: 'bg-indigo-100 dark:bg-indigo-900' },
+    { days: 365, label: '1 Year', icon: Trophy, color: 'bg-blue-100 dark:bg-blue-900' },
 ];
 
 const sizeClasses = computed(() => {
@@ -67,7 +68,7 @@ const progressToNextMilestone = computed(() => {
                     class="flex items-center justify-center rounded-lg border-2 border-current font-bold transition-transform hover:scale-110"
                     :title="`${milestone.label} - Day ${milestone.days}`"
                 >
-                    <span>{{ milestone.icon }}</span>
+                    <component :is="milestone.icon" class="w-6 h-6" />
                 </div>
             </div>
         </div>
@@ -91,11 +92,12 @@ const progressToNextMilestone = computed(() => {
         </div>
 
         <!-- Celebration message -->
-        <div v-if="unlocked.length >= 3" class="rounded-lg bg-purple-50 p-3 text-center dark:bg-purple-950">
-            <p class="text-sm font-medium text-purple-700 dark:text-purple-300">
-                🎉 You're on fire! {{ unlocked.length }} milestone{{ unlocked.length > 1 ? 's' : '' }}
-                unlocked!
-            </p>
-        </div>
+         <div v-if="unlocked.length >= 3" class="rounded-lg bg-purple-50 p-3 text-center dark:bg-purple-950 flex items-center justify-center gap-2">
+             <Sparkles class="w-4 h-4 text-purple-700 dark:text-purple-300" />
+             <p class="text-sm font-medium text-purple-700 dark:text-purple-300">
+                 You're on fire! {{ unlocked.length }} milestone{{ unlocked.length > 1 ? 's' : '' }}
+                 unlocked!
+             </p>
+         </div>
     </div>
 </template>

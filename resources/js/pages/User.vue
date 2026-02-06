@@ -19,6 +19,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Star, Trophy, Crown, Book, CheckCircle2, Flame, Camera } from 'lucide-vue-next';
 
 interface UserProfile {
     id: number;
@@ -96,12 +97,12 @@ const coverPhotoInput = ref<HTMLInputElement | null>(null);
 
 // Animated stats
 const animatedStats = ref([
-    { label: 'XP', value: 0, target: props.stats.totalXP, icon: '⭐', suffix: '' },
-    { label: 'Rank', value: 0, target: props.stats.rank, icon: '🏅', suffix: '', isRank: true },
-    { label: 'Level', value: 0, target: props.stats.level, icon: '👑', suffix: '' },
-    { label: 'Courses', value: 0, target: props.stats.coursesEnrolled, icon: '📚', suffix: '' },
-    { label: 'Assignments', value: 0, target: props.stats.assignmentsCompleted, icon: '✓', suffix: '' },
-    { label: 'Streak', value: 0, target: props.stats.currentStreak, icon: '🔥', suffix: ' days' },
+    { label: 'XP', value: 0, target: props.stats.totalXP, icon: Star, suffix: '' },
+    { label: 'Rank', value: 0, target: props.stats.rank, icon: Trophy, suffix: '', isRank: true },
+    { label: 'Level', value: 0, target: props.stats.level, icon: Crown, suffix: '' },
+    { label: 'Courses', value: 0, target: props.stats.coursesEnrolled, icon: Book, suffix: '' },
+    { label: 'Assignments', value: 0, target: props.stats.assignmentsCompleted, icon: CheckCircle2, suffix: '' },
+    { label: 'Streak', value: 0, target: props.stats.currentStreak, icon: Flame, suffix: ' days' },
 ]);
 
 const nextLevelXp = computed(() => (props.stats.level + 1) * 1000);
@@ -166,12 +167,12 @@ const handleAchievementClick = (achievement: UserAchievement) => {
     selectedAchievement.value = achievement;
 };
 
-const getStreakEmoji = () => {
+const getStreakLevel = () => {
     const streak = props.stats.currentStreak;
-    if (streak === 0) return '❄️';
-    if (streak < 7) return '🔥';
-    if (streak < 30) return '🔥🔥';
-    return '🔥🔥🔥';
+    if (streak === 0) return 0;
+    if (streak < 7) return 1;
+    if (streak < 30) return 2;
+    return 3;
 };
 
 const openCoverPhotoUpload = () => {
@@ -211,8 +212,9 @@ const getCoverPhotoUrl = () => {
 
                 <!-- Change Cover Button
                 <button v-if="getCoverPhotoUrl()" @click="openCoverPhotoUpload"
-                    class="absolute top-3 right-3 bg-black/50 hover:bg-black/70 text-white px-3 py-2 rounded-lg text-sm transition-colors z-20">
-                    📸 Change Cover
+                    class="absolute top-3 right-3 bg-black/50 hover:bg-black/70 text-white px-3 py-2 rounded-lg text-sm transition-colors z-20 flex items-center gap-2">
+                    <Camera class="w-4 h-4" />
+                    Change Cover
                 </button> -->
 
                 <!-- Add Cover Photo Placeholder -->
@@ -288,9 +290,9 @@ const getCoverPhotoUrl = () => {
                     <Button 
                         v-if="isOwnProfile"
                         @click="handleEditClick"
-                        class="transition-all duration-300 hover:scale-105 mt-4 md:mt-0 w-full md:w-auto text-xs md:text-base px-2 md:px-4 py-1 md:py-2"
+                        class="transition-all duration-300 hover:scale-105 mt-4 md:mt-0 w-full md:w-auto text-xs md:text-base px-2 md:px-4 py-1 md:py-2 flex items-center justify-center gap-2"
                     >
-                        ✏️ Edit Profile
+                        <span>✏️</span> Edit Profile
                     </Button>
                 </div>
             </div>
@@ -304,7 +306,10 @@ const getCoverPhotoUrl = () => {
             <div class="rounded-lg border-2 border-sidebar-border/70 dark:border-sidebar-border bg-card p-6">
                 <div class="space-y-3">
                     <div class="flex items-center justify-between">
-                        <span class="text-lg font-semibold text-foreground">⭐ Experience to Next Level</span>
+                        <span class="text-lg font-semibold text-foreground flex items-center gap-2">
+                            <Star class="w-5 h-5" />
+                            Experience to Next Level
+                        </span>
                         <span class="text-sm text-muted-foreground">{{ props.stats.totalXP % 1000 }} / 1000 XP</span>
                     </div>
                     <div class="relative h-6 w-full overflow-hidden rounded-full bg-muted border border-sidebar-border/50">
@@ -332,7 +337,9 @@ const getCoverPhotoUrl = () => {
                     <div
                         class="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"/>
                     <div class="relative z-10">
-                        <div class="mb-3 text-4xl">{{ stat.icon }}</div>
+                        <div class="mb-3 flex justify-center">
+                            <component :is="stat.icon" class="w-8 h-8 text-accent" />
+                        </div>
                         <div v-if="stat.isRank" class="text-lg font-bold text-foreground">{{ stats.rankTitle }}</div>
                         <div v-else class="text-3xl font-bold text-foreground">{{ stat.value.toLocaleString() }}</div>
                         <div class="text-xs text-muted-foreground mt-2">{{ stat.label }}{{ stat.suffix }}</div>
@@ -349,7 +356,8 @@ const getCoverPhotoUrl = () => {
                     <Card v-else class="border-sidebar-border/70 dark:border-sidebar-border shadow-md">
                         <CardHeader>
                             <CardTitle class="text-foreground flex items-center gap-2">
-                                <span>📚</span> Course Progress
+                                <Book class="w-5 h-5" />
+                                Course Progress
                             </CardTitle>
                             <CardDescription>Your learning journey across all enrolled courses</CardDescription>
                         </CardHeader>
@@ -457,7 +465,10 @@ const getCoverPhotoUrl = () => {
                                 <p class="text-sm font-medium text-foreground">{{ user.joinedDate }}</p>
                             </div>
                             <div>
-                                <p class="text-xs text-muted-foreground mb-2">{{ getStreakEmoji() }} Current Streak</p>
+                                <p class="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                                    <Flame class="w-3 h-3" :class="{ 'text-orange-500': getStreakLevel() > 0 }" />
+                                    Current Streak
+                                </p>
                                 <p class="text-sm font-bold text-accent">
                                     {{ stats.currentStreak }} days
                                 </p>

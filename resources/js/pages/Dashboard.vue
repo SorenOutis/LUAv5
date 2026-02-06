@@ -23,7 +23,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Search } from 'lucide-vue-next';
+import { Search, Trophy, Calendar, CheckCircle2, ListTodo, Megaphone } from 'lucide-vue-next';
 import axios from 'axios';
 import { watch, onMounted, onUnmounted, ref as vueRef } from 'vue';
 import { useToast } from '@/composables/useToast';
@@ -253,7 +253,7 @@ const handleBonusModalClosed = async (result: any) => {
             longestStreak: props.streak.longestStreak,
         };
     }
-    
+
     // Add a small delay to make the transition smoother
     setTimeout(() => {
         isStreakDayModalOpen.value = true;
@@ -262,14 +262,14 @@ const handleBonusModalClosed = async (result: any) => {
 
 const startAutoRefresh = () => {
     if (!autoRefreshEnabled.value) return;
-    
+
     // Fetch announcements every 30 seconds
     const announcementsInterval = setInterval(() => {
         if (autoRefreshEnabled.value) {
             fetchAnnouncements();
         }
     }, refreshInterval);
-    
+
     // Fetch dashboard stats every 30 seconds
     const dashboardInterval = setInterval(() => {
         if (autoRefreshEnabled.value) {
@@ -283,7 +283,7 @@ const startAutoRefresh = () => {
             fetchNotifications();
         }
     }, refreshInterval);
-    
+
     refreshIntervals.value = [announcementsInterval, dashboardInterval, notificationsInterval];
 };
 
@@ -309,15 +309,15 @@ onMounted(() => {
     fetchAnnouncements();
     fetchDashboardData();
     fetchNotifications();
-    
+
     // Show daily bonus modal if user hasn't received it today
     if (props.dailyBonus && !props.dailyBonus.hasReceivedToday) {
         isDailyBonusModalOpen.value = true;
     }
-    
+
     // Start auto-refresh
     startAutoRefresh();
-    
+
     // Listen for visibility changes (pause refresh when tab is hidden)
     document.addEventListener('visibilitychange', handleVisibilityChange);
 });
@@ -450,6 +450,7 @@ const demoXPToast = () => {
     0% {
         transform: translateX(-100%);
     }
+
     100% {
         transform: translateX(100%);
     }
@@ -465,59 +466,48 @@ const demoXPToast = () => {
     <Head title="Dashboard" />
 
     <!-- Daily Bonus Modal -->
-    <DailyBonusModal 
-        :open="isDailyBonusModalOpen"
-        :has-received-today="props.dailyBonus?.hasReceivedToday ?? false"
-        :xp-amount="props.dailyBonus?.xpAmount ?? 20"
-        @update:open="isDailyBonusModalOpen = $event"
-        @bonus-claimed="handleBonusClaimed"
-        @closed="handleBonusModalClosed"
-    />
+    <DailyBonusModal :open="isDailyBonusModalOpen" :has-received-today="props.dailyBonus?.hasReceivedToday ?? false"
+        :xp-amount="props.dailyBonus?.xpAmount ?? 20" @update:open="isDailyBonusModalOpen = $event"
+        @bonus-claimed="handleBonusClaimed" @closed="handleBonusModalClosed" />
 
     <!-- Streak Day Modal -->
-    <StreakDayModal 
-        :open="isStreakDayModalOpen"
-        :current-streak="streakData.currentStreak"
-        :longest-streak="streakData.longestStreak"
-        @update:open="isStreakDayModalOpen = $event"
-    />
+    <StreakDayModal :open="isStreakDayModalOpen" :current-streak="streakData.currentStreak"
+        :longest-streak="streakData.longestStreak" @update:open="isStreakDayModalOpen = $event" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <!-- Announcements Banner Section -->
             <div v-if="announcements.length > 0" class="space-y-2">
-                <div 
-                    v-for="announcement in announcements.slice(0, 1)" 
-                    :key="announcement.id"
-                    class="relative overflow-hidden rounded-lg bg-gradient-to-r from-accent/80 via-accent/70 to-accent/80 border border-accent/50 p-4 shadow-lg"
-                >
+                <div v-for="announcement in announcements.slice(0, 1)" :key="announcement.id"
+                    class="relative overflow-hidden rounded-lg bg-gradient-to-r from-accent/80 via-accent/70 to-accent/80 border border-accent/50 p-4 shadow-lg">
                     <!-- Decorative background elements -->
                     <div class="absolute -right-20 -top-20 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
                     <div class="absolute -left-20 -bottom-20 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
-                    
+
                     <div class="relative z-10">
                         <div class="flex items-center gap-4">
                             <!-- Announcement Icon -->
                             <div class="flex-shrink-0">
                                 <svg class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 7a1 1 0 112 0 1 1 0 01-2 0zm-.5 5a.5.5 0 11-1 0 .5.5 0 011 0zm4 0a.5.5 0 11-1 0 .5.5 0 011 0z" />
+                                    <path
+                                        d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 7a1 1 0 112 0 1 1 0 01-2 0zm-.5 5a.5.5 0 11-1 0 .5.5 0 011 0zm4 0a.5.5 0 11-1 0 .5.5 0 011 0z" />
                                 </svg>
                             </div>
-                            
+
                             <!-- Announcement Content -->
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-bold text-white">{{ announcement.title }}</p>
-                                <p v-if="announcement.description" class="text-xs text-white/80 mt-0.5 line-clamp-2">{{ announcement.description }}</p>
+                                <p v-if="announcement.description" class="text-xs text-white/80 mt-0.5 line-clamp-2">{{
+                                    announcement.description }}</p>
                             </div>
-                            
+
                             <!-- Close Button -->
-                            <button 
-                                @click="announcements = announcements.filter(a => a.id !== announcement.id)"
+                            <button @click="announcements = announcements.filter(a => a.id !== announcement.id)"
                                 class="flex-shrink-0 text-white hover:text-white/70 transition-colors p-1"
-                                aria-label="Close announcement"
-                            >
+                                aria-label="Close announcement">
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
                         </div>
@@ -526,80 +516,102 @@ const demoXPToast = () => {
             </div>
 
             <!-- Hero Banner Section -->
-            <div class="relative overflow-hidden rounded-xl bg-gradient-to-r from-accent/20 via-accent/10 to-transparent border border-accent/30 p-6 mb-4 shadow-sm">
+            <div
+                class="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary/20 via-primary/10 to-transparent border border-primary/30 p-4 md:p-6 mb-4 shadow-sm">
                 <!-- Decorative background elements -->
-                <div class="absolute -right-20 -top-20 w-40 h-40 bg-accent/5 rounded-full blur-3xl"></div>
-                <div class="absolute -left-20 -bottom-20 w-40 h-40 bg-accent/5 rounded-full blur-3xl"></div>
-                
+                <div class="absolute -right-20 -top-20 w-40 h-40 bg-primary/5 rounded-full blur-3xl"></div>
+                <div class="absolute -left-20 -bottom-20 w-40 h-40 bg-primary/5 rounded-full blur-3xl"></div>
+
                 <div class="relative z-10">
-                    <div class="flex items-start justify-between gap-6">
-                        <!-- User Info Section -->
-                        <div class="flex flex-col gap-2 flex-1">
-                            <h4 class="text-2xl font-bold text-foreground">{{ timeBasedGreeting }}, <span class="text-yellow-500 font-bold">{{ userName }}!</span></h4>
-                            <p class="text-sm text-muted-foreground">Keep up your amazing progress and reach new milestones</p>
-                            <div class="flex gap-2 mt-1">
-                                <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-accent/30 text-foreground font-medium">
-                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
+                    <!-- Mobile: Compact, Desktop: Full -->
+                    <div class="space-y-3 md:space-y-4">
+                        <!-- Header Row -->
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-lg md:text-2xl font-bold text-foreground leading-tight">{{ timeBasedGreeting }}, <span
+                                        class="text-primary font-bold">{{ userName }}!</span></h4>
+                                <!-- Description - hide on mobile, show on desktop -->
+                                <p class="hidden md:block text-sm text-muted-foreground mt-1">Keep up your amazing progress and reach new
+                                    milestones</p>
+                            </div>
+
+                            <!-- Level Badge - Compact -->
+                            <div
+                                class="flex-shrink-0 flex flex-col items-center justify-center p-2 md:p-4 bg-background/50 backdrop-blur-sm rounded-lg border border-primary/30">
+                                <div class="hidden md:block text-xs text-muted-foreground mb-1">Current Level</div>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-3xl md:text-5xl font-bold text-primary">{{ userStats.level }}</span>
+                                    <svg class="h-5 md:h-8 w-5 md:w-8 text-primary flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M13 10V3L4 14h7v7l9-11h-7z" />
                                     </svg>
-                                    Active Learner
-                                </span>
-                                <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-yellow-500/30 text-foreground font-medium">
-                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                    </svg>
-                                    Committed
-                                </span>
+                                </div>
                             </div>
                         </div>
-                        
-                        <!-- Level Badge -->
-                        <div class="flex flex-col items-center justify-center p-4 bg-background/50 backdrop-blur-sm rounded-lg border border-accent/30">
-                            <div class="text-xs text-muted-foreground mb-1">Current Level</div>
-                            <div class="flex items-baseline gap-2">
-                                <span class="text-5xl font-bold text-yellow-500">{{ userStats.level }}</span>
-                                <svg class="h-8 w-8 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+
+                        <!-- Badges - show only on desktop, single row -->
+                        <div class="hidden md:flex flex-wrap gap-2">
+                            <span
+                                class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-primary/30 text-foreground font-medium">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
                                 </svg>
-                            </div>
+                                Active Learner
+                            </span>
+                            <span
+                                class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-primary/30 text-foreground font-medium">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                                Committed
+                            </span>
                         </div>
                     </div>
-                    
+
                     <!-- XP Progress Bar with Energy Effect - Total XP to 1M -->
-                    <div class="mt-4 space-y-2">
-                        <div class="flex items-center justify-between text-xs text-muted-foreground">
-                            <span class="font-medium">Total Experience Progress</span>
-                            <span class="font-semibold text-foreground">{{ Math.round(totalXPProgress) }}%</span>
+                    <div class="mt-3 md:mt-4 space-y-2">
+                        <div class="flex items-center justify-between text-xs text-muted-foreground gap-2">
+                            <span class="font-medium">XP Progress</span>
+                            <span class="font-semibold text-foreground flex-shrink-0">{{ Math.round(totalXPProgress) }}%</span>
                         </div>
-                        <div class="relative h-4 bg-background/50 rounded-full overflow-hidden border border-yellow-500/40 shadow-lg shadow-yellow-500/20">
+                        <div
+                            class="relative h-4 bg-background/50 rounded-full overflow-hidden border border-primary/40 shadow-lg shadow-primary/20">
                             <!-- Background shimmer effect -->
-                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse"></div>
-                            
+                            <div
+                                class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse">
+                            </div>
+
                             <!-- Main progress fill with dynamic animation -->
-                            <div class="h-full bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 rounded-full transition-all duration-1000 ease-out relative energy-bar"
+                            <div class="h-full bg-primary rounded-full transition-all duration-1000 ease-out relative energy-bar"
                                 :style="{ width: `${totalXPProgress}%` }">
                                 <!-- Inner glow effect -->
-                                <div class="absolute inset-0 bg-gradient-to-t from-transparent to-white/40 rounded-full"></div>
-                                
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-transparent to-white/40 rounded-full">
+                                </div>
+
                                 <!-- Lightning effect streaks -->
                                 <div class="absolute inset-0 rounded-full overflow-hidden">
                                     <!-- Horizontal lightning shimmer -->
                                     <div class="absolute top-0 left-0 right-0 bottom-0 animate-lightning-shimmer opacity-70"
-                                        style="background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 20%, rgba(255,255,200,0.4) 50%, rgba(255,255,255,0.6) 80%, transparent 100%);"></div>
-                                    
+                                        style="background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 20%, rgba(255,255,200,0.4) 50%, rgba(255,255,255,0.6) 80%, transparent 100%);">
+                                    </div>
+
                                     <!-- Energy particles pulsing -->
                                     <div class="absolute inset-0 opacity-50"
-                                        style="background: radial-gradient(circle at 30% 50%, rgba(255,255,100,0.4) 0%, transparent 70%); animation: energy-pulse 3s ease-in-out infinite;"></div>
+                                        style="background: radial-gradient(circle at 30% 50%, rgba(255,255,100,0.4) 0%, transparent 70%); animation: energy-pulse 3s ease-in-out infinite;">
+                                    </div>
                                 </div>
                             </div>
-                            
+
                             <!-- Outer glow for energy effect -->
-                            <div v-if="totalXPProgress > 0" class="absolute top-0 left-0 h-full rounded-full blur-lg opacity-50 energy-glow"
-                                :style="{ width: `${totalXPProgress}%`, background: 'linear-gradient(90deg, rgba(250,204,21,0.8), rgba(234,179,8,0.5))' }"></div>
+                            <div v-if="totalXPProgress > 0"
+                                class="absolute top-0 left-0 h-full rounded-full blur-lg opacity-50 energy-glow bg-primary">
+                            </div>
                         </div>
-                        <div class="flex justify-between text-xs text-muted-foreground">
-                            <span>{{ userStats.totalXP.toLocaleString() }} XP</span>
-                            <span>500,000 XP</span>
+                        <div class="flex justify-between text-xs text-muted-foreground gap-2">
+                            <span class="truncate">{{ userStats.totalXP.toLocaleString() }} XP</span>
+                            <span class="flex-shrink-0">500,000 XP</span>
                         </div>
                     </div>
                 </div>
@@ -611,16 +623,13 @@ const demoXPToast = () => {
                 <div class="relative max-w-md">
                     <div class="relative">
                         <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <input 
-                            v-model="searchQuery"
-                            type="text"
-                            placeholder="Search students..."
-                            class="w-full pl-10 pr-4 py-2 rounded-lg border border-sidebar-border/70 bg-background hover:border-sidebar-border focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all"
-                        />
+                        <input v-model="searchQuery" type="text" placeholder="Search students..."
+                            class="w-full pl-10 pr-4 py-2 rounded-lg border border-sidebar-border/70 bg-background hover:border-sidebar-border focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all" />
                     </div>
-                    
+
                     <!-- Search Results Dropdown -->
-                    <div v-if="searchQuery && (searchResults.length > 0 || isSearching)" class="absolute top-full left-0 right-0 mt-2 bg-background border border-sidebar-border/70 rounded-lg shadow-lg z-50">
+                    <div v-if="searchQuery && (searchResults.length > 0 || isSearching)"
+                        class="absolute top-full left-0 right-0 mt-2 bg-background border border-sidebar-border/70 rounded-lg shadow-lg z-50">
                         <!-- Loading State -->
                         <div v-if="isSearching" class="p-4 text-center text-muted-foreground text-sm">
                             Searching...
@@ -628,22 +637,17 @@ const demoXPToast = () => {
 
                         <!-- Results -->
                         <div v-else-if="searchResults.length > 0" class="max-h-96 overflow-y-auto">
-                            <div 
-                                v-for="user in searchResults" 
-                                :key="user.id"
-                                @click="handleViewProfile(user.id)"
-                                class="flex items-center gap-3 p-3 border-b border-sidebar-border/30 last:border-b-0 hover:bg-accent/10 cursor-pointer transition-colors"
-                            >
+                            <div v-for="user in searchResults" :key="user.id" @click="handleViewProfile(user.id)"
+                                class="flex items-center gap-3 p-3 border-b border-sidebar-border/30 last:border-b-0 hover:bg-accent/10 cursor-pointer transition-colors">
                                 <!-- User Avatar -->
-                                <div v-if="user.profile_photo_path" class="h-10 w-10 rounded-full overflow-hidden flex-shrink-0">
-                                    <img 
-                                        :src="`/storage/${user.profile_photo_path}`"
-                                        :alt="user.name"
-                                        class="h-full w-full object-cover"
-                                    />
+                                <div v-if="user.profile_photo_path"
+                                    class="h-10 w-10 rounded-full overflow-hidden flex-shrink-0">
+                                    <img :src="`/storage/${user.profile_photo_path}`" :alt="user.name"
+                                        class="h-full w-full object-cover" />
                                 </div>
-                                <div v-else class="h-10 w-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 text-sm font-bold">
-                                    {{ user.name.split(' ').map((n: string) => n[0]).join('') }}
+                                <div v-else
+                                    class="h-10 w-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 text-sm font-bold">
+                                    {{user.name.split(' ').map((n: string) => n[0]).join('')}}
                                 </div>
 
                                 <!-- User Info -->
@@ -669,16 +673,16 @@ const demoXPToast = () => {
                     class="overflow-hidden border-sidebar-border/70 dark:border-sidebar-border transition-all duration-200 hover:border-sidebar-border hover:shadow-md dark:hover:shadow-lg cursor-pointer hover:scale-105"
                     @mouseenter="isLevelCardHovered = true" @mouseleave="isLevelCardHovered = false">
                     <CardHeader class="pb-2 flex flex-row items-center justify-between space-y-0 gap-1 px-4 md:px-6">
-                         <CardTitle class="text-xs md:text-sm font-medium min-w-0">Level</CardTitle>
-                         <svg class="h-4 w-4 text-yellow-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                             <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-                         </svg>
-                     </CardHeader>
+                        <CardTitle class="text-xs md:text-sm font-medium min-w-0">Level</CardTitle>
+                        <svg class="h-4 w-4 text-primary flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </CardHeader>
                     <CardContent>
-                         <div class="flex items-baseline justify-between gap-2">
-                             <div class="text-2xl md:text-3xl font-bold">{{ userStats.level }}</div>
-                             <span class="text-xs text-muted-foreground truncate">{{ userStats.rank }}</span>
-                         </div>
+                        <div class="flex items-baseline justify-between gap-2">
+                            <div class="text-2xl md:text-3xl font-bold">{{ userStats.level }}</div>
+                            <span class="text-xs text-muted-foreground truncate">{{ userStats.rank }}</span>
+                        </div>
                         <div class="mt-4 space-y-2 overflow-hidden">
                             <!-- XP Bar Container (hidden by default, shown on hover) -->
                             <div class="transition-all duration-300 ease-out" :style="{
@@ -688,7 +692,7 @@ const demoXPToast = () => {
                                 <div class="text-xs font-medium mb-1">Experience Progress</div>
                                 <div class="relative h-3 bg-muted rounded-full overflow-hidden">
                                     <!-- Animated progress bar -->
-                                    <div class="h-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 rounded-full transition-all duration-1000 ease-out"
+                                    <div class="h-full bg-primary rounded-full transition-all duration-1000 ease-out"
                                         :style="{ width: isLevelCardHovered ? `${progressPercentage}%` : '0%' }" />
                                 </div>
                                 <div class="flex justify-between text-xs text-muted-foreground mt-1">
@@ -720,7 +724,7 @@ const demoXPToast = () => {
                     @mouseenter="isTotalXPCardHovered = true" @mouseleave="isTotalXPCardHovered = false">
                     <CardHeader class="pb-2 flex flex-row items-center justify-between space-y-0">
                         <CardTitle class="text-sm font-medium">Total XP</CardTitle>
-                        <svg class="h-4 w-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+                        <svg class="h-4 w-4 text-primary" fill="currentColor" viewBox="0 0 24 24">
                             <path
                                 d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                         </svg>
@@ -736,7 +740,7 @@ const demoXPToast = () => {
                                 <div class="text-xs font-medium mb-1">Total Points</div>
                                 <div class="relative h-3 bg-muted rounded-full overflow-hidden">
                                     <!-- Animated bar showing relative progress -->
-                                    <div class="h-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 rounded-full transition-all duration-1000 ease-out"
+                                    <div class="h-full bg-primary rounded-full transition-all duration-1000 ease-out"
                                         :style="{ width: isTotalXPCardHovered ? '75%' : '0%' }" />
                                 </div>
                                 <div class="text-xs text-muted-foreground mt-2">
@@ -767,7 +771,7 @@ const demoXPToast = () => {
                     @mouseenter="isAchievementsCardHovered = true" @mouseleave="isAchievementsCardHovered = false">
                     <CardHeader class="pb-2 flex flex-row items-center justify-between space-y-0">
                         <CardTitle class="text-sm font-medium">Achievements</CardTitle>
-                        <svg class="h-4 w-4 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
+                        <svg class="h-4 w-4 text-primary" fill="currentColor" viewBox="0 0 24 24">
                             <path
                                 d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                         </svg>
@@ -783,7 +787,7 @@ const demoXPToast = () => {
                                 <div class="text-xs font-medium mb-1">Achievement Progress</div>
                                 <div class="relative h-3 bg-muted rounded-full overflow-hidden">
                                     <!-- Animated bar for achievements -->
-                                    <div class="h-full bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-600 rounded-full transition-all duration-1000 ease-out"
+                                    <div class="h-full bg-primary rounded-full transition-all duration-1000 ease-out"
                                         :style="{ width: isAchievementsCardHovered ? '60%' : '0%' }" />
                                 </div>
                                 <div class="text-xs text-muted-foreground mt-2">
@@ -810,10 +814,11 @@ const demoXPToast = () => {
             <ImprovedLeaderboard :leaderboard="leaderboard" />
 
             <!-- Streak Heatmap -->
-            <Card v-if="streak?.loginDates" class="border-sidebar-border/70 dark:border-sidebar-border transition-all duration-200 hover:border-sidebar-border hover:shadow-md dark:hover:shadow-lg">
+            <Card v-if="streak?.loginDates"
+                class="border-sidebar-border/70 dark:border-sidebar-border transition-all duration-200 hover:border-sidebar-border hover:shadow-md dark:hover:shadow-lg">
                 <CardHeader>
                     <CardTitle class="flex items-center gap-2">
-                        <span>📅</span>
+                        <Calendar class="w-5 h-5" />
                         <span>Activity Heatmap</span>
                     </CardTitle>
                     <CardDescription>Your login activity throughout the year</CardDescription>
@@ -854,7 +859,7 @@ const demoXPToast = () => {
                                             </p>
                                         </div>
                                         <div class="text-right">
-                                            <div class="text-lg font-semibold text-yellow-500">+{{ course.xpEarned }}
+                                            <div class="text-lg font-semibold text-primary">+{{ course.xpEarned }}
                                             </div>
                                             <p class="text-xs text-muted-foreground">XP earned</p>
                                         </div>
@@ -877,11 +882,9 @@ const demoXPToast = () => {
                                     @click="handleAssignmentClick(assignment)">
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center gap-2 flex-1">
-                                            <div v-if="assignment.isOverdue"
-                                                class="text-red-600 dark:text-red-400 font-bold">⚠</div>
-                                            <div v-else-if="assignment.submitted"
-                                                class="text-green-600 dark:text-green-400 font-bold">✓</div>
-                                            <div v-else class="text-yellow-600 dark:text-yellow-400 font-bold">📋</div>
+                                            <CheckCircle2 v-if="assignment.submitted"
+                                                class="w-5 h-5 text-green-600 dark:text-green-400" />
+                                            <ListTodo v-else class="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
                                             <div>
                                                 <h4 class="font-medium text-sm">{{ assignment.title }}</h4>
                                                 <p class="text-xs text-muted-foreground">{{ assignment.description }}
@@ -920,13 +923,15 @@ const demoXPToast = () => {
                             </div>
                             <div v-else class="space-y-3">
                                 <div v-for="announcement in announcements" :key="announcement.id"
-                                    class="flex items-start gap-3 pb-3 border-b last:border-b-0 p-2 rounded cursor-pointer transition-all duration-150 hover:bg-accent/10">
-                                    <div class="mt-1 text-lg">
-                                        <span>📢</span>
+                                    class="flex items-start gap-3 pb-3 border-b last:border-b-0 p-2 rounded cursor-pointer transition-all duration-150 hover:bg-primary/10">
+                                    <div class="mt-1">
+                                        <Megaphone class="w-5 h-5 text-primary" />
                                     </div>
                                     <div class="flex-1">
                                         <p class="text-sm font-medium">{{ announcement.title }}</p>
-                                        <p v-if="announcement.description" class="text-xs text-muted-foreground line-clamp-2">{{ announcement.description }}</p>
+                                        <p v-if="announcement.description"
+                                            class="text-xs text-muted-foreground line-clamp-2">{{
+                                                announcement.description }}</p>
                                         <p class="text-xs text-muted-foreground mt-1">{{ announcement.timestamp }}</p>
                                     </div>
                                 </div>
@@ -943,42 +948,49 @@ const demoXPToast = () => {
                         <CardHeader class="flex flex-row items-center justify-between">
                             <div class="flex items-center gap-2">
                                 <CardTitle class="text-sm">Notifications</CardTitle>
-                                <span v-if="unreadNotificationCount > 0" 
+                                <span v-if="unreadNotificationCount > 0"
                                     class="inline-flex items-center justify-center h-5 w-5 text-xs font-semibold rounded-full bg-red-500 text-white">
                                     {{ unreadNotificationCount > 9 ? '9+' : unreadNotificationCount }}
                                 </span>
                             </div>
-                            <button v-if="unreadNotificationCount > 0"
-                                @click="markAllNotificationsAsRead"
+                            <button v-if="unreadNotificationCount > 0" @click="markAllNotificationsAsRead"
                                 class="text-xs text-muted-foreground hover:text-foreground transition-colors">
                                 Mark all as read
                             </button>
                         </CardHeader>
                         <CardContent>
                             <div class="space-y-2 max-h-64 overflow-y-auto">
-                                <div v-if="notifications.length === 0" class="text-xs text-muted-foreground text-center py-4">
+                                <div v-if="notifications.length === 0"
+                                    class="text-xs text-muted-foreground text-center py-4">
                                     No notifications yet
                                 </div>
                                 <div v-for="notification in notifications.slice(0, 5)" :key="notification.id"
                                     :class="['p-2 rounded border cursor-pointer transition-all duration-150 hover:bg-accent/10', !notification.readAt ? 'bg-accent/5 border-accent/30' : 'border-sidebar-border/50']"
                                     @click="!notification.readAt && markNotificationAsRead(notification.id)">
                                     <div class="flex items-start gap-2">
-                                        <span v-if="notification.icon" class="text-lg flex-shrink-0">{{ notification.icon }}</span>
+                                        <span v-if="notification.icon" class="text-lg flex-shrink-0">{{
+                                            notification.icon }}</span>
                                         <div class="flex-1 min-w-0">
-                                            <p class="text-xs font-medium text-foreground truncate">{{ notification.title }}</p>
-                                            <p class="text-xs text-muted-foreground line-clamp-2 mt-0.5">{{ notification.message }}</p>
-                                            <p class="text-xs text-muted-foreground mt-1">{{ notification.createdAt }}</p>
+                                            <p class="text-xs font-medium text-foreground truncate">{{
+                                                notification.title }}</p>
+                                            <p class="text-xs text-muted-foreground line-clamp-2 mt-0.5">{{
+                                                notification.message }}</p>
+                                            <p class="text-xs text-muted-foreground mt-1">{{ notification.createdAt }}
+                                            </p>
                                         </div>
                                         <button @click.stop="deleteNotification(notification.id)"
                                             class="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 p-0.5">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M6 18L18 6M6 6l12 12" />
                                             </svg>
                                         </button>
                                     </div>
                                 </div>
-                                <div v-if="notifications.length > 5" class="text-center pt-2 border-t border-sidebar-border/50">
-                                    <a href="/notifications" class="text-xs text-accent hover:text-accent/80 transition-colors font-medium">
+                                <div v-if="notifications.length > 5"
+                                    class="text-center pt-2 border-t border-sidebar-border/50">
+                                    <a href="/notifications"
+                                        class="text-xs text-accent hover:text-accent/80 transition-colors font-medium">
                                         View all notifications
                                     </a>
                                 </div>
@@ -995,7 +1007,7 @@ const demoXPToast = () => {
                         <CardContent>
                             <div class="grid grid-cols-3 gap-2">
                                 <div v-for="achievement in achievements.filter(a => a.unlocked)" :key="achievement.id"
-                                    :class="['flex flex-col items-center justify-center p-2 rounded border cursor-pointer transition-all duration-150 hover:scale-110', achievement.unlocked ? 'bg-accent/20 border-sidebar-border/50 hover:border-accent hover:shadow-sm' : 'opacity-50 grayscale border-sidebar-border/50 hover:opacity-75']"
+                                    :class="['flex flex-col items-center justify-center p-2 rounded border cursor-pointer transition-all duration-150 hover:scale-110', achievement.unlocked ? 'bg-primary/20 border-sidebar-border/50 hover:border-primary hover:shadow-sm' : 'opacity-50 grayscale border-sidebar-border/50 hover:opacity-75']"
                                     :title="achievement.description" @click="handleAchievementClick(achievement)">
                                     <div class="text-2xl mb-1">{{ achievement.icon }}</div>
                                     <p class="text-xs text-center text-muted-foreground">{{ achievement.name }}</p>
@@ -1062,9 +1074,8 @@ const demoXPToast = () => {
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle class="flex items-center gap-2">
-                        <span v-if="selectedAssignment.isOverdue" class="text-red-600">⚠</span>
-                        <span v-else-if="selectedAssignment.submitted" class="text-green-600">✓</span>
-                        <span v-else class="text-yellow-600">📋</span>
+                        <CheckCircle2 v-if="selectedAssignment.submitted" class="w-5 h-5 text-green-600" />
+                        <ListTodo v-else class="w-5 h-5 text-yellow-600" />
                         {{ selectedAssignment.title }}
                     </DialogTitle>
                     <DialogDescription>
@@ -1075,9 +1086,11 @@ const demoXPToast = () => {
                     <div
                         :class="['p-3 rounded-lg border', selectedAssignment.isOverdue ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900' : selectedAssignment.submitted ? 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900' : 'bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-900']">
                         <p
-                            :class="['text-sm font-medium', selectedAssignment.isOverdue ? 'text-red-700 dark:text-red-300' : selectedAssignment.submitted ? 'text-green-700 dark:text-green-300' : 'text-yellow-700 dark:text-yellow-300']">
-                            {{ selectedAssignment.isOverdue ? '⚠ Overdue' : selectedAssignment.submitted ? '✓ Submitted'
-                                : '📋 Pending Submission' }}
+                            :class="['text-sm font-medium flex items-center gap-2', selectedAssignment.isOverdue ? 'text-red-700 dark:text-red-300' : selectedAssignment.submitted ? 'text-green-700 dark:text-green-300' : 'text-yellow-700 dark:text-yellow-300']">
+                            <CheckCircle2 v-if="selectedAssignment.submitted" class="w-4 h-4" />
+                            <ListTodo v-else class="w-4 h-4" />
+                            {{ selectedAssignment.isOverdue ? 'Overdue' : selectedAssignment.submitted ? 'Submitted'
+                                : 'Pending Submission' }}
                         </p>
                     </div>
                     <div>
@@ -1116,8 +1129,11 @@ const demoXPToast = () => {
                 </DialogHeader>
                 <div class="space-y-4">
                     <div class="p-4 rounded-lg bg-accent/10 border border-accent/30">
-                        <p v-if="selectedAchievement.unlocked" class="text-sm font-medium text-accent">✓ Achievement
-                            Unlocked</p>
+                        <p v-if="selectedAchievement.unlocked"
+                            class="text-sm font-medium text-accent flex items-center gap-2">
+                            <CheckCircle2 class="w-4 h-4" />
+                            Achievement Unlocked
+                        </p>
                         <p v-else class="text-sm font-medium text-muted-foreground">Locked - Keep working to unlock this
                             achievement!</p>
                     </div>
@@ -1152,58 +1168,65 @@ const demoXPToast = () => {
                             <p class="text-2xl font-bold">{{ selectedLeaderboardEntry.xp.toLocaleString() }}</p>
                         </div>
                     </div>
-                    <Button class="w-full" variant="outline" @click="handleViewProfile(selectedLeaderboardEntry.id)">View Profile</Button>
+                    <Button class="w-full" variant="outline"
+                        @click="handleViewProfile(selectedLeaderboardEntry.id)">View Profile</Button>
                 </div>
             </DialogContent>
         </Dialog>
-        </AppLayout>
-        </template>
+    </AppLayout>
+</template>
 
-        <style scoped>
-        @keyframes lightning-shimmer {
-        0% {
+<style scoped>
+@keyframes lightning-shimmer {
+    0% {
         transform: translateX(-100%);
         opacity: 0;
-        }
-        10% {
+    }
+
+    10% {
         opacity: 1;
-        }
-        50% {
+    }
+
+    50% {
         opacity: 0.8;
-        }
-        90% {
+    }
+
+    90% {
         opacity: 1;
-        }
-        100% {
+    }
+
+    100% {
         transform: translateX(100%);
         opacity: 0;
-        }
-        }
+    }
+}
 
-        @keyframes energy-pulse {
-        0% {
+@keyframes energy-pulse {
+    0% {
         transform: scale(1);
         opacity: 0.3;
-        }
-        50% {
+    }
+
+    50% {
         transform: scale(1.05);
         opacity: 0.6;
-        }
-        100% {
+    }
+
+    100% {
         transform: scale(1);
         opacity: 0.3;
-        }
-        }
+    }
+}
 
-        .animate-lightning-shimmer {
-        animation: lightning-shimmer 2s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
-        }
+.animate-lightning-shimmer {
+    animation: lightning-shimmer 2s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
+}
 
-        .energy-bar {
-        box-shadow: inset 0 0 20px rgba(255, 255, 100, 0.3);
-        }
+.energy-bar {
+    box-shadow: inset 0 0 20px rgba(255, 255, 100, 0.3);
+}
 
-        .energy-glow {
-        filter: blur(12px);
-        }
-        </style>
+.energy-glow {
+    filter: blur(12px);
+}
+</style>

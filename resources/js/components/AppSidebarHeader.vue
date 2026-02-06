@@ -15,6 +15,7 @@ import {
 import { useAppearance } from '@/composables/useAppearance';
 import { useNotifications } from '@/composables/useNotifications';
 import type { BreadcrumbItemType } from '@/types';
+import { Flame, Zap } from 'lucide-vue-next';
 
 withDefaults(
     defineProps<{
@@ -177,12 +178,20 @@ onMounted(() => {
                                     <div class="flex items-start justify-between gap-2">
                                         <div class="flex-1">
                                             <p class="text-sm font-medium text-foreground">{{ notification.title }}</p>
-                                            <p v-if="notification.type === 'announcement'" class="text-xs text-amber-600 dark:text-amber-400">Announcement</p>
-                                            <p v-else-if="notification.type === 'community_post'" class="text-xs text-blue-600 dark:text-blue-400">Community</p>
-                                            <p v-else-if="notification.type === 'achievement'" class="text-xs text-purple-600 dark:text-purple-400">Achievement</p>
-                                            <p v-else-if="notification.type === 'xp'" class="text-xs text-green-600 dark:text-green-400">✨ XP Earned</p>
-                                            <p v-else-if="notification.type === 'streak'" class="text-xs text-orange-600 dark:text-orange-400">🔥 Streak</p>
-                                            <p v-else-if="notification.type === 'level_up'" class="text-xs text-indigo-600 dark:text-indigo-400">⚡ Level Up</p>
+                                            <p class="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                                                <span v-if="notification.type === 'announcement'">Announcement</span>
+                                                <span v-else-if="notification.type === 'community_post'" class="text-blue-600 dark:text-blue-400">Community</span>
+                                                <span v-else-if="notification.type === 'achievement'" class="text-purple-600 dark:text-purple-400">Achievement</span>
+                                                <span v-else-if="notification.type === 'xp'" class="text-green-600 dark:text-green-400">XP Earned</span>
+                                                <span v-else-if="notification.type === 'streak'" class="text-orange-600 dark:text-orange-400 flex items-center gap-1">
+                                                    <Flame class="w-3 h-3" />
+                                                    Streak
+                                                </span>
+                                                <span v-else-if="notification.type === 'level_up'" class="text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                                                    <Zap class="w-3 h-3" />
+                                                    Level Up
+                                                </span>
+                                            </p>
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <div v-if="!notification.read" class="h-2 w-2 bg-blue-500 rounded-full mt-1 flex-shrink-0"></div>

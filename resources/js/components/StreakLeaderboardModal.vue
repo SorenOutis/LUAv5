@@ -7,6 +7,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Flame } from 'lucide-vue-next';
 
 interface StreakUser {
     id: number;
@@ -71,7 +72,7 @@ onMounted(() => {
         <DialogContent class="max-w-2xl max-h-[85vh] flex flex-col gap-0 p-0">
             <DialogHeader class="border-b border-sidebar-border/70 px-6 py-4">
                 <DialogTitle class="flex items-center gap-2">
-                    <span class="text-2xl">🔥</span>
+                    <Flame class="w-6 h-6 text-orange-600 fill-orange-600" />
                     Streak Leaderboard
                 </DialogTitle>
             </DialogHeader>

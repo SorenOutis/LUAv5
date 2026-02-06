@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { Toast } from '@/composables/useToast';
+import { Award, CheckCircle2, Zap, Sparkles, AlertCircle, Info, X } from 'lucide-vue-next';
 
 interface Props {
     toast: Toast;
@@ -82,15 +83,15 @@ const getDuration = () => {
 <template>
     <div :class="toastClasses" :key="toast.id" class="relative">
         <!-- Icon/Avatar -->
-        <div class="flex-shrink-0 mt-0.5">
-            <div v-if="toast.type === 'achievement'" class="text-2xl">{{ toast.icon || '⭐' }}</div>
-            <div v-else-if="toast.type === 'quest'" class="text-2xl">{{ toast.icon || '✓' }}</div>
-            <div v-else-if="toast.type === 'levelup'" class="text-3xl animate-bounce">{{ toast.icon || '⚡' }}</div>
-            <div v-else-if="toast.type === 'xp'" class="text-xl">{{ toast.icon || '✨' }}</div>
-            <div v-else-if="toast.type === 'success'" class="text-xl">✓</div>
-            <div v-else-if="toast.type === 'error'" class="text-xl">⚠</div>
-            <div v-else class="text-xl">ℹ</div>
-        </div>
+         <div class="flex-shrink-0 mt-0.5">
+             <Award v-if="toast.type === 'achievement'" class="w-6 h-6 text-amber-600" />
+             <CheckCircle2 v-else-if="toast.type === 'quest'" class="w-6 h-6 text-green-600" />
+             <Zap v-else-if="toast.type === 'levelup'" class="w-7 h-7 animate-bounce text-purple-600" />
+             <Sparkles v-else-if="toast.type === 'xp'" class="w-5 h-5 text-yellow-600" />
+             <CheckCircle2 v-else-if="toast.type === 'success'" class="w-5 h-5 text-green-600" />
+             <AlertCircle v-else-if="toast.type === 'error'" class="w-5 h-5 text-red-600" />
+             <Info v-else class="w-5 h-5 text-blue-600" />
+         </div>
 
         <!-- Content -->
         <div class="flex-1 min-w-0">
@@ -103,14 +104,12 @@ const getDuration = () => {
         </div>
 
         <!-- Close Button -->
-        <button
-            @click="emit('close')"
-            class="flex-shrink-0 mt-0.5 text-muted-foreground hover:text-foreground transition-colors"
-        >
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-        </button>
+         <button
+             @click="emit('close')"
+             class="flex-shrink-0 mt-0.5 text-muted-foreground hover:text-foreground transition-colors"
+         >
+             <X class="h-4 w-4" />
+         </button>
 
         <!-- Progress Bar -->
         <div v-if="toast.duration && toast.duration > 0" class="absolute bottom-0 left-0 right-0 h-1 rounded-b-lg" :class="progressClasses" :style="{

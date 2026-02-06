@@ -30,17 +30,17 @@ const currentStreak = computed(() => props.streak?.currentStreak ?? 0);
 const longestStreak = computed(() => props.streak?.longestStreak ?? 0);
 
 const streakColor = computed(() => {
-    if (currentStreak.value >= 30) return 'text-orange-600 dark:text-orange-400';
-    if (currentStreak.value >= 14) return 'text-amber-500 dark:text-amber-400';
-    if (currentStreak.value >= 7) return 'text-yellow-500 dark:text-yellow-400';
-    return 'text-gray-400 dark:text-gray-600';
+    if (currentStreak.value >= 30) return 'text-primary';
+    if (currentStreak.value >= 14) return 'text-primary';
+    if (currentStreak.value >= 7) return 'text-primary';
+    return 'text-muted-foreground';
 });
 
 const streakBgColor = computed(() => {
-    if (currentStreak.value >= 30) return 'bg-orange-50 dark:bg-orange-950';
-    if (currentStreak.value >= 14) return 'bg-amber-50 dark:bg-amber-950';
-    if (currentStreak.value >= 7) return 'bg-yellow-50 dark:bg-yellow-950';
-    return 'bg-gray-50 dark:bg-gray-900';
+    if (currentStreak.value >= 30) return 'bg-primary/5';
+    if (currentStreak.value >= 14) return 'bg-primary/5';
+    if (currentStreak.value >= 7) return 'bg-primary/5';
+    return 'bg-muted/20';
 });
 
 const streakMessage = computed(() => {
@@ -54,11 +54,8 @@ const streakMessage = computed(() => {
 </script>
 
 <template>
-    <StreakLeaderboardModal 
-        :open="isLeaderboardModalOpen"
-        @update:open="isLeaderboardModalOpen = $event"
-    />
-    
+    <StreakLeaderboardModal :open="isLeaderboardModalOpen" @update:open="isLeaderboardModalOpen = $event" />
+
     <Card :class="streakBgColor"
         class="border-sidebar-border/70 dark:border-sidebar-border transition-all duration-200 hover:border-sidebar-border hover:shadow-md dark:hover:shadow-lg cursor-pointer hover:scale-105 overflow-hidden"
         @mouseenter="isStreakCardHovered = true" @mouseleave="isStreakCardHovered = false"
@@ -71,7 +68,8 @@ const streakMessage = computed(() => {
             <svg class="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M17.657 18.657L13.414 22.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
         </CardHeader>
 
@@ -95,16 +93,16 @@ const streakMessage = computed(() => {
                     <p class="text-xs font-medium text-muted-foreground">Current Streak</p>
                     <p :class="streakColor" class="text-2xl font-bold">
                         {{ currentStreak }}
-                        <span class="text-xs font-normal text-gray-500 dark:text-gray-400">days</span>
+                        <span class="text-xs font-normal text-muted-foreground">days</span>
                     </p>
                 </div>
 
                 <!-- Longest Streak -->
                 <div class="space-y-1">
                     <p class="text-xs font-medium text-muted-foreground">Longest Streak</p>
-                    <p class="text-lg font-bold text-purple-600 dark:text-purple-400">
+                    <p class="text-lg font-bold text-primary">
                         {{ longestStreak }}
-                        <span class="text-xs font-normal text-gray-500 dark:text-gray-400">days</span>
+                        <span class="text-xs font-normal text-muted-foreground">days</span>
                     </p>
                 </div>
 

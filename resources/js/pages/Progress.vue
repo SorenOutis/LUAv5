@@ -13,6 +13,7 @@ import CardDescription from '@/components/ui/card/CardDescription.vue';
 import CardHeader from '@/components/ui/card/CardHeader.vue';
 import CardTitle from '@/components/ui/card/CardTitle.vue';
 import Progress from '@/components/ui/progress/Progress.vue';
+import { CheckCircle2 } from 'lucide-vue-next';
 
 interface ProgressMetric {
     id: number;
@@ -240,7 +241,7 @@ const getLevelProgressPercentage = () => {
                             <div class="flex-shrink-0">
                                 <div
                                     class="flex h-8 w-8 items-center justify-center rounded-full bg-accent/20 border border-accent/30">
-                                    <span class="text-sm">✓</span>
+                                    <CheckCircle2 class="w-4 h-4 text-accent" />
                                 </div>
                             </div>
                             <div class="flex-1">
