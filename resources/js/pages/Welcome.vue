@@ -132,8 +132,8 @@ onMounted(() => {
                             <span class="text-foreground">Elevate your</span>
                             <br />
                             <span class="inline-flex items-center justify-center flex-wrap gap-2 mt-4 sm:mt-6 md:mt-8">
-                                <span class="text-foreground">Business</span>
-                                <RotatingText :texts="['Growth', 'Innovation', 'Efficiency', 'Success', 'Performance']"
+                                 <span class="text-foreground">Learning</span>
+                                 <RotatingText :texts="['Knowledge', 'Skills', 'Confidence', 'Mastery', 'Potential']"
                                     :interval="2000"
                                     mainClassName="px-2 sm:px-2 md:px-3 bg-white text-black overflow-hidden py-1 sm:py-1 md:py-2 justify-center rounded-lg shadow-lg inline-block"
                                     splitLevelClassName="overflow-hidden pb-1 sm:pb-1 md:pb-1 inline-block" />

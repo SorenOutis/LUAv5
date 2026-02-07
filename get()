@@ -1,0 +1,22 @@
+
+   InvalidArgumentException 
+
+  Unexpected end of input
+
+  at vendor\psy\psysh\src\Shell.php:976
+    972▕ 
+    973▕         if (!$this->hasValidCode()) {
+    974▕             $this->popCodeStack();
+    975▕ 
+  ➜ 976▕             throw new \InvalidArgumentException('Unexpected end of input');
+    977▕         }
+    978▕     }
+    979▕ 
+    980▕     /**
+
+  1   vendor\psy\psysh\src\Shell.php:1510
+      Psy\Shell::setCode("DB::table('roles')-")
+
+  2   vendor\laravel\tinker\src\Console\TinkerCommand.php:76
+      Psy\Shell::execute("DB::table('roles')-")
+
